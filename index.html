@@ -154,13 +154,28 @@ select option{background:#131920}
 <!-- WOUND -->
 <div id="tab-wound" class="tb">
   <div class="ph2">
-    <div><div class="pt3">Wound Care</div><div class="ps2" id="w-sub">Loading…</div></div>
+    <div><div class="pt3">Wound &amp; Skin Integrity</div><div class="ps2" id="w-sub">Loading…</div></div>
     <button class="btn bb2" onclick="woundRpt()">🖨 Print Report</button>
   </div>
   <div class="fs2" id="w-fs"></div>
-  <div id="w-alerts" style="display:none;margin-bottom:11px"></div>
-  <div class="kg g6" style="margin-bottom:11px" id="w-kpis"></div>
-  <div class="card"><table class="tbl" id="w-tb"></table></div>
+  <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px">
+    <button class="btn bd2 bsm" id="w-t0" onclick="wTab(0)">🩹 Active Wounds</button>
+    <button class="btn bg3 bsm" id="w-t1" onclick="wTab(1)">📊 Data Analytics</button>
+    <button class="btn bg3 bsm" id="w-t2" onclick="wTab(2)">⚠ Quality Measures</button>
+    <button class="btn bg3 bsm" id="w-t3" onclick="wTab(3)">🧴 Skin Integrity &amp; Braden</button>
+    <button class="btn bg3 bsm" id="w-t4" onclick="wTab(4)">📅 Wound Rounds</button>
+    <button class="btn bg3 bsm" id="w-t5" onclick="wTab(5)">🏥 Rehospitalizations</button>
+  </div>
+  <div id="w-p0">
+    <div id="w-alerts" style="display:none;margin-bottom:11px"></div>
+    <div class="kg g6" style="margin-bottom:11px" id="w-kpis"></div>
+    <div class="card"><table class="tbl" id="w-tb"></table></div>
+  </div>
+  <div id="w-p1" style="display:none"></div>
+  <div id="w-p2" style="display:none"></div>
+  <div id="w-p3" style="display:none"></div>
+  <div id="w-p4" style="display:none"></div>
+  <div id="w-p5" style="display:none"></div>
 </div>
 
 <!-- PSYCH -->
@@ -557,7 +572,7 @@ let PATIENTS=[
   {id:"p9",name:"Ingram, Helen",dob:"04/27/1943",fac:"Reliant – Pinebrook",rm:"14B",adm:"05/05/2026",dx:"COPD, Anxiety",ins:"Medicare A",pv:"Dr. Chen",code:"DNR",st:"Active",al:"Codeine",gen:"Female",mrn:"",chart:[{dt:"05/05/2026",tp:"census",by:"Admin",dx:"COPD, Anxiety",notes:"Admission entry."}]},
   {id:"p10",name:"Johnson, Earl",dob:"08/14/1939",fac:"Embassy – Lakewood",rm:"44C",adm:"01/22/2026",dx:"Stage 4 Pressure Injury",ins:"Medicare A",pv:"NP Rodriguez",code:"DNR",st:"Active",al:"NKDA",gen:"Male",mrn:"",chart:[{dt:"01/22/2026",tp:"census",by:"Admin",dx:"Stage 4 Pressure Injury",notes:"Admission entry."}]},
   {id:"p11",name:"Kim, Soo-Jin",dob:"10/21/1955",fac:"Reliant – Maplewood",rm:"23A",adm:"03/12/2026",dx:"PTSD, Major Depression",ins:"Medicare A",pv:"Dr. Patel",code:"Full Code",st:"Active",al:"NKDA",gen:"Female",mrn:"",chart:[{dt:"03/12/2026",tp:"census",by:"Admin",dx:"PTSD, Major Depression",notes:"Admission entry."}]},
-  {id:"p12",name:"Lewis, Robert",dob:"06/08/1942",fac:"Embassy – Northgate",rm:"8B",adm:"04/05/2026",dx:"ESRD, Dialysis",ins:"Medicare A",pv:"Dr. Chen",code:"DNR",st:"Active",al:"Aspirin",gen:"Male",mrn:"",chart:[{dt:"04/05/2026",tp:"census",by:"Admin",dx:"ESRD, Dialysis",notes:"Admission entry."}]},,
+  {id:"p12",name:"Lewis, Robert",dob:"06/08/1942",fac:"Embassy – Northgate",rm:"8B",adm:"04/05/2026",dx:"ESRD, Dialysis",ins:"Medicare A",pv:"Dr. Chen",code:"DNR",st:"Active",al:"Aspirin",gen:"Male",mrn:"",chart:[{dt:"04/05/2026",tp:"census",by:"Admin",dx:"ESRD, Dialysis",notes:"Admission entry."}]},
   {id:"p13",name:"Morris, Sandra",dob:"06/12/1948",fac:"Embassy – Riverside",rm:"18C",adm:"04/10/2026",dx:"Pressure Injury Stage 4, Diabetes T2",ins:"Medicare A",pv:"NP Williams",code:"DNR",st:"Active",al:"NKDA",gen:"Female",mrn:"EM013",chart:[{dt:"04/10/2026",tp:"census",by:"Admin",dx:"Pressure Injury Stage 4, Diabetes T2",notes:"Admission entry."}]},
   {id:"p14",name:"Turner, Raymond",dob:"09/28/1940",fac:"Reliant – Maplewood",rm:"11A",adm:"03/05/2026",dx:"CHF, Venous Ulcer L. Leg, Obesity",ins:"Medicare A",pv:"Dr. Chen",code:"Full Code",st:"Active",al:"Penicillin",gen:"Male",mrn:"RM014",chart:[{dt:"03/05/2026",tp:"census",by:"Admin",dx:"CHF, Venous Ulcer L. Leg",notes:"Admission entry."}]},
   {id:"p15",name:"Washington, Gloria",dob:"11/03/1952",fac:"Sunrise SNF – Central",rm:"7B",adm:"05/08/2026",dx:"Diabetic Foot Ulcer, PVD, Neuropathy",ins:"Medicaid",pv:"Dr. Kim",code:"Full Code",st:"Active",al:"Sulfa",gen:"Female",mrn:"SS015",chart:[{dt:"05/08/2026",tp:"census",by:"Admin",dx:"Diabetic Foot Ulcer, PVD",notes:"Admission entry."}]},
@@ -569,12 +584,52 @@ let WOUNDS=[
   {id:"w3",ptId:"p6",name:"Flores, Miguel",fac:"Sunrise SNF – Central",tp:"Diabetic Ulcer",stage:"N/A",loc:"L. Foot",etio:"Non-Pressure",tx:"Collagen dressing, diabetic shoe",ls:"05/15/2026",heal:"Slow",inf:false,notes:"A1c 9.1.",chart:[{dt:"03/29/2026",stage:"N/A",tx:"Collagen dressing",heal:"Stable",inf:false,L:2.0,W:1.5,D:0.4,notes:"Initial DFU.",by:"Dr. Kim"},{dt:"05/15/2026",stage:"N/A",tx:"Collagen dressing, diabetic shoe",heal:"Slow",inf:false,L:2.1,W:1.5,D:0.3,notes:"Nutrition consult placed.",by:"Dr. Kim"}]},
   {id:"w4",ptId:"p3",name:"Castillo, Elena",fac:"Embassy – Northgate",tp:"Skin Tear",stage:"N/A",loc:"R. Forearm",etio:"Traumatic",tx:"Mepitel One",ls:"05/13/2026",heal:"Progressing",inf:false,notes:"Healing well.",chart:[{dt:"05/08/2026",stage:"N/A",tx:"Mepitel One",heal:"Stable",inf:false,L:3.5,W:0.8,D:0.1,notes:"Fall-related skin tear.",by:"NP Williams"},{dt:"05/13/2026",stage:"N/A",tx:"Mepitel One",heal:"Progressing",inf:false,L:2.8,W:0.6,D:0.1,notes:"Healing well.",by:"NP Williams"}]},
   {id:"w5",ptId:"p2",name:"Brennan, Mary",fac:"Embassy – Riverside",tp:"Pressure Injury",stage:"Unstageable",loc:"Coccyx",etio:"Pressure",tx:"Debridement, silver alginate",ls:"05/14/2026",heal:"Improving",inf:true,notes:"Culture sent 05/10.",chart:[{dt:"03/11/2026",stage:"Unstageable",tx:"Debridement",heal:"Stable",inf:false,L:5.0,W:4.0,D:null,notes:"Thick eschar.",by:"Dr. Patel"},{dt:"05/14/2026",stage:"Unstageable",tx:"Debridement, silver alginate",heal:"Improving",inf:true,L:4.0,W:3.2,D:null,notes:"Infection. Culture sent.",by:"Dr. Patel"}]},
-  {id:"w6",ptId:"p4",name:"Donovan, Patrick",fac:"Reliant – Maplewood",tp:"Venous Ulcer",stage:"N/A",loc:"L. Leg",etio:"Non-Pressure",tx:"Compression wrap (Coban 2)",ls:"05/10/2026",heal:"Progressing",inf:false,notes:"Edema improving.",chart:[{dt:"02/14/2026",stage:"N/A",tx:"Compression wrap",heal:"Stable",inf:false,L:6.0,W:3.0,D:0.2,notes:"Initial venous ulcer.",by:"Dr. Chen"},{dt:"05/10/2026",stage:"N/A",tx:"Compression wrap (Coban 2)",heal:"Progressing",inf:false,L:4.0,W:2.0,D:0.1,notes:"Edema improving.",by:"Dr. Chen"}]},,
+  {id:"w6",ptId:"p4",name:"Donovan, Patrick",fac:"Reliant – Maplewood",tp:"Venous Ulcer",stage:"N/A",loc:"L. Leg",etio:"Non-Pressure",tx:"Compression wrap (Coban 2)",ls:"05/10/2026",heal:"Progressing",inf:false,notes:"Edema improving.",chart:[{dt:"02/14/2026",stage:"N/A",tx:"Compression wrap",heal:"Stable",inf:false,L:6.0,W:3.0,D:0.2,notes:"Initial venous ulcer.",by:"Dr. Chen"},{dt:"05/10/2026",stage:"N/A",tx:"Compression wrap (Coban 2)",heal:"Progressing",inf:false,L:4.0,W:2.0,D:0.1,notes:"Edema improving.",by:"Dr. Chen"}]},
   {id:"w7",ptId:"p13",name:"Morris, Sandra",fac:"Embassy – Riverside",tp:"Pressure Injury",stage:"Stage 4",loc:"Coccyx",etio:"Pressure",tx:"Wound VAC, protein supplementation, pressure redistribution mattress",ls:"06/10/2026",heal:"Slow",inf:true,notes:"Tunneling 2.5cm. IV antibiotics initiated. Surgical consult pending.",chart:[{dt:"04/12/2026",stage:"Stage 3",tx:"Foam dressing, offloading",heal:"Stable",inf:false,L:3.5,W:3.0,D:0.9,notes:"Initial wound assessment at admit.",by:"NP Williams"},{dt:"05/01/2026",stage:"Stage 4",tx:"Wound VAC",heal:"Slow",inf:false,L:4.2,W:3.8,D:1.8,notes:"Wound deepened — VAC initiated.",by:"NP Williams"},{dt:"05/22/2026",stage:"Stage 4",tx:"Wound VAC",heal:"Slow",inf:true,L:4.5,W:4.0,D:2.1,notes:"Signs of infection. Culture sent. IV abx started.",by:"NP Williams"},{dt:"06/10/2026",stage:"Stage 4",tx:"Wound VAC, protein supplementation",heal:"Slow",inf:true,L:4.3,W:3.9,D:2.0,notes:"Tunneling 2.5cm noted. Surgical consult requested.",by:"NP Williams"}]},
   {id:"w8",ptId:"p14",name:"Turner, Raymond",fac:"Reliant – Maplewood",tp:"Venous Ulcer",stage:"N/A",loc:"L. Leg (medial)",etio:"Non-Pressure",tx:"Compression wrap (Coban 2), wound gel, elevation",ls:"06/08/2026",heal:"Progressing",inf:false,notes:"Edema significantly improved. Good granulation tissue.",chart:[{dt:"03/07/2026",stage:"N/A",tx:"Compression wrap",heal:"Stable",inf:false,L:7.0,W:4.5,D:0.3,notes:"Large venous ulcer at admit. Edema 3+.",by:"Dr. Chen"},{dt:"04/15/2026",stage:"N/A",tx:"Compression wrap, wound gel",heal:"Stable",inf:false,L:6.2,W:3.8,D:0.2,notes:"Slow improvement. Edema 2+.",by:"Dr. Chen"},{dt:"06/08/2026",stage:"N/A",tx:"Compression wrap (Coban 2), wound gel, elevation",heal:"Progressing",inf:false,L:4.5,W:2.5,D:0.1,notes:"Good progress. Edema 1+. Granulation tissue visible.",by:"Dr. Chen"}]},
   {id:"w9",ptId:"p15",name:"Washington, Gloria",fac:"Sunrise SNF – Central",tp:"Diabetic Ulcer",stage:"N/A",loc:"R. Plantar Foot",etio:"Non-Pressure",tx:"Total contact casting, collagen dressing, glycemic management",ls:"06/09/2026",heal:"Worsening",inf:true,notes:"A1c 10.2. Poor glycemic control impeding healing. Vascular surgery consult placed.",chart:[{dt:"05/09/2026",stage:"N/A",tx:"Collagen dressing, offloading shoe",heal:"Stable",inf:false,L:2.5,W:2.0,D:0.5,notes:"Plantar DFU at admit. Neuropathy confirmed.",by:"Dr. Kim"},{dt:"05/28/2026",stage:"N/A",tx:"Collagen dressing, TCC",heal:"Slow",inf:false,L:3.0,W:2.2,D:0.7,notes:"Wound enlarging. TCC applied. A1c 10.2.",by:"Dr. Kim"},{dt:"06/09/2026",stage:"N/A",tx:"TCC, collagen dressing, glycemic mgmt",heal:"Worsening",inf:true,L:3.5,W:2.8,D:1.0,notes:"Cellulitis present. IV abx started. Vascular surgery consult placed.",by:"Dr. Kim"}]},
   {id:"w10",ptId:"p16",name:"Chen, William",fac:"Embassy – Lakewood",tp:"Pressure Injury",stage:"Stage 2",loc:"Sacrum",etio:"Pressure",tx:"Hydrocolloid dressing, repositioning q2h, pressure relief cushion",ls:"06/07/2026",heal:"Improving",inf:false,notes:"Good response to repositioning protocol. Skin intact at margins.",chart:[{dt:"02/18/2026",stage:"Stage 1",tx:"Barrier cream, repositioning",heal:"Stable",inf:false,L:2.0,W:1.5,D:0.0,notes:"Stage 1 at admit. Redness without skin break.",by:"NP Rodriguez"},{dt:"03/10/2026",stage:"Stage 2",tx:"Hydrocolloid dressing",heal:"Stable",inf:false,L:2.5,W:2.0,D:0.2,notes:"Progressed to Stage 2. Dressing initiated.",by:"NP Rodriguez"},{dt:"06/07/2026",stage:"Stage 2",tx:"Hydrocolloid dressing, repositioning q2h",heal:"Improving",inf:false,L:1.8,W:1.5,D:0.1,notes:"Improvement noted. Repositioning compliance improved.",by:"NP Rodriguez"}]},
+  {id:"w11",ptId:"p7",name:"Garcia, Rosa",fac:"Sunrise SNF – Central",tp:"Skin Tear",stage:"N/A",loc:"R. Forearm",etio:"Non-Pressure",tx:"Steri-strips, non-adherent dressing",ls:"05/25/2026",heal:"Healed",inf:false,notes:"Wound fully epithelialized. Closed.",chart:[{dt:"04/20/2026",stage:"N/A",tx:"Steri-strips, non-adherent dressing",heal:"Stable",inf:false,L:3.0,W:1.2,D:0.1,notes:"Skin tear from transfer. ISTAP Type 2.",by:"NP Williams"},{dt:"05/08/2026",stage:"N/A",tx:"Non-adherent dressing",heal:"Progressing",inf:false,L:1.5,W:0.6,D:0.0,notes:"Granulating well.",by:"NP Williams"},{dt:"05/25/2026",stage:"N/A",tx:"Closed — no dressing",heal:"Healed",inf:false,L:0,W:0,D:0,notes:"Fully epithelialized. Wound closed.",by:"NP Williams"}]},
+  {id:"w12",ptId:"p5",name:"Evans, Dorothy",fac:"Reliant – Pinebrook",tp:"Surgical Wound",stage:"N/A",loc:"R. Hip (incision)",etio:"Non-Pressure",tx:"Negative pressure incision mgmt, staple removal",ls:"06/14/2026",heal:"Healed",inf:false,notes:"Surgical incision healed. Staples removed.",chart:[{dt:"05/03/2026",stage:"N/A",tx:"Surgical dressing",heal:"Stable",inf:false,L:14.0,W:0.5,D:0.4,notes:"Post-op hip ORIF incision.",by:"Dr. Chen"},{dt:"05/20/2026",stage:"N/A",tx:"Dry dressing",heal:"Progressing",inf:false,L:14.0,W:0.2,D:0.1,notes:"Incision approximated, no drainage.",by:"Dr. Chen"},{dt:"06/14/2026",stage:"N/A",tx:"Staple removal — closed",heal:"Healed",inf:false,L:0,W:0,D:0,notes:"Incision fully healed. Staples removed.",by:"Dr. Chen"}]},
 ];
+/* ── WOUND-RELATED HOSPITALIZATIONS / TRANSFERS (Rehospitalization tracking) ── */
+let WHOSP=[
+  {id:"wh1",ptId:"p13",woundId:"w7",name:"Morris, Sandra",fac:"Embassy – Riverside",co:"Embassy Healthcare",date:"05/30/2026",type:"Sepsis",dx:"Sepsis secondary to infected Stage 4 pressure injury (coccyx)",los:6,readmit:true,thAttempted:"No",preventable:"Possibly — earlier culture/abx may have prevented",pv:"NP Williams"},
+  {id:"wh2",ptId:"p15",woundId:"w9",name:"Washington, Gloria",fac:"Sunrise SNF – Central",co:"Sunrise Health Group",date:"06/09/2026",type:"Cellulitis",dx:"Lower extremity cellulitis — infected diabetic foot ulcer",los:4,readmit:false,thAttempted:"Yes",preventable:"No — appropriate escalation",pv:"Dr. Kim"},
+  {id:"wh3",ptId:"p10",woundId:"w2",name:"Johnson, Earl",fac:"Embassy – Lakewood",co:"Embassy Healthcare",date:"04/28/2026",type:"Osteomyelitis",dx:"Osteomyelitis underlying Stage 4 ischial pressure injury",los:9,readmit:true,thAttempted:"No",preventable:"Possibly — bone involvement detected late",pv:"NP Rodriguez"},
+];
+/* extra clinical attributes merged onto wounds at init (Braden, etiology detail, products, labs, vascular, nutrition, POA vs facility-acquired) */
+const WMETA={
+  w1:{poa:"Facility-Acquired",braden:14,debride:"Selective",vac:false,vacBrand:"",albumin:2.8,vascular:"N/A",dietary:true},
+  w2:{poa:"Present on Admission",braden:11,debride:"Excisional",vac:true,vacBrand:"3M V.A.C.",albumin:2.5,vascular:"Screened — adequate perfusion",dietary:true,healedDate:""},
+  w3:{poa:"Present on Admission",braden:16,debride:"Sharp",vac:false,vacBrand:"",albumin:3.0,vascular:"PVD — vascular referral placed",dietary:true},
+  w5:{poa:"Facility-Acquired",braden:12,debride:"Excisional",vac:false,vacBrand:"",albumin:2.6,vascular:"N/A",dietary:true},
+  w6:{poa:"Present on Admission",braden:17,debride:"None",vac:false,vacBrand:"",albumin:3.4,vascular:"Venous insufficiency — compression",dietary:false},
+  w7:{poa:"Present on Admission",braden:10,debride:"Excisional",vac:true,vacBrand:"3M V.A.C.",albumin:2.4,vascular:"Screened — adequate perfusion",dietary:true},
+  w8:{poa:"Present on Admission",braden:18,debride:"None",vac:false,vacBrand:"",albumin:3.2,vascular:"Venous insufficiency — compression",dietary:true},
+  w9:{poa:"Present on Admission",braden:15,debride:"Sharp",vac:false,vacBrand:"",albumin:2.9,vascular:"PVD — vascular surgery consult",dietary:true},
+  w10:{poa:"Facility-Acquired",braden:16,debride:"None",vac:false,vacBrand:"",albumin:3.1,vascular:"N/A",dietary:true},
+  w11:{poa:"Facility-Acquired",braden:18,debride:"None",vac:false,vacBrand:"",albumin:3.5,vascular:"N/A",dietary:false,healedDate:"05/25/2026"},
+  w12:{poa:"Present on Admission",braden:15,debride:"None",vac:true,vacBrand:"Prevena (incision)",albumin:3.3,vascular:"N/A",dietary:false,healedDate:"06/14/2026"}
+};
+/* Braden scores for the full active census (drives skin-integrity hot list & pressure prevention) */
+const BRADEN={p1:14,p2:12,p3:17,p4:17,p5:15,p6:16,p7:18,p8:13,p9:18,p10:11,p11:20,p12:16,p13:10,p14:18,p15:15,p16:16};
+function bradenRisk(s){if(s==null)return{l:"—",c:"#8a9ab0"};if(s<=9)return{l:"Severe",c:"#dc2626"};if(s<=12)return{l:"High",c:"#ef4444"};if(s<=14)return{l:"Moderate",c:"#f59e0b"};if(s<=18)return{l:"Mild",c:"#eab308"};return{l:"Minimal",c:"#10b981"};}
+function initWoundData(){
+  WOUNDS.forEach(function(w){
+    var m=WMETA[w.id]||{};
+    if(w.poa==null)w.poa=m.poa||"Unknown";
+    if(w.braden==null)w.braden=m.braden!=null?m.braden:(BRADEN[w.ptId]!=null?BRADEN[w.ptId]:null);
+    if(w.debride==null)w.debride=m.debride||"None";
+    if(w.vac==null)w.vac=!!m.vac;
+    if(w.vacBrand==null)w.vacBrand=m.vacBrand||"";
+    if(w.albumin==null)w.albumin=m.albumin!=null?m.albumin:null;
+    if(w.vascular==null)w.vascular=m.vascular||"Not assessed";
+    if(w.dietary==null)w.dietary=!!m.dietary;
+    if(w.onset==null)w.onset=(w.chart&&w.chart.length?w.chart[0].dt:w.ls);
+    if(w.healedDate==null)w.healedDate=m.healedDate||(w.heal==="Healed"&&w.chart&&w.chart.length?w.chart[w.chart.length-1].dt:"");
+  });
+}
 let PSYCH=[
   {id:"ps1",ptId:"p1",name:"Abbott, Charles",fac:"Embassy – Riverside",dx:["Major Depressive Disorder","GAD"],meds:["Sertraline 50mg QD","Lorazepam 0.5mg PRN"],ls:"05/13/2026",lastH:"02/18/2026",hReas:"Acute decompensation",v30:4,th:false,apy:false,gdr:"N/A",notes:"Mood improving. No SI.",chart:[{dt:"02/18/2026",ev:"Acute Hospitalization",meds:["Sertraline 50mg QD"],notes:"Admitted x5d.",by:"Psych NP"},{dt:"05/13/2026",ev:"Follow-up Visit",meds:["Sertraline 50mg QD","Lorazepam 0.5mg PRN"],notes:"Mood improving. No SI.",by:"Psych NP"}]},
   {id:"ps2",ptId:"p8",name:"Harris, James",fac:"Valley View SNF",dx:["Dementia w/ Behavioral Disturbance"],meds:["Risperidone 0.25mg QD","Mirtazapine 15mg QHS"],ls:"05/14/2026",lastH:"N/A",hReas:"—",v30:6,th:false,apy:true,gdr:"04/2026",notes:"Agitation 2x/week.",chart:[{dt:"03/01/2026",ev:"Behavioral Assessment",meds:["Risperidone 0.5mg QD"],notes:"Daily agitation. Risperidone started.",by:"Psych NP"},{dt:"05/14/2026",ev:"Follow-up Visit",meds:["Risperidone 0.25mg QD","Mirtazapine 15mg QHS"],notes:"Agitation 2x/week.",by:"Psych NP"}]},
@@ -646,7 +701,7 @@ function go(id){
   var idx={dashboard:0,census:1,wound:2,psych:3,qa:4,primary:5,reports:6}[id];
   document.querySelectorAll("#mnav button")[idx].classList.add("A");
   if(id==="census")  renderCensus();
-  if(id==="wound")   renderWound();
+  if(id==="wound")   wTab(wCurrentTab);
   if(id==="psych")   renderPsych();
   if(id==="qa")      renderQA();
   if(id==="primary") renderPrimary();
@@ -767,17 +822,23 @@ function renderDashAlerts(){
   } else {
     html+=alerts.map(function(a){
       var isStale=a.type==="stale";
-      var color=isStale?"#f87171":"#c4b5fd";
-      var bg=isStale?"#ef444412":"#7c3aed12";
-      var border=isStale?"#ef444444":"#7c3aed44";
-      var icon=isStale?"⚠️":"⏱";
-      return'<div style="background:'+bg+';border:1px solid '+border+';border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer" onclick="go(\'wound\')">'
+      var isWound=a.type==="stale"||a.type==="longterm";
+      var palette={stale:["#f87171","#ef444412","#ef444444","⚠️","STALE WOUND"],longterm:["#c4b5fd","#7c3aed12","#7c3aed44","⏱","LONG-TERM PRESSURE WOUND"],bypass:["#fca5a5","#ef444412","#ef444444","🚫","PROVIDER BYPASS"],pending:["#fcd34d","#f59e0b12","#f59e0b44","📋","UNREVIEWED SEND-OUT"]};
+      var p=palette[a.type]||["#c4b5fd","#7c3aed12","#7c3aed44","•","ALERT"];
+      var color=p[0],bg=p[1],border=p[2],icon=p[3],label=p[4];
+      var rec=a.w||a.h||{};
+      var nm=rec.name||rec.pt||"—";
+      var fac=rec.fac||"";
+      var sub=isWound?(fac+(rec.loc?" · "+rec.loc:"")):(fac+(rec.date?" · "+rec.date:""));
+      var right=isStale?(a.days+"d overdue"):a.type==="longterm"?("Day "+a.onset):(rec.date||"");
+      var dest=isWound?"wound":"qa";
+      return'<div style="background:'+bg+';border:1px solid '+border+';border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer" onclick="go(\''+dest+'\')">'
         +'<div style="display:flex;justify-content:space-between;margin-bottom:2px">'
-        +'<span style="font-size:10px;font-weight:700;color:'+color+'">'+icon+' '+(isStale?"STALE WOUND":"LONG-TERM PRESSURE WOUND")+'</span>'
-        +'<span style="font-size:10px;color:var(--mu)">'+(isStale?a.days+"d overdue":"Day "+a.onset)+'</span>'
+        +'<span style="font-size:10px;font-weight:700;color:'+color+'">'+icon+' '+label+'</span>'
+        +'<span style="font-size:10px;color:var(--mu)">'+right+'</span>'
         +'</div>'
-        +'<div style="font-size:12px;color:var(--tx);font-weight:600">'+a.w.name+'</div>'
-        +'<div style="font-size:11px;color:var(--mu)">'+a.w.fac+' · '+a.w.loc+'</div>'
+        +'<div style="font-size:12px;color:var(--tx);font-weight:600">'+nm+'</div>'
+        +'<div style="font-size:11px;color:var(--mu)">'+sub+'</div>'
         +'<div style="font-size:11px;color:'+color+';margin-top:2px">'+a.msg+'</div>'
         +'</div>';
     }).join("");
@@ -866,7 +927,7 @@ function buildFields(){
       var od=woundOnsetDays(rec);
       ltAlert='<div style="background:#7c3aed12;border:1px solid #7c3aed44;border-radius:7px;padding:10px 13px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#c4b5fd;margin-bottom:4px">⏱ Day '+od+' — Pressure wound approaching 100-day threshold</div><div style="font-size:11px;color:#a78bfa">Long-term pressure wounds require enhanced documentation, care team review, and possible specialist referral.</div></div>';
     }
-    flds=[{id:"wf-stage",l:"Stage",v:rec.stage,sel:["N/A","Stage 1","Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."]},{id:"wf-heal",l:"Healing",v:rec.heal,sel:["Stable","Progressing","Improving","Slow","Worsening","Healed"]},{id:"wf-inf",l:"Infection",v:rec.inf?"Yes":"No",sel:["No","Yes"]},{id:"wf-L",l:"Length (cm)",v:last.L||""},{id:"wf-W",l:"Width (cm)",v:last.W||""},{id:"wf-D",l:"Depth (cm)",v:last.D||""},{id:"wf-tx",l:"Treatment / New Intervention",v:rec.tx,full:true},{id:"wf-notes",l:"Progress Note (required if no measurement change)",v:"",ta:true,full:true,ph:"Document wound appearance, drainage, odor, patient response, or reason measurements unchanged…"},{id:"wf-date",l:"Visit Date",v:TDS()},{id:"wf-by",l:"Updated By",v:"",ph:"Clinician name"}];
+    flds=[{id:"wf-stage",l:"Stage",v:rec.stage,sel:["N/A","Stage 1","Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."]},{id:"wf-heal",l:"Healing",v:rec.heal,sel:["Stable","Progressing","Improving","Slow","Worsening","Healed"]},{id:"wf-inf",l:"Infection",v:rec.inf?"Yes":"No",sel:["No","Yes"]},{id:"wf-L",l:"Length (cm)",v:last.L||""},{id:"wf-W",l:"Width (cm)",v:last.W||""},{id:"wf-D",l:"Depth (cm)",v:last.D||""},{id:"wf-poa",l:"Origin",v:rec.poa||"Unknown",sel:["Unknown","Present on Admission","Facility-Acquired"]},{id:"wf-braden",l:"Braden Score",v:rec.braden!=null?rec.braden:""},{id:"wf-debride",l:"Debridement",v:rec.debride||"None",sel:["None","Selective","Sharp","Excisional","Enzymatic","Autolytic"]},{id:"wf-vac",l:"Wound VAC",v:rec.vac?"Yes":"No",sel:["No","Yes"]},{id:"wf-albumin",l:"Albumin (g/dL)",v:rec.albumin!=null?rec.albumin:""},{id:"wf-vascular",l:"Vascular Screening",v:rec.vascular||""},{id:"wf-dietary",l:"Nutrition Consult",v:rec.dietary?"Yes":"No",sel:["No","Yes"]},{id:"wf-tx",l:"Treatment / New Intervention",v:rec.tx,full:true},{id:"wf-notes",l:"Progress Note (required if no measurement change)",v:"",ta:true,full:true,ph:"Document wound appearance, drainage, odor, patient response, or reason measurements unchanged…"},{id:"wf-date",l:"Visit Date",v:TDS()},{id:"wf-by",l:"Updated By",v:"",ph:"Clinician name"}];
     var savedBuild=flds;
     var wflds=flds.map(function(f){return'<div style="grid-column:'+(f.full?"1/-1":"span 1")+'"><label class="fl">'+f.l+'</label>'+(f.sel?'<select id="'+f.id+'">'+f.sel.map(function(o){return'<option'+(o===f.v?' selected':'')+'>'+o+'</option>';}).join("")+'</select>':f.ta?'<textarea id="'+f.id+'" rows="3" placeholder="'+(f.ph||"")+'">'+e(f.v)+'</textarea>':'<input id="'+f.id+'" value="'+e(f.v||"")+'" placeholder="'+(f.ph||"")+'">') +'</div>';}).join("");
     el.innerHTML=staleAlert+ltAlert+'<div class="st" style="margin-bottom:10px">Update Wound Chart</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+wflds+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:flex-end"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div>';
@@ -896,11 +957,16 @@ function saveWoundEntry(){
     }
   }
   if(!rec.chart)rec.chart=[];
-  var en={dt:gv("wf-date")||today,stage:gv("wf-stage"),tx:gv("wf-tx"),heal:gv("wf-heal"),inf:gv("wf-inf")==="Yes",L:newL,W:parseFloat(gv("wf-W"))||null,D:parseFloat(gv("wf-D"))||null,notes:notes,by:gv("wf-by")||"Wound Team"};
+  var braden=gv("wf-braden")!==""?parseInt(gv("wf-braden")):rec.braden;
+  var albumin=gv("wf-albumin")!==""?parseFloat(gv("wf-albumin")):rec.albumin;
+  var en={dt:gv("wf-date")||today,stage:gv("wf-stage"),tx:gv("wf-tx"),heal:gv("wf-heal"),inf:gv("wf-inf")==="Yes",L:newL,W:parseFloat(gv("wf-W"))||null,D:parseFloat(gv("wf-D"))||null,poa:gv("wf-poa"),braden:braden,debride:gv("wf-debride"),vac:gv("wf-vac")==="Yes",albumin:albumin,vascular:gv("wf-vascular"),dietary:gv("wf-dietary")==="Yes",notes:notes,by:gv("wf-by")||"Wound Team"};
   rec.chart.push(en);
   rec.stage=en.stage;if(en.tx)rec.tx=en.tx;rec.heal=en.heal;rec.inf=en.inf;rec.ls=en.dt;if(en.notes)rec.notes=en.notes;
+  rec.poa=en.poa;rec.braden=braden;rec.debride=en.debride;rec.vac=en.vac;rec.albumin=albumin;rec.vascular=en.vascular;rec.dietary=en.dietary;
+  if(en.heal==="Healed"&&!rec.healedDate)rec.healedDate=en.dt;
+  if(en.heal!=="Healed")rec.healedDate="";
   cht(0);
-  renderWound();
+  wRefresh();
   // Also refresh dashboard alerts
   renderDashAlerts();
   alert("✓ Wound chart updated."+(woundIsStale(rec)?"":"\n\n✅ Stale alert cleared."));
@@ -935,7 +1001,7 @@ function saveEntry(){
     rec.vwk=en.vwk;rec.th=en.thVisits;rec.inf=en.inf;rec.rth=en.rth;rec.wn=en.wn;rec.cs=en.cs;rec.hr=en.hr;
   }
   cht(0);
-  if(tp==="census")renderCensus();else if(tp==="wound")renderWound();else if(tp==="psych")renderPsych();else if(tp==="qa")renderQA();else if(tp==="primary")renderPrimary();
+  if(tp==="census")renderCensus();else if(tp==="wound")wRefresh();else if(tp==="psych")renderPsych();else if(tp==="qa")renderQA();else if(tp==="primary")renderPrimary();
   alert("✓ Chart updated and archived.");
 }
 function buildHistory(){
@@ -1042,6 +1108,7 @@ function woundOnsetDays(w){
 function woundIsStale(w){
   return w.heal!=="Healed"&&woundDaysSinceUpdate(w)>=7;
 }
+function getStaleWounds(){return WOUNDS.filter(woundIsStale);}
 function woundNearingLongTerm(w){
   // Pressure wounds approaching or past 100 days
   var isPressure=w.etio==="Pressure"||w.tp==="Pressure Injury";
@@ -1107,6 +1174,138 @@ function renderWound(){
     var wid=w.id;
     return'<tr style="'+rowStyle+'"><td><button class="btn bg3 bsm" onclick="openChart(\'wound\',\''+wid+'\')">✏</button></td><td class="b">'+w.name+'</td><td style="font-size:11px">'+w.fac+'</td><td style="color:var(--tx)">'+w.tp+'</td><td>'+sP(w.stage)+'</td><td>'+w.loc+'</td><td style="color:var(--tx);max-width:160px;font-size:11px">'+w.tx+'</td><td class="b" style="color:'+(stale?"#f87171":"var(--tx)")+'">'+w.ls+'</td><td style="font-weight:700;color:'+(stale?"#f87171":daysSince<4?"var(--tl)":"var(--am)")+'">'+daysSince+'d</td><td style="font-weight:700;color:'+hC(w.heal)+'">● '+w.heal+'</td><td>'+(w.inf?'<span class="pill pr2">ACTIVE</span>':'<span style="color:var(--tl)">✓</span>')+'</td><td style="white-space:nowrap">'+woundAlertBadge(w)+'</td><td><span class="pill pt" style="cursor:pointer" onclick="openChart(\'wound\',\''+wid+'\');cht(1);">'+(w.chart||[]).length+'</span></td></tr>';
   }).join("")+'</tbody>';
+}
+
+/* ── WOUND SUB-TABS & ANALYTICS ── */
+var wCurrentTab=0;
+function wTab(i){
+  wCurrentTab=i;
+  for(var j=0;j<6;j++){var p=document.getElementById("w-p"+j),b=document.getElementById("w-t"+j);if(p)p.style.display=j===i?"block":"none";if(b)b.className=j===i?"btn bd2 bsm":"btn bg3 bsm";}
+  if(i===0)renderWound();
+  else if(i===1)renderWAnalytics();
+  else if(i===2)renderWQuality();
+  else if(i===3)renderWSkin();
+  else if(i===4)renderWRounds();
+  else if(i===5)renderWRehosp();
+}
+function wRefresh(){wTab(wCurrentTab);}
+function wIsPressure(w){return w.etio==="Pressure"||w.tp==="Pressure Injury";}
+function wStage2Plus(w){return["Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."].indexOf(w.stage)>=0;}
+function wIsHealed(w){return w.heal==="Healed";}
+function wIsNew(w){var d=parseDate(w.onset);return d?daysBetween(d,new Date())<=30:false;}
+function wHealTimeDays(w){if(w.heal!=="Healed")return null;var a=parseDate(w.onset),b=parseDate(w.healedDate);return(a&&b)?daysBetween(a,b):null;}
+function wQuarter(dt){var d=parseDate(dt);if(!d)return null;return"Q"+(Math.floor(d.getMonth()/3)+1)+" "+d.getFullYear();}
+function wFacList(){return wFac==="All"?WOUNDS:WOUNDS.filter(function(w){return w.fac===wFac;});}
+function wk(v,l,c,warn){return'<div class="kt" style="'+(warn?"border-color:"+c+"55;":"")+'"><div class="kv" style="color:'+c+'">'+v+'</div><div class="kl">'+l+'</div></div>';}
+
+function renderWAnalytics(){
+  buildFS("w-fs",wFac,function(v){wFac=v;wRefresh();},"#0ea5e9");
+  var el=document.getElementById("w-p1");if(!el)return;
+  var w=wFacList();
+  var active=w.filter(function(x){return!wIsHealed(x);});
+  var pr=w.filter(wIsPressure),np=w.filter(function(x){return!wIsPressure(x);});
+  var healed=w.filter(wIsHealed),neu=w.filter(wIsNew);
+  var inf=active.filter(function(x){return x.inf;});
+  var s2=active.filter(wStage2Plus);
+  var healingPool=w.filter(function(x){return["Progressing","Improving","Healed"].indexOf(x.heal)>=0;});
+  var hp=w.length?Math.round(healingPool.length/w.length*100):0;
+  var ht=healed.map(wHealTimeDays).filter(function(d){return d!=null;});
+  var avgHt=ht.length?Math.round(ht.reduce(function(a,b){return a+b;},0)/ht.length):null;
+  var whCount=wFac==="All"?WHOSP.length:WHOSP.filter(function(h){return h.fac===wFac;}).length;
+  document.getElementById("w-sub").textContent=w.length+" wounds tracked · "+healed.length+" healed · "+hp+"% healing rate";
+  // wound type distribution
+  var types={};w.forEach(function(x){types[x.tp]=(types[x.tp]||0)+1;});
+  var typeK=Object.keys(types);
+  // facility benchmarks
+  var facs=wFac==="All"?FACS:FACS.filter(function(f){return f.name===wFac;});
+  var byFac=facs.map(function(f){var fw=w.filter(function(x){return x.fac===f.name;});var fa=fw.filter(function(x){return!wIsHealed(x);});var fhp=fw.filter(function(x){return["Progressing","Improving","Healed"].indexOf(x.heal)>=0;});var fht=fw.filter(wIsHealed).map(wHealTimeDays).filter(function(d){return d!=null;});return{fac:f.name,co:f.co,cs:f.cs,total:fw.length,active:fa.length,prev:f.cs?Math.round(fa.length/f.cs*1000)/10:0,pressure:fw.filter(wIsPressure).length,s2:fa.filter(wStage2Plus).length,inf:fa.filter(function(x){return x.inf;}).length,hp:fw.length?Math.round(fhp.length/fw.length*100):0,avgHt:fht.length?Math.round(fht.reduce(function(a,b){return a+b;},0)/fht.length):"—",wh:WHOSP.filter(function(h){return h.fac===f.name;}).length};});
+  // quarterly metrics from onset / healed dates
+  var qs={};w.forEach(function(x){var q=wQuarter(x.onset);if(q){qs[q]=qs[q]||{q:q,nw:0,hl:0};qs[q].nw++;}if(wIsHealed(x)){var hq=wQuarter(x.healedDate);if(hq){qs[hq]=qs[hq]||{q:hq,nw:0,hl:0};qs[hq].hl++;}}});
+  var qArr=Object.keys(qs).sort().map(function(k){return qs[k];});
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:13px">'+
+    wk(w.length,"Total Wounds","#e2e8f0")+wk(neu.length,"New (30d)","#7dd3fc")+wk(healed.length,"Healed","#6ee7b7")+wk(hp+"%","Healing Rate","#3ecfb2")+
+    wk(avgHt!=null?avgHt+"d":"—","Avg Healing Time","#a78bfa")+wk(s2.length,"Stage 2+","#fca5a5")+wk(whCount,"Wound-Rel. Hosp.",whCount?"#f87171":"#6ee7b7",whCount>0)+wk(inf.length,"Infected",inf.length?"#f87171":"#6ee7b7",inf.length>0)+'</div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:13px"><div class="card cp"><div class="st">Etiology</div><div style="height:160px"><canvas id="wa-c1"></canvas></div></div><div class="card cp"><div class="st">Healing Status</div><div style="height:160px"><canvas id="wa-c2"></canvas></div></div><div class="card cp"><div class="st">New vs Healed Trend</div><div style="height:160px"><canvas id="wa-c3"></canvas></div></div></div>'+
+    '<div style="display:grid;grid-template-columns:2fr 1fr;gap:11px;margin-bottom:13px"><div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Facility Benchmarks</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Census</th><th>Wounds</th><th>Prevalence</th><th>Pressure</th><th>Stage 2+</th><th>Infected</th><th>Healing</th><th>Avg Heal</th><th>Hosp</th></tr></thead><tbody>'+byFac.filter(function(f){return f.total>0;}).map(function(f){return'<tr><td class="b">'+f.fac+'</td><td>'+f.cs+'</td><td style="font-weight:700">'+f.total+'</td><td style="color:'+(f.prev>5?"#f87171":f.prev>3?"#fcd34d":"#6ee7b7")+';font-weight:700">'+f.prev+'%</td><td style="color:#fca5a5">'+f.pressure+'</td><td>'+f.s2+'</td><td style="color:'+(f.inf?"#f87171":"var(--mu)")+'">'+f.inf+'</td><td style="color:'+(f.hp>=70?"var(--tl)":f.hp>=40?"var(--am)":"#f87171")+';font-weight:700">'+f.hp+'%</td><td>'+f.avgHt+(f.avgHt!=="—"?"d":"")+'</td><td style="color:'+(f.wh?"#f87171":"var(--mu)")+'">'+f.wh+'</td></tr>';}).join("")+'</tbody></table></div></div>'+
+    '<div class="card cp"><div class="st">Quarterly Metrics</div><table class="tbl" style="font-size:11px"><thead><tr><th>Quarter</th><th>New Wounds</th><th>Healed</th></tr></thead><tbody>'+(qArr.length?qArr.map(function(q){return'<tr><td class="b">'+q.q+'</td><td style="color:#7dd3fc;font-weight:700">'+q.nw+'</td><td style="color:#6ee7b7;font-weight:700">'+q.hl+'</td></tr>';}).join(""):'<tr><td colspan="3" style="color:var(--mu)">No dated wounds</td></tr>')+'</tbody></table><div style="font-size:10px;color:var(--mu);margin-top:8px;line-height:1.5">Marketable metrics for hospital partners & QAPI: healing rates, average healing time, and wound-related rehospitalizations.</div></div></div>';
+  setTimeout(function(){
+    mkChart("wa-c1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#fca5a5","#7dd3fc"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom"}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wa-c2","doughnut",["Progressing","Improving","Stable","Slow","Worsening","Healed"],[{data:["Progressing","Improving","Stable","Slow","Worsening","Healed"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#3ecfb2","#10b981","#2a7fff","#f59e0b","#ef4444","#6ee7b7"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wa-c3","bar",["Mar","Apr","May","Jun"],[{label:"New",data:[2,4,3,2],backgroundColor:"#7dd3fc",borderRadius:3},{label:"Healed",data:[1,1,2,2],backgroundColor:"#6ee7b7",borderRadius:3}]);
+  },60);
+}
+
+function renderWQuality(){
+  buildFS("w-fs",wFac,function(v){wFac=v;wRefresh();},"#0ea5e9");
+  var el=document.getElementById("w-p2");if(!el)return;
+  var w=wFacList().filter(function(x){return!wIsHealed(x);});
+  var facs=wFac==="All"?FACS:FACS.filter(function(f){return f.name===wFac;});
+  var pr=w.filter(wIsPressure);
+  var acq=pr.filter(function(x){return(x.poa||"").indexOf("Facility")>=0;});
+  var poa=pr.filter(function(x){return(x.poa||"").indexOf("Admission")>=0;});
+  var totalCs=facs.reduce(function(a,f){return a+f.cs;},0);
+  var prev=totalCs?Math.round(pr.length/totalCs*1000)/10:0;
+  var infRate=w.length?Math.round(w.filter(function(x){return x.inf;}).length/w.length*100):0;
+  var avgRth=facs.length?(facs.reduce(function(a,f){return a+f.rth;},0)/facs.length).toFixed(1):"—";
+  document.getElementById("w-sub").textContent="QAPI Quality Measures · "+pr.length+" pressure injuries · "+prev+"% prevalence";
+  var byFac=facs.map(function(f){var fw=w.filter(function(x){return x.fac===f.name;});var fp=fw.filter(wIsPressure);var fac=fp.filter(function(x){return(x.poa||"").indexOf("Facility")>=0;});return{fac:f.name,co:f.co,cs:f.cs,pi:fp.length,prev:f.cs?Math.round(fp.length/f.cs*1000)/10:0,acq:fac.length,inf:fw.filter(function(x){return x.inf;}).length,infRate:fw.length?Math.round(fw.filter(function(x){return x.inf;}).length/fw.length*100):0,rth:f.rth};});
+  el.innerHTML='<div style="background:#0ea5e912;border:1px solid #0ea5e933;border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#7dd3fc;margin-bottom:4px">📋 QAPI Key Targets — Quality Measure Support</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Tracking the four CMS-aligned targets the wound team reports into monthly QAPI: <b style="color:#e2e8f0">Pressure Ulcer Prevalence</b>, <b style="color:#e2e8f0">New / Facility-Acquired Pressure Injuries</b>, <b style="color:#e2e8f0">Infection Rates</b>, and <b style="color:#e2e8f0">Return-to-Hospital Rates</b>.</div></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:13px">'+
+    wk(prev+"%","PI Prevalence",prev>5?"#f87171":"#fcd34d",prev>5)+wk(acq.length,"Facility-Acquired PI",acq.length?"#f87171":"#6ee7b7",acq.length>0)+wk(poa.length,"Present-on-Admission","#7dd3fc")+wk(infRate+"%","Infection Rate",infRate>20?"#f87171":"#fcd34d",infRate>20)+wk(avgRth+"%","Avg RTH Rate",parseFloat(avgRth)>18?"#f87171":"#fcd34d",parseFloat(avgRth)>18)+'</div>'+
+    '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Quality Measures by Facility</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Census</th><th>Pressure Injuries</th><th>Prevalence</th><th>Facility-Acquired</th><th>Infection Rate</th><th>RTH%</th></tr></thead><tbody>'+byFac.map(function(f){return'<tr style="'+(f.acq||f.prev>5?"background:#ef44440a;":"")+'"><td class="b">'+f.fac+'</td><td>'+coB(f.co)+'</td><td>'+f.cs+'</td><td style="font-weight:700;color:#fca5a5">'+f.pi+'</td><td style="font-weight:700;color:'+(f.prev>5?"#f87171":f.prev>3?"#fcd34d":"#6ee7b7")+'">'+f.prev+'%</td><td style="color:'+(f.acq?"#f87171":"var(--mu)")+';font-weight:700">'+f.acq+'</td><td style="color:'+(f.infRate>20?"#f87171":"var(--mu)")+'">'+f.infRate+'%</td><td style="font-weight:700;color:'+rC(f.rth)+'">'+f.rth+'%</td></tr>';}).join("")+'</tbody></table></div></div>'+
+    '<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px"><div class="card cp"><div class="st">Pressure Injury Origin</div><div style="height:160px"><canvas id="wq-c1"></canvas></div></div><div class="card cp"><div class="st">Prevalence by Facility</div><div style="height:160px"><canvas id="wq-c2"></canvas></div></div></div>';
+  setTimeout(function(){
+    mkChart("wq-c1","doughnut",["Facility-Acquired","Present on Admission"],[{data:[acq.length,poa.length],backgroundColor:["#ef4444","#7dd3fc"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wq-c2","bar",byFac.map(function(f){return f.fac.split("–").pop().trim();}),[{label:"Prevalence %",data:byFac.map(function(f){return f.prev;}),backgroundColor:"#fca5a5",borderRadius:3}]);
+  },60);
+}
+
+function renderWSkin(){
+  buildFS("w-fs",wFac,function(v){wFac=v;wRefresh();},"#0ea5e9");
+  var el=document.getElementById("w-p3");if(!el)return;
+  var pts=PATIENTS.filter(function(p){return p.st==="Active"&&(wFac==="All"||p.fac===wFac);});
+  var rows=pts.map(function(p){var b=BRADEN[p.id];var risk=bradenRisk(b);var wd=WOUNDS.filter(function(x){return x.ptId===p.id&&!wIsHealed(x);});var freq=(b!=null&&b<=14)?"Twice weekly":(b!=null&&b<=18)?"Weekly":"Routine";return{p:p,b:b,risk:risk,wd:wd,freq:freq,hot:b!=null&&b<=14};}).sort(function(a,b){return(a.b==null?99:a.b)-(b.b==null?99:b.b);});
+  var hot=rows.filter(function(r){return r.hot;});
+  var withW=rows.filter(function(r){return r.wd.length;});
+  var acqAll=WOUNDS.filter(function(x){return wIsPressure(x)&&(x.poa||"").indexOf("Facility")>=0&&(wFac==="All"||x.fac===wFac);});
+  document.getElementById("w-sub").textContent="Skin Integrity Program · "+rows.length+" residents on watch · "+hot.length+" high-risk (Braden ≤14)";
+  el.innerHTML='<div style="background:#7c3aed12;border:1px solid #7c3aed33;border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#c4b5fd;margin-bottom:4px">🧴 Comprehensive Skin Integrity Program</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Every resident — not just pressure ulcers — is on the watch list. Residents with <b style="color:#e2e8f0">Braden ≤ 14</b> are flagged to the hot list for <b style="color:#e2e8f0">twice-weekly oversight</b> and active pressure-prevention review.</div></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:13px">'+
+    wk(rows.length,"Residents Monitored","#e2e8f0")+wk(hot.length,"Hot List (≤14)",hot.length?"#f87171":"#6ee7b7",hot.length>0)+wk(withW.length,"With Active Wound","#7dd3fc")+wk(acqAll.length,"Facility-Acquired",acqAll.length?"#fca5a5":"#6ee7b7",acqAll.length>0)+wk(rows.filter(function(r){return!r.wd.length&&r.hot;}).length,"At-Risk, No Wound","#fcd34d")+'</div>'+
+    '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Braden Watch List — sorted by risk</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Resident</th><th>Facility</th><th>Braden</th><th>Risk</th><th>Active Wound</th><th>Oversight</th><th>Pressure Prevention</th></tr></thead><tbody>'+rows.map(function(r){return'<tr style="'+(r.hot?"background:#ef44440a;":"")+'"><td class="b">'+r.p.name+'</td><td style="font-size:11px">'+r.p.fac+'</td><td style="font-weight:800;color:'+r.risk.c+'">'+(r.b==null?"—":r.b)+'</td><td><span class="pill" style="background:'+r.risk.c+'22;color:'+r.risk.c+'">'+r.risk.l+'</span></td><td>'+(r.wd.length?r.wd.map(function(x){return'<span class="pill pr2" style="cursor:pointer" onclick="openChart(\'wound\',\''+x.id+'\')">'+x.tp+'</span>';}).join(" "):'<span style="color:var(--tl)">none</span>')+'</td><td style="font-weight:700;color:'+(r.hot?"#f87171":"var(--mu)")+'">'+r.freq+'</td><td style="font-size:11px;color:var(--mu)">'+(r.hot?"Repositioning q2h · surface eval · nutrition":r.b<=18?"Repositioning · skin checks":"Standard skin care")+'</td></tr>';}).join("")+'</tbody></table></div></div>';
+}
+
+function renderWRounds(){
+  buildFS("w-fs",wFac,function(v){wFac=v;wRefresh();},"#0ea5e9");
+  var el=document.getElementById("w-p4");if(!el)return;
+  var facs=wFac==="All"?FACS:FACS.filter(function(f){return f.name===wFac;});
+  var days=["Monday","Tuesday","Wednesday","Thursday","Friday"];
+  var rows=facs.map(function(f,i){var fw=WOUNDS.filter(function(x){return x.fac===f.name&&!wIsHealed(x);});var overdue=fw.filter(woundIsStale);var lastDays=fw.length?Math.min.apply(null,fw.map(woundDaysSinceUpdate)):null;return{fac:f.name,co:f.co,day:days[i%5],wounds:fw.length,overdue:overdue.length,last:lastDays,status:overdue.length===0&&fw.length?"On Track":overdue.length>0?"Action Needed":"No Active Wounds"};});
+  var totalOver=rows.reduce(function(a,r){return a+r.overdue;},0);
+  var onTrack=rows.filter(function(r){return r.status==="On Track";}).length;
+  document.getElementById("w-sub").textContent="Weekly Wound Rounds · "+rows.filter(function(r){return r.wounds;}).length+" facilities with active wounds · "+totalOver+" overdue";
+  el.innerHTML='<div style="background:#10b98112;border:1px solid #10b98133;border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#6ee7b7;margin-bottom:4px">📅 Weekly Wound Rounds — the most important program element</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Each facility runs dedicated wound rounds on a set day each week. Protocol: any wound with <b style="color:#e2e8f0">no change in 7 days is re-evaluated</b>. Wounds overdue for documentation appear below as Action Needed.</div></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px">'+
+    wk(rows.filter(function(r){return r.wounds;}).length,"Facilities w/ Rounds","#e2e8f0")+wk(onTrack,"On Track","#6ee7b7")+wk(rows.filter(function(r){return r.status==="Action Needed";}).length,"Action Needed",totalOver?"#f87171":"#6ee7b7",totalOver>0)+wk(totalOver,"Wounds Overdue",totalOver?"#f87171":"#6ee7b7",totalOver>0)+'</div>'+
+    '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Rounds Schedule & Compliance</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Rounds Day</th><th>Active Wounds</th><th>Most Recent Update</th><th>Overdue (7d+)</th><th>Status</th></tr></thead><tbody>'+rows.map(function(r){var sc=r.status==="On Track"?"#6ee7b7":r.status==="Action Needed"?"#f87171":"#8a9ab0";return'<tr style="'+(r.overdue?"background:#ef44440a;":"")+'"><td class="b">'+r.fac+'</td><td>'+coB(r.co)+'</td><td style="color:var(--tl)">'+r.day+'</td><td style="font-weight:700">'+r.wounds+'</td><td>'+(r.last==null?"—":r.last+"d ago")+'</td><td style="color:'+(r.overdue?"#f87171":"var(--mu)")+';font-weight:700">'+r.overdue+'</td><td><span class="pill" style="background:'+sc+'22;color:'+sc+'">'+r.status+'</span></td></tr>';}).join("")+'</tbody></table></div></div>';
+}
+
+function renderWRehosp(){
+  buildFS("w-fs",wFac,function(v){wFac=v;wRefresh();},"#0ea5e9");
+  var el=document.getElementById("w-p5");if(!el)return;
+  var hs=wFac==="All"?WHOSP:WHOSP.filter(function(h){return h.fac===wFac;});
+  var byType=function(t){return hs.filter(function(h){return h.type===t;}).length;};
+  var readmit=hs.filter(function(h){return h.readmit;}).length;
+  var prevent=hs.filter(function(h){return(h.preventable||"").toLowerCase().indexOf("possibly")>=0||((h.preventable||"").toLowerCase().indexOf("yes")>=0);}).length;
+  document.getElementById("w-sub").textContent="Wound-Related Rehospitalizations · "+hs.length+" transfers tracked";
+  el.innerHTML='<div style="background:#ef444412;border:1px solid #ef444433;border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:4px">🏥 Wound-Related Rehospitalization Tracking</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Monitoring wound-related transfers — <b style="color:#e2e8f0">Cellulitis</b>, <b style="color:#e2e8f0">Osteomyelitis</b>, and <b style="color:#e2e8f0">Sepsis</b> admissions — to drive down rehospitalization. Marketable to SNFs and hospital partners.</div></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:13px">'+
+    wk(hs.length,"Total Transfers",hs.length?"#f87171":"#6ee7b7",hs.length>0)+wk(byType("Sepsis"),"Sepsis","#fca5a5")+wk(byType("Osteomyelitis"),"Osteomyelitis","#fca5a5")+wk(byType("Cellulitis"),"Cellulitis","#fcd34d")+wk(readmit,"30-Day Readmits","#f87171")+wk(prevent,"Potentially Preventable",prevent?"#fcd34d":"#6ee7b7",prevent>0)+'</div>'+
+    '<div style="display:grid;grid-template-columns:2fr 1fr;gap:11px"><div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Transfer Detail</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Patient</th><th>Facility</th><th>Date</th><th>Type</th><th>Diagnosis</th><th>LOS</th><th>Readmit</th><th>Telehealth</th><th>Preventable</th></tr></thead><tbody>'+(hs.length?hs.map(function(h){return'<tr><td class="b"><span style="cursor:pointer;color:#7dd3fc" onclick="openChart(\'wound\',\''+h.woundId+'\')">'+h.name+'</span></td><td style="font-size:11px">'+h.fac+'</td><td>'+h.date+'</td><td><span class="pill pr2">'+h.type+'</span></td><td style="font-size:11px;max-width:220px">'+h.dx+'</td><td>'+h.los+'d</td><td>'+(h.readmit?'<span class="pill pr2">Yes</span>':'<span style="color:var(--tl)">No</span>')+'</td><td>'+h.thAttempted+'</td><td style="font-size:11px;color:'+((h.preventable||"").toLowerCase().indexOf("possibly")>=0?"#fcd34d":"var(--mu)")+'">'+h.preventable+'</td></tr>';}).join(""):'<tr><td colspan="9" style="color:var(--mu)">No wound-related transfers recorded.</td></tr>')+'</tbody></table></div></div>'+
+    '<div class="card cp"><div class="st">Transfers by Type</div><div style="height:180px"><canvas id="wr-c1"></canvas></div></div></div>';
+  setTimeout(function(){
+    mkChart("wr-c1","doughnut",["Sepsis","Osteomyelitis","Cellulitis"],[{data:[byType("Sepsis"),byType("Osteomyelitis"),byType("Cellulitis")],backgroundColor:["#ef4444","#f97316","#f59e0b"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
+  },60);
 }
 
 /* ── PSYCH ── */
@@ -1979,11 +2178,18 @@ function renderRptWound(){
   var stale=w.filter(function(x){return woundIsStale(x);});
   var lt=w.filter(function(x){return woundNearingLongTerm(x);});
   var hp=w.length?Math.round(heal.length/w.length*100):0;
+  var neu=w.filter(wIsNew),healed=w.filter(wIsHealed),s2=w.filter(wStage2Plus);
+  var ht=healed.map(wHealTimeDays).filter(function(d){return d!=null;});
+  var avgHt=ht.length?Math.round(ht.reduce(function(a,b){return a+b;},0)/ht.length):null;
+  var facNames=facs.map(function(f){return f.name;});
+  var wh=WHOSP.filter(function(h){return facNames.indexOf(h.fac)>=0;});
   var byFac=facs.map(function(f){var fw=w.filter(function(x){return x.fac===f.name;});var fh=fw.filter(function(x){return["Progressing","Improving","Healed"].includes(x.heal);});return{fac:f.name,co:f.co,total:fw.length,pressure:fw.filter(function(x){return x.etio==="Pressure"||x.tp==="Pressure Injury";}).length,nonPressure:fw.filter(function(x){return x.etio!=="Pressure"&&x.tp!=="Pressure Injury";}).length,infected:fw.filter(function(x){return x.inf;}).length,stale:fw.filter(function(x){return woundIsStale(x);}).length,lt:fw.filter(function(x){return woundNearingLongTerm(x);}).length,hp:fw.length?Math.round(fh.length/fw.length*100):0};});
   var byPort=Object.keys(COM).map(function(co){var pf=FACS.filter(function(f){return f.co===co;});var pw=w.filter(function(x){return pf.find(function(f){return f.name===x.fac;});});return{co:co,total:pw.length,pressure:pw.filter(function(x){return x.etio==="Pressure"||x.tp==="Pressure Injury";}).length,nonPressure:pw.filter(function(x){return x.etio!=="Pressure"&&x.tp!=="Pressure Injury";}).length};});
-  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:13px"><div class="kt"><div class="kv">'+w.length+'</div><div class="kl">Total Wounds</div></div><div class="kt"><div class="kv" style="color:#fca5a5">'+pr.length+'</div><div class="kl">Pressure</div></div><div class="kt"><div class="kv" style="color:#7dd3fc">'+np.length+'</div><div class="kl">Non-Pressure</div></div><div class="kt" style="'+(inf.length?"border-color:#f8717144":"")+'"><div class="kv" style="color:'+(inf.length?"#f87171":"#6ee7b7")+'">'+inf.length+'</div><div class="kl">Infected</div></div><div class="kt"><div class="kv" style="color:var(--tl)">'+hp+'%</div><div class="kl">Healing Rate</div></div><div class="kt" style="'+(stale.length?"border-color:#f8717144":"")+'"><div class="kv" style="color:'+(stale.length?"#f87171":"#6ee7b7")+'">'+stale.length+'</div><div class="kl">Stale 7d+</div></div></div>'
+  el.innerHTML='<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:13px"><div class="kt"><div class="kv">'+w.length+'</div><div class="kl">Total Wounds</div></div><div class="kt"><div class="kv" style="color:#fca5a5">'+pr.length+'</div><div class="kl">Pressure</div></div><div class="kt"><div class="kv" style="color:#7dd3fc">'+np.length+'</div><div class="kl">Non-Pressure</div></div><div class="kt"><div class="kv" style="color:#7dd3fc">'+neu.length+'</div><div class="kl">New (30d)</div></div><div class="kt"><div class="kv" style="color:#6ee7b7">'+healed.length+'</div><div class="kl">Healed</div></div><div class="kt"><div class="kv" style="color:#a78bfa">'+(avgHt!=null?avgHt+"d":"—")+'</div><div class="kl">Avg Heal Time</div></div><div class="kt"><div class="kv" style="color:#fca5a5">'+s2.length+'</div><div class="kl">Stage 2+</div></div><div class="kt"><div class="kv" style="color:var(--tl)">'+hp+'%</div><div class="kl">Healing Rate</div></div></div>'
+  +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px"><div class="kt" style="'+(inf.length?"border-color:#f8717144":"")+'"><div class="kv" style="color:'+(inf.length?"#f87171":"#6ee7b7")+'">'+inf.length+'</div><div class="kl">Infected</div></div><div class="kt" style="'+(stale.length?"border-color:#f8717144":"")+'"><div class="kv" style="color:'+(stale.length?"#f87171":"#6ee7b7")+'">'+stale.length+'</div><div class="kl">Stale 7d+</div></div><div class="kt" style="'+(wh.length?"border-color:#f8717144":"")+'"><div class="kv" style="color:'+(wh.length?"#f87171":"#6ee7b7")+'">'+wh.length+'</div><div class="kl">Wound-Rel. Hosp.</div></div></div>'
   +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:13px"><div class="card cp"><div class="st">Pressure vs Non-Pressure</div><div style="height:150px"><canvas id="rc-w1"></canvas></div></div><div class="card cp"><div class="st">Healing Status</div><div style="height:150px"><canvas id="rc-w2"></canvas></div></div><div class="card cp"><div class="st">Wounds by Portfolio</div><div style="height:150px"><canvas id="rc-w3"></canvas></div></div></div>'
   +(lt.length?'<div style="background:#7c3aed12;border:1px solid #7c3aed44;border-radius:8px;padding:10px 14px;margin-bottom:11px"><div style="font-size:12px;font-weight:700;color:#c4b5fd;margin-bottom:5px">&#x23F1; '+lt.length+' pressure wound'+(lt.length>1?"s":"")+" near/past 100 days</div>"+lt.map(function(x){return'<div style="font-size:11px;color:#a78bfa">&#x25B8; '+x.name+' &middot; '+x.fac+' &middot; Day '+woundOnsetDays(x)+'</div>';}).join("")+'</div>':"")
+  +(wh.length?'<div class="card" style="margin-bottom:11px"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">&#x1F3E5; Wound-Related Rehospitalizations</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Patient</th><th>Facility</th><th>Date</th><th>Type</th><th>Diagnosis</th><th>LOS</th><th>Preventable</th></tr></thead><tbody>'+wh.map(function(h){return'<tr><td class="b">'+h.name+'</td><td style="font-size:11px">'+h.fac+'</td><td>'+h.date+'</td><td><span class="pill pr2">'+h.type+'</span></td><td style="font-size:11px">'+h.dx+'</td><td>'+h.los+'d</td><td style="font-size:11px;color:var(--mu)">'+h.preventable+'</td></tr>';}).join("")+'</tbody></table></div></div>':"")
   +'<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Detail by Facility</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Total</th><th>Pressure</th><th>Non-Pressure</th><th>Infected</th><th>Healing Rate</th><th>Stale 7d+</th><th>80-100d+</th></tr></thead><tbody>'+byFac.filter(function(f){return f.total>0;}).map(function(f){return'<tr style="'+(f.stale?"background:#ef44440a;":"")+'"><td class="b">'+f.fac+'</td><td>'+coB(f.co)+'</td><td style="font-weight:700">'+f.total+'</td><td style="color:#fca5a5">'+f.pressure+'</td><td style="color:#7dd3fc">'+f.nonPressure+'</td><td style="color:'+(f.infected?"#f87171":"var(--mu)")+'">'+f.infected+'</td><td style="color:'+(f.hp>=70?"var(--tl)":f.hp>=40?"var(--am)":"#f87171")+';font-weight:700">'+f.hp+'%</td><td style="color:'+(f.stale?"#f87171":"var(--mu)")+'">'+f.stale+'</td><td style="color:'+(f.lt?"#c4b5fd":"var(--mu)")+'">'+f.lt+'</td></tr>';}).join("")+'</tbody></table></div></div>';
   setTimeout(function(){
     mkChart("rc-w1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#fca5a5","#7dd3fc"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
@@ -2072,7 +2278,7 @@ function closeAllRpts(){["pm-wound","pm-psych","pm-ent","pm-prim","pm-polyrx"].f
 function mkPrintCss(){return "body{font-family:system-ui,sans-serif;max-width:1100px;margin:0 auto;padding:22px;font-size:11px}h2{font-size:11px;font-weight:700;text-transform:uppercase;color:#475569;border-bottom:2px solid #e2e8f0;padding-bottom:3px;margin:14px 0 7px}table{width:100%;border-collapse:collapse;margin-bottom:12px}th{padding:5px 7px;text-align:left;font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;background:#f1f5f9;border-bottom:2px solid #e2e8f0}td{padding:5px 7px;border-bottom:1px solid #f1f5f9}.np{margin-top:14px;display:flex;gap:7px}@media print{.np{display:none}@page{margin:.4in;size:landscape}}";}
 function mkPrintHdr(title,sc,stats,gc){gc=gc||"#1e3a5f";return'<div style="background:linear-gradient(135deg,#0f172a,'+gc+');color:#fff;padding:18px 24px;border-radius:9px;margin-bottom:16px"><div style="font-size:9px;letter-spacing:.12em;color:#7dd3fc;text-transform:uppercase;font-weight:700;margin-bottom:4px">AMA SNF Provider Services &middot; Care Connect</div><div style="font-family:Georgia,serif;font-size:20px;margin-bottom:2px">'+title+'</div><div style="font-size:12px;color:#7dd3fc;font-weight:600">'+sc+'</div><div style="font-size:10px;color:#94a3b8">'+TD()+'</div><div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">'+stats.map(function(s){return'<div style="background:#ffffff15;border-radius:7px;padding:7px 13px;text-align:center"><div style="font-size:18px;font-weight:800;color:#fff">'+s.v+'</div><div style="font-size:9px;color:#94a3b8">'+s.l+'</div></div>';}).join("")+'</div></div>';}
 function mkPrintFtr(){var cb='<button onclick="closeAllRpts()" style="background:#e2e8f0;color:#475569;border:none;padding:7px 13px;border-radius:6px;font-size:12px;cursor:pointer">Close</button>';return'<div style="margin-top:18px;font-size:10px;color:#94a3b8;text-align:center">CONFIDENTIAL &middot; HIPAA Protected &middot; '+TD()+'</div><div class="np"><button onclick="window.print()" style="background:#1e3a5f;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Print / PDF</button>'+cb+'</div>';}
-function runWoundReport(){var sc=rptLabel();var facs=rptGetFacs();var w=facs.length===FACS.length?WOUNDS:WOUNDS.filter(function(x){return facs.find(function(f){return f.name===x.fac;});});var css=mkPrintCss();var html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Wound Report</title><style>"+css+"</style></head><body>"+mkPrintHdr("Wound Care Report",sc,[{l:"Total",v:w.length},{l:"Pressure",v:w.filter(function(x){return x.etio==="Pressure"||x.tp==="Pressure Injury";}).length},{l:"Non-Pressure",v:w.filter(function(x){return x.etio!=="Pressure"&&x.tp!=="Pressure Injury";}).length},{l:"Infected",v:w.filter(function(x){return x.inf;}).length},{l:"Healing Rate",v:w.length?Math.round(w.filter(function(x){return["Progressing","Improving","Healed"].includes(x.heal);}).length/w.length*100)+"%":"N/A"},{l:"Stale 7d+",v:w.filter(function(x){return woundIsStale(x);}).length}],"#0e7490")+"<div style='padding:0 24px 24px'><h2>Wound Detail</h2><table><thead><tr><th>Patient</th><th>Facility</th><th>Type</th><th>Stage</th><th>Location</th><th>Treatment</th><th>Last Update</th><th>Healing</th><th>Infection</th><th>Days</th></tr></thead><tbody>"+w.map(function(x){return"<tr><td><b>"+x.name+"</b></td><td>"+x.fac+"</td><td>"+x.tp+"</td><td>"+x.stage+"</td><td>"+x.loc+"</td><td>"+x.tx+"</td><td>"+x.ls+"</td><td>"+x.heal+"</td><td>"+(x.inf?"ACTIVE":"No")+"</td><td>"+(woundIsStale(x)?"<b style='color:#dc2626'>"+woundDaysSinceUpdate(x)+"d</b>":woundDaysSinceUpdate(x)+"d")+"</td></tr>";}).join("")+"</tbody></table>"+mkPrintFtr()+"</div></body></html>";showRpt("pm-ent",html);}
+function runWoundReport(){var sc=rptLabel();var facs=rptGetFacs();var w=facs.length===FACS.length?WOUNDS:WOUNDS.filter(function(x){return facs.find(function(f){return f.name===x.fac;});});var css=mkPrintCss();var html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Wound Report</title><style>"+css+"</style></head><body>"+mkPrintHdr("Wound Care Report",sc,[{l:"Total",v:w.length},{l:"Pressure",v:w.filter(function(x){return x.etio==="Pressure"||x.tp==="Pressure Injury";}).length},{l:"Non-Pressure",v:w.filter(function(x){return x.etio!=="Pressure"&&x.tp!=="Pressure Injury";}).length},{l:"New (30d)",v:w.filter(wIsNew).length},{l:"Healed",v:w.filter(wIsHealed).length},{l:"Stage 2+",v:w.filter(wStage2Plus).length},{l:"Infected",v:w.filter(function(x){return x.inf;}).length},{l:"Healing Rate",v:w.length?Math.round(w.filter(function(x){return["Progressing","Improving","Healed"].includes(x.heal);}).length/w.length*100)+"%":"N/A"},{l:"Stale 7d+",v:w.filter(function(x){return woundIsStale(x);}).length}],"#0e7490")+"<div style='padding:0 24px 24px'><h2>Wound Detail</h2><table><thead><tr><th>Patient</th><th>Facility</th><th>Type</th><th>Stage</th><th>Location</th><th>Treatment</th><th>Last Update</th><th>Healing</th><th>Infection</th><th>Days</th></tr></thead><tbody>"+w.map(function(x){return"<tr><td><b>"+x.name+"</b></td><td>"+x.fac+"</td><td>"+x.tp+"</td><td>"+x.stage+"</td><td>"+x.loc+"</td><td>"+x.tx+"</td><td>"+x.ls+"</td><td>"+x.heal+"</td><td>"+(x.inf?"ACTIVE":"No")+"</td><td>"+(woundIsStale(x)?"<b style='color:#dc2626'>"+woundDaysSinceUpdate(x)+"d</b>":woundDaysSinceUpdate(x)+"d")+"</td></tr>";}).join("")+"</tbody></table>"+(function(){var wh=WHOSP.filter(function(h){return facs.some(function(f){return f.name===h.fac;});});return wh.length?"<h2>Wound-Related Rehospitalizations</h2><table><thead><tr><th>Patient</th><th>Facility</th><th>Date</th><th>Type</th><th>Diagnosis</th><th>LOS</th><th>Readmit</th><th>Preventable</th></tr></thead><tbody>"+wh.map(function(h){return"<tr><td><b>"+h.name+"</b></td><td>"+h.fac+"</td><td>"+h.date+"</td><td>"+h.type+"</td><td>"+h.dx+"</td><td>"+h.los+"d</td><td>"+(h.readmit?"Yes":"No")+"</td><td>"+h.preventable+"</td></tr>";}).join("")+"</tbody></table>":"";})()+mkPrintFtr()+"</div></body></html>";showRpt("pm-ent",html);}
 function runPrimaryReport(){var sc=rptLabel();var facs=rptGetFacs();var rv=PR_REVIEWS.filter(function(r){return facs.find(function(f){return f.name===r.fac;});});var css=mkPrintCss();var html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Primary Report</title><style>"+css+"</style></head><body>"+mkPrintHdr("Primary Services Report",sc,[{l:"Reviews",v:rv.length+"/"+facs.length},{l:"QAPI%",v:rv.length?Math.round(rv.filter(function(r){return r.qapi==="Yes";}).length/rv.length*100)+"%":"N/A"},{l:"GDR%",v:rv.length?Math.round(rv.filter(function(r){return r.gdr==="Yes";}).length/rv.length*100)+"%":"N/A"},{l:"48-72hr%",v:rv.length?Math.round(rv.filter(function(r){return r.seen48==="Yes";}).length/rv.length*100)+"%":"N/A"}],"#1e3a5f")+"<div style='padding:0 24px 24px'><h2>Facility Summary</h2><table><thead><tr><th>Facility</th><th>Admits</th><th>48-72hr</th><th>QAPI</th><th>GDRs</th><th>AWV</th><th>CHF</th><th>COPD</th><th>HTN</th><th>APY</th><th>Braden</th><th>LPN Daily</th></tr></thead><tbody>"+facs.map(function(f){var r=rv.find(function(rv2){return rv2.fac===f.name;});if(!r)return"<tr><td><b>"+f.name+"</b></td><td colspan='11' style='color:#94a3b8'>Not reviewed</td></tr>";return"<tr><td><b>"+f.name+"</b></td><td>"+( r.admits||"0")+"</td><td>"+r.seen48+"</td><td>"+r.qapi+"</td><td>"+r.gdr+"</td><td>"+r.awv+"</td><td>"+( r.chf||"—")+"</td><td>"+( r.copd||"—")+"</td><td>"+( r.htn||"—")+"</td><td>"+( r.apy||"—")+"</td><td>"+r.braden+"</td><td>"+r.lpndaily+"</td></tr>";}).join("")+"</tbody></table>"+mkPrintFtr()+"</div></body></html>";showRpt("pm-prim",html);}
 function runPsychReport(){var sc=rptLabel();var facs=rptGetFacs();var rv=PSY_REVIEWS.filter(function(r){return facs.find(function(f){return f.name===r.fac;});});var css=mkPrintCss();var html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Psych Report</title><style>"+css+"</style></head><body>"+mkPrintHdr("Psych Services Report",sc,[{l:"Reviews",v:rv.length+"/"+facs.length},{l:"MSE",v:rv.reduce(function(a,r){return a+(parseInt(r.mse)||0);},0)},{l:"Acute",v:rv.reduce(function(a,r){return a+(parseInt(r.acute)||0);},0)},{l:"TH",v:rv.reduce(function(a,r){return a+(parseInt(r.th)||0);},0)},{l:"3+ APY",v:rv.reduce(function(a,r){return a+(parseInt(r.triApy)||0);},0)}],"#3b0764")+"<div style='padding:0 24px 24px'><h2>Facility Summary</h2><table><thead><tr><th>Facility</th><th>Provider</th><th>BHI</th><th>Poly</th><th>3+ APY</th><th>MSE</th><th>Acute</th><th>TH</th><th>Total</th><th>Weekly Visits</th><th>GDR 7d</th><th>Prior Auth</th></tr></thead><tbody>"+facs.map(function(f){var r=rv.find(function(rv2){return rv2.fac===f.name;});if(!r)return"<tr><td><b>"+f.name+"</b></td><td colspan='11' style='color:#94a3b8'>Not reviewed</td></tr>";return"<tr><td><b>"+f.name+"</b></td><td>"+( r.pv||"—")+"</td><td>"+r.bhi+"</td><td>"+r.poly+"</td><td style='color:"+(parseInt(r.triApy)>0?"#dc2626":"inherit")+"'>"+( r.triApy||"0")+"</td><td>"+( r.mse||"0")+"</td><td>"+( r.acute||"0")+"</td><td>"+( r.th||"0")+"</td><td>"+( r.totalVis||"0")+"</td><td>"+r.weeklyVis+"</td><td>"+r.gdr+"</td><td>"+r.pa+"</td></tr>";}).join("")+"</tbody></table>"+mkPrintFtr()+"</div></body></html>";showRpt("pm-psych",html);}
 function runQAReport(){var sc=rptLabel();var facs=rptGetFacs();var hs=HOSP.filter(function(h){return facs.find(function(f){return f.name===h.fac;});});var css=mkPrintCss();var html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>QA Report</title><style>"+css+"</style></head><body>"+mkPrintHdr("Quality Assurance Report",sc,[{l:"Send-Outs",v:hs.length},{l:"Bypasses",v:hs.filter(function(h){return h.bypass;}).length},{l:"Avoidable",v:hs.filter(function(h){return h.preventable&&h.preventable.startsWith("Yes");}).length},{l:"Pending",v:hs.filter(function(h){return h.reviewed&&h.reviewed.startsWith("No");}).length},{l:"TH Done",v:hs.filter(function(h){return h.thDone==="Yes";}).length}],"#1e1048")+"<div style='padding:0 24px 24px'><h2>Send-Out Reviews</h2><table><thead><tr><th>Date</th><th>Resident</th><th>Facility</th><th>Provider</th><th>Reason</th><th>Admit Dx</th><th>Prov Notified</th><th>TH Done</th><th>Bypass</th><th>Reviewed</th><th>Preventable</th></tr></thead><tbody>"+hs.map(function(h){return"<tr><td>"+h.date+"</td><td><b>"+h.pt+"</b></td><td>"+h.fac+"</td><td>"+h.pv+"</td><td>"+h.rsn+"</td><td>"+( h.adx||"—")+"</td><td>"+h.pvNotified+"</td><td>"+h.thDone+"</td><td style='color:"+(h.bypass?"#dc2626":"inherit")+"'>"+(h.bypass?"BYPASS":"No")+"</td><td>"+h.reviewed+"</td><td>"+( h.preventable||"—")+"</td></tr>";}).join("")+"</tbody></table>"+mkPrintFtr()+"</div></body></html>";showRpt("pm-ent",html);}
@@ -2272,6 +2478,7 @@ function renderCDTracker(){
 document.addEventListener("DOMContentLoaded",function(){
   // drag/drop for upload zone
   var uz=document.getElementById("up-fi");if(uz){var uzp=uz.closest(".uz");if(uzp){uzp.addEventListener("dragover",function(ev){ev.preventDefault();uzp.style.borderColor="var(--tl)";});uzp.addEventListener("dragleave",function(){uzp.style.borderColor="";});uzp.addEventListener("drop",function(ev){ev.preventDefault();uzp.style.borderColor="";handleF2([].slice.call(ev.dataTransfer.files));});}}
+  initWoundData();
   initDash();
   renderCensus();
   document.getElementById("ftr").textContent="Last sync: "+TD()+" · "+FACS.length+" facilities · "+PATIENTS.filter(function(p){return p.st==="Active";}).length+" active residents";
