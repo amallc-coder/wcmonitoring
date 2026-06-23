@@ -87,9 +87,36 @@ select option{background:#131920}
 .pfill{height:100%;border-radius:99px;background:var(--tl);transition:width .3s}
 .uz{border:2px dashed var(--b2);border-radius:9px;padding:22px;text-align:center;cursor:pointer;transition:all .2s}
 .uz:hover{border-color:var(--tl);background:rgba(62,207,178,.04)}
+#lgate{position:fixed;inset:0;z-index:9999;background:radial-gradient(1200px 600px at 50% -10%,#162132,#0d1117 70%);display:flex;align-items:center;justify-content:center}
+#lgate.h{display:none}
+#lgate .lcard{width:340px;max-width:92vw;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:26px 24px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+#lgate .lhd{display:flex;align-items:center;gap:9px;margin-bottom:4px}
+#lgate .lic2{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#0f172a,#1e3a5f);display:flex;align-items:center;justify-content:center;font-size:18px;color:#7dd3fc}
+#lgate h2{font-size:16px;font-weight:800;color:var(--tx);margin:0}
+#lgate .lsub{font-size:11px;color:var(--mu);margin:2px 0 18px}
+#lgate label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin:0 0 4px}
+#lgate .frow{margin-bottom:13px}
+#lgate input{padding:9px 11px;font-size:13px}
+#lgate .lbtn{width:100%;justify-content:center;padding:9px;font-size:13px;margin-top:4px}
+#lgate .lerr{font-size:11px;color:#fca5a5;min-height:15px;margin-top:8px;text-align:center}
+#lgate .lft{font-size:10px;color:var(--mu);text-align:center;margin-top:16px;line-height:1.5}
 </style>
 </head>
 <body>
+
+<div id="lgate">
+  <div class="lcard">
+    <div class="lhd"><div class="lic2">⚕</div><h2>AMA Care Connect</h2></div>
+    <div class="lsub">Wound &amp; Skin Integrity Monitoring · Secure Sign-In</div>
+    <form id="lform" onsubmit="return doLogin(event)">
+      <div class="frow"><label for="lg-user">Username</label><input id="lg-user" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="username"></div>
+      <div class="frow"><label for="lg-pass">Password</label><input id="lg-pass" type="password" autocomplete="current-password" placeholder="password"></div>
+      <button type="submit" class="btn ba2 lbtn">Sign In</button>
+      <div class="lerr" id="lg-err"></div>
+    </form>
+    <div class="lft">Authorized AMA SNF Provider Services staff only.<br>Sessions end when the browser tab is closed.</div>
+  </div>
+</div>
 
 <header id="hdr">
   <div class="logo"><div class="lic">⚕</div><span class="ltx">AMA <span>Care Connect</span></span></div>
@@ -102,7 +129,7 @@ select option{background:#131920}
     <button onclick="go('primary')">Primary Services</button>
     <button onclick="go('reports')">Reports &amp; Analytics</button>
   </nav>
-  <div class="hdr-r"><div class="live"></div><span style="font-size:10px;color:var(--mu)">Live</span><span style="background:var(--bd);border-radius:16px;padding:3px 10px;font-size:11px">SNF Admin</span></div>
+  <div class="hdr-r"><div class="live"></div><span style="font-size:10px;color:var(--mu)">Live</span><span style="background:var(--bd);border-radius:16px;padding:3px 10px;font-size:11px">SNF Admin</span><button class="btn bg3 bsm" style="font-size:10px" onclick="ccLogout()">Sign Out</button></div>
 </header>
 <div id="main">
 
@@ -2475,7 +2502,32 @@ function renderCDTracker(){
   }).join("");
 }
 
+/* ── LOGIN GATE (client-side) ── */
+var LG_USER="ama";
+var LG_HASH="0d0a07438bcd6705edbfdd9104a39ce2d5399eccb25d6cd63d0b594ce3553e3d"; // SHA-256 of the password
+async function sha256hex(s){var b=new TextEncoder().encode(s);var h=await crypto.subtle.digest("SHA-256",b);return Array.from(new Uint8Array(h)).map(function(x){return x.toString(16).padStart(2,"0");}).join("");}
+async function doLogin(ev){
+  ev.preventDefault();
+  var u=(document.getElementById("lg-user").value||"").trim().toLowerCase();
+  var p=document.getElementById("lg-pass").value||"";
+  var err=document.getElementById("lg-err");
+  if(!crypto||!crypto.subtle){err.textContent="Secure sign-in requires an https:// connection.";return false;}
+  try{
+    var h=await sha256hex(p);
+    if(u===LG_USER&&h===LG_HASH){sessionStorage.setItem("cc_auth","1");document.getElementById("lgate").classList.add("h");err.textContent="";}
+    else{err.textContent="Invalid username or password.";document.getElementById("lg-pass").value="";document.getElementById("lg-pass").focus();}
+  }catch(e){err.textContent="Sign-in error. Please retry.";}
+  return false;
+}
+function ccLogout(){sessionStorage.removeItem("cc_auth");location.reload();}
+function lgateInit(){
+  var g=document.getElementById("lgate");if(!g)return;
+  if(sessionStorage.getItem("cc_auth")==="1"){g.classList.add("h");}
+  else{var u=document.getElementById("lg-user");if(u)u.focus();}
+}
+
 document.addEventListener("DOMContentLoaded",function(){
+  lgateInit();
   // drag/drop for upload zone
   var uz=document.getElementById("up-fi");if(uz){var uzp=uz.closest(".uz");if(uzp){uzp.addEventListener("dragover",function(ev){ev.preventDefault();uzp.style.borderColor="var(--tl)";});uzp.addEventListener("dragleave",function(){uzp.style.borderColor="";});uzp.addEventListener("drop",function(ev){ev.preventDefault();uzp.style.borderColor="";handleF2([].slice.call(ev.dataTransfer.files));});}}
   initWoundData();
