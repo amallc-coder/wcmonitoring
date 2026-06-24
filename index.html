@@ -12,7 +12,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f7f7f5;--sf:#ffffff;--bd:#ebe9e4;--b2:#dedbd3;--tx:#202227;--mu:#8f8a81;--tl:#6f9b7a;--bl:#3f7d76;--rd:#c0392b;--am:#c2693f;--pu:#8a6db0;--gn:#6f9b7a;--ink:#1a1b1f;--mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
+:root{--bg:#f6f7f7;--sf:#ffffff;--bd:#e7e8e7;--b2:#d7d9d8;--tx:#23262b;--mu:#888d92;--tl:#3f7d76;--ac:#3f7d76;--bl:#4a6f86;--rd:#b3433a;--am:#b07d3c;--pu:#7d6a9c;--gn:#5b8c6e;--ink:#23262b;--mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
 body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;font-size:13px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 16px;display:flex;flex-direction:column;position:sticky;top:0;z-index:100;flex-shrink:0}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;height:48px}
@@ -20,13 +20,11 @@ body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;backgroun
 .lic{display:flex;align-items:center;justify-content:center;line-height:0}
 .lic svg{display:block}
 .ltx{font-weight:700;font-size:17px;color:var(--tx);letter-spacing:-.02em}.ltx span{color:var(--tl)}
-.modpill{background:var(--am);color:#fff;border-radius:5px;padding:4px 12px;font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:.01em}
+.modpill{background:rgba(63,125,118,.12);color:#356b64;border:1px solid rgba(63,125,118,.25);border-radius:5px;padding:3px 11px;font-size:11px;font-weight:600;white-space:nowrap;letter-spacing:.01em}
 nav{display:flex;overflow-x:auto;gap:4px;padding-bottom:9px;margin:0}
-nav button{background:transparent;border:none;color:#6f6a61;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;border-radius:5px;display:inline-flex;align-items:center;gap:6px}
-nav button::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tl);opacity:.55;flex-shrink:0}
-nav button:hover{color:var(--tx)}
+nav button{background:transparent;border:none;color:#6b7077;padding:6px 13px;font-size:12.5px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .12s;border-radius:6px;display:inline-flex;align-items:center;gap:6px}
+nav button:hover{color:var(--tx);background:#eef0f0}
 nav button.A{background:var(--ink);color:#fff;font-weight:600}
-nav button.A::before{background:#fff;opacity:.7}
 .hdr-r{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .live{width:6px;height:6px;border-radius:50%;background:var(--tl);box-shadow:0 0 5px var(--tl)}
 #main{flex:1;overflow-y:auto}
@@ -34,15 +32,15 @@ nav button.A::before{background:#fff;opacity:.7}
 footer{background:var(--sf);border-top:1px solid var(--bd);padding:5px 16px;display:flex;justify-content:space-between;font-size:10px;color:var(--mu);flex-shrink:0}
 .card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;box-shadow:0 1px 2px rgba(20,20,20,.03);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .cp{padding:15px 17px}
-.st{font-size:10.5px;font-weight:600;color:#7c776d;letter-spacing:.085em;text-transform:uppercase;margin-bottom:7px;font-family:var(--mono)}
+.st{font-size:10.5px;font-weight:600;color:#787d82;letter-spacing:.085em;text-transform:uppercase;margin-bottom:7px;font-family:var(--mono)}
 .kt{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:13px 15px;box-shadow:0 1px 2px rgba(20,20,20,.03)}
 .kv{font-size:23px;font-weight:700;color:var(--tx);line-height:1.05;letter-spacing:-.015em;font-family:"Inter",system-ui,sans-serif}
 .kl{font-size:10px;color:var(--mu);margin-top:2px;text-transform:uppercase;letter-spacing:.07em;font-family:var(--mono)}
 .ksub{font-size:10.5px;color:var(--mu);margin-top:4px}
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{padding:7px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--bd);white-space:nowrap;font-family:var(--mono)}
-.tbl td{padding:7px 10px;font-size:12px;color:#46443e;border-bottom:1px solid #efece5;font-family:var(--mono)}
-.tbl tr:hover td{background:#faf8f4}
+.tbl td{padding:7px 10px;font-size:12px;color:#41454b;border-bottom:1px solid #eceeed;font-family:var(--mono)}
+.tbl tr:hover td{background:#f4f6f6}
 .tbl td.b{color:var(--tx);font-weight:600}
 .pill{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700}
 .ph{background:#f7e3df;color:#b23a2e}.pm2{background:#f6ecd7;color:#9a6a25}.pl{background:#e3efe1;color:#3f7d4e}
@@ -50,7 +48,7 @@ footer{background:var(--sf);border-top:1px solid var(--bd);padding:5px 16px;disp
 .pp{background:rgba(138,109,176,.15);color:var(--pu)}.pr2{background:#f7e3df;color:#b23a2e}
 .btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:7px;font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid transparent;font-family:inherit;transition:all .15s;white-space:nowrap}
 .bt{background:var(--tl);color:#fff;border-color:var(--tl)}
-.bd2{background:#efece5;color:var(--tx);border-color:var(--bd)}
+.bd2{background:#eceeed;color:var(--tx);border-color:var(--bd)}
 .bg3{background:#fff;color:#6f6a61;border-color:var(--bd)}
 .bg3:hover{border-color:var(--b2);color:var(--tx)}
 .bp2{background:var(--ink);color:#fff;border-color:var(--ink)}
@@ -88,7 +86,7 @@ select option{background:#fff}
 .te::before{content:'';position:absolute;left:-15px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--tl);border:2px solid var(--sf)}
 .te.old::before{background:var(--mu)}
 .td2{font-size:10px;color:var(--mu);margin-bottom:2px}
-.tc{background:#faf8f4;border:1px solid var(--bd);border-radius:6px;padding:8px 11px}
+.tc{background:#f4f6f6;border:1px solid var(--bd);border-radius:6px;padding:8px 11px}
 .cw{position:relative;height:130px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
@@ -114,9 +112,29 @@ select option{background:#fff}
 #lgate .lbtn{width:100%;justify-content:center;padding:9px;font-size:13px;margin-top:4px}
 #lgate .lerr{font-size:11px;color:var(--rd);min-height:15px;margin-top:8px;text-align:center}
 #lgate .lft{font-size:10px;color:var(--mu);text-align:center;margin-top:16px;line-height:1.5}
+/* ── HELP & TRAINING ── */
+.help-wrap{display:grid;grid-template-columns:248px 1fr;gap:16px;align-items:start}
+.help-nav{position:sticky;top:96px;display:flex;flex-direction:column;gap:2px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:8px;max-height:calc(100vh - 130px);overflow-y:auto}
+.help-nav .hcat{font-size:9.5px;font-weight:700;color:var(--mu);letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono);padding:9px 9px 4px}
+.help-nav button{text-align:left;background:transparent;border:none;color:#4d5258;font-size:12.5px;padding:7px 10px;border-radius:7px;cursor:pointer;font-family:inherit;line-height:1.3}
+.help-nav button:hover{background:#eef0f0;color:var(--tx)}
+.help-nav button.A{background:rgba(63,125,118,.12);color:#2f5f59;font-weight:600}
+.help-body{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:22px 26px;min-height:60vh;box-shadow:0 1px 2px rgba(20,20,20,.03)}
+.help-body h2{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
+.help-body .hsub{color:var(--mu);font-size:13px;margin-bottom:18px}
+.help-body h3{font-size:13px;font-weight:700;margin:22px 0 8px;color:var(--tx)}
+.help-body p{font-size:13.5px;line-height:1.65;color:#42474d;margin-bottom:10px}
+.help-fig{border:1px solid var(--bd);border-radius:10px;background:#fbfcfc;padding:14px;margin:6px 0 18px}
+.help-step{display:flex;gap:12px;margin-bottom:13px}
+.help-step .hn{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:"Inter",sans-serif}
+.help-step .ht{font-size:13.5px;line-height:1.55;color:#42474d}
+.help-step .ht b{color:var(--tx)}
+.help-tip{background:rgba(63,125,118,.07);border-left:3px solid var(--ac);border-radius:0 7px 7px 0;padding:9px 13px;font-size:12.5px;color:#3a4f4b;margin:6px 0 4px;line-height:1.55}
+.help-pill{display:inline-block;background:#eef0f0;border:1px solid var(--bd);border-radius:5px;padding:1px 7px;font-size:11.5px;font-family:var(--mono);color:#3a4f4b}
+@media (max-width:760px){.help-wrap{grid-template-columns:1fr}.help-nav{position:static;max-height:none;flex-direction:column}.help-body{padding:16px 15px}}
 /* ── HAMBURGER + RESPONSIVE ── */
 #navtoggle{display:none;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--bd);border-radius:8px;background:#fff;cursor:pointer;color:var(--tx);font-size:16px;line-height:1;margin-right:4px;flex-shrink:0}
-#navtoggle:hover{border-color:var(--b2);background:#faf8f4}
+#navtoggle:hover{border-color:var(--b2);background:#f4f6f6}
 img,canvas,svg{max-width:100%}
 @media (max-width:1024px){
   [style*="grid-template-columns"]{grid-template-columns:1fr 1fr!important}
@@ -183,6 +201,7 @@ img,canvas,svg{max-width:100%}
     <button onclick="go('census')">Census &amp; Facilities</button>
     <button onclick="go('wound')">Wound Care</button>
     <button onclick="go('reports')">Reports &amp; Analytics</button>
+    <button onclick="go('help')">Help &amp; Training</button>
   </nav>
 </header>
 <div id="main">
@@ -235,8 +254,9 @@ img,canvas,svg{max-width:100%}
     <div><div class="pt3">Wound &amp; Skin Integrity</div><div class="ps2" id="w-sub">Loading…</div></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
       <select id="w-prov" style="width:170px;font-size:11px" onchange="wProv=this.value;wRefresh()"></select>
-      <button class="btn bb2 bsm" onclick="emailWFacReport()">📧 Email Facility Report</button>
-      <button class="btn bb2 bsm" onclick="woundRpt()">🖨 Print Report</button>
+      <button class="btn bt bsm" onclick="openAddWound()">＋ Add Wound</button>
+      <button class="btn bg3 bsm" onclick="emailWFacReport()">📧 Email Report</button>
+      <button class="btn bg3 bsm" onclick="woundRpt()">🖨 Print</button>
     </div>
   </div>
   <div class="fs2" id="w-fs"></div>
@@ -297,6 +317,18 @@ img,canvas,svg{max-width:100%}
       <div style="display:flex;gap:7px"><button class="btn bt" onclick="runKw()">Search</button><button class="btn bg3" onclick="clearKw()">Clear</button></div>
     </div>
     <div id="kw-results"></div>
+  </div>
+</div>
+
+<!-- HELP & TRAINING -->
+<div id="tab-help" class="tb">
+  <div class="ph2">
+    <div><div class="pt3">Help &amp; Training</div><div class="ps2">Plain-language, step-by-step guides for every workflow</div></div>
+    <input id="help-q" placeholder="Search guides…" style="width:220px" oninput="renderHelp()">
+  </div>
+  <div class="help-wrap">
+    <div class="help-nav" id="help-nav"></div>
+    <div class="help-body" id="help-body"></div>
   </div>
 </div>
 </div>
@@ -526,7 +558,7 @@ img,canvas,svg{max-width:100%}
 <div class="mb">
   <div class="mh"><div class="mtt">📤 Facesheet Upload</div><button class="xb" onclick="cM('m-upload')">✕</button></div>
   <div class="mbd">
-    <div style="padding:9px 11px;background:#faf8f4;border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:11px">
+    <div style="padding:9px 11px;background:#f4f6f6;border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:11px">
       <div style="font-size:12px;font-weight:600;margin-bottom:2px">AI-Powered OCR Extraction</div>
       <div style="font-size:11px;color:var(--mu)">Upload PDF facesheets — AI extracts Name, DOB, Dx, Insurance, Room, Provider, Code Status, Allergies, MRN.</div>
     </div>
@@ -556,12 +588,42 @@ img,canvas,svg{max-width:100%}
 </div>
 </div>
 
+<!-- ADD WOUND -->
+<div id="m-addwound" class="mo h">
+<div class="mb xl">
+  <div class="mh"><div class="mtt">＋ Add Wound to Watch List</div><button class="xb" onclick="cM('m-addwound')">✕</button></div>
+  <div class="mbd"><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+    <div><label class="fl">Facility *</label><select id="aw-fac" onchange="awFacChange()"><option value="">— Select —</option></select></div>
+    <div><label class="fl">Resident *</label><select id="aw-pt"><option value="">— Select facility first —</option></select></div>
+    <div><label class="fl">Wound Provider (owner)</label><input id="aw-pv" placeholder="who rounds on this wound"></div>
+    <div><label class="fl">Wound Type *</label><select id="aw-tp"><option>Pressure Injury</option><option>Diabetic Ulcer</option><option>Venous Ulcer</option><option>Arterial Ulcer</option><option>Surgical Wound</option><option>Skin Tear</option><option>Moisture-Associated</option><option>Other</option></select></div>
+    <div><label class="fl">Etiology</label><select id="aw-etio"><option>Pressure</option><option>Non-Pressure</option><option>Traumatic</option></select></div>
+    <div><label class="fl">Stage</label><select id="aw-stage"><option>N/A</option><option>Stage 1</option><option>Stage 2</option><option>Stage 3</option><option>Stage 4</option><option>Unstageable</option><option>Deep Tissue Inj.</option></select></div>
+    <div><label class="fl">Location *</label><input id="aw-loc" placeholder="e.g. Sacrum, L. Heel"></div>
+    <div><label class="fl">Onset Date</label><input id="aw-onset" type="date"></div>
+    <div><label class="fl">Origin</label><select id="aw-poa"><option>Unknown</option><option>Present on Admission</option><option>Facility-Acquired</option></select></div>
+    <div><label class="fl">Length (cm)</label><input id="aw-L" placeholder="0.0"></div>
+    <div><label class="fl">Width (cm)</label><input id="aw-W" placeholder="0.0"></div>
+    <div><label class="fl">Depth (cm)</label><input id="aw-D" placeholder="0.0"></div>
+    <div><label class="fl">Healing Status</label><select id="aw-heal"><option>Stable</option><option>Progressing</option><option>Improving</option><option>Slow</option><option>Worsening</option></select></div>
+    <div><label class="fl">Infection Present</label><select id="aw-inf"><option>No</option><option>Yes</option></select></div>
+    <div><label class="fl">Braden Score</label><input id="aw-braden" placeholder="6–23"></div>
+    <div><label class="fl">Graft In Place</label><select id="aw-graft"><option>No</option><option>Yes</option></select></div>
+    <div><label class="fl">Collagen In Use</label><select id="aw-collagen"><option>No</option><option>Yes</option></select></div>
+    <div><label class="fl">PCR Required</label><select id="aw-pcr"><option>No</option><option>Yes</option></select></div>
+    <div style="grid-column:1/-1"><label class="fl">Treatment / Initial Intervention</label><input id="aw-tx" placeholder="e.g. Foam dressing, offloading, weekly debridement"></div>
+    <div style="grid-column:1/-1"><label class="fl">Notes</label><textarea id="aw-notes" rows="2" placeholder="Wound appearance, drainage, plan…"></textarea></div>
+  </div></div>
+  <div class="mft"><button class="btn bg3" onclick="cM('m-addwound')">Cancel</button><button class="btn bt" onclick="saveNewWound()">Save Wound</button></div>
+</div>
+</div>
+
 <!-- ADMIN / USER MANAGEMENT -->
 <div id="m-admin" class="mo h">
 <div class="mb">
   <div class="mh"><div class="mtt">👤 User Management</div><button class="xb" onclick="cM('m-admin')">✕</button></div>
   <div class="mbd">
-    <div style="padding:9px 11px;background:#faf8f4;border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:13px">
+    <div style="padding:9px 11px;background:#f4f6f6;border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:13px">
       <div style="font-size:12px;font-weight:600;margin-bottom:2px">Create sign-in accounts</div>
       <div style="font-size:11px;color:var(--mu)">Each provider/admin signs in with their own username &amp; password. Passwords are stored as SHA-256 hashes in this browser. (For org-wide accounts across devices, a backend would be required.)</div>
     </div>
@@ -588,7 +650,7 @@ img,canvas,svg{max-width:100%}
 
 <script>
 /* ── DATA ── */
-const COM={"Embassy Healthcare":{c:"#3b82f6",a:"#93c5fd"},"Reliant Senior Care":{c:"#10b981",a:"#6ee7b7"},"Sunrise Health Group":{c:"#f59e0b",a:"#fcd34d"},"Valley SNF Partners":{c:"#ec4899",a:"#f9a8d4"}};
+const COM={"Embassy Healthcare":{c:"#4a6f86",a:"#4a6f86"},"Reliant Senior Care":{c:"#5b8c6e",a:"#5b8c6e"},"Sunrise Health Group":{c:"#b07d3c",a:"#b07d3c"},"Valley SNF Partners":{c:"#8a6f9c",a:"#8a6f9c"}};
 let FACS=[
   {id:"f1",name:"Embassy – Riverside",co:"Embassy Healthcare",reg:"North",tp:"SNF",cs:92,pv:"NP Williams",rth:21,inf:4,hr:8,mo:3,th:42,apy:12,wn:4,vwk:7,chart:[]},
   {id:"f2",name:"Embassy – Northgate",co:"Embassy Healthcare",reg:"North",tp:"SNF",cs:78,pv:"Dr. Chen",rth:17,inf:3,hr:6,mo:2,th:35,apy:9,wn:2,vwk:5,chart:[]},
@@ -721,11 +783,11 @@ const KWP=[
 /* ── HELPERS ── */
 const TD=()=>new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
 const TDS=()=>new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"});
-const rC=r=>r>18?"#c0392b":r>15?"#c2693f":"#6f9b7a";
+const rC=r=>r>18?"#b3433a":r>15?"#b07d3c":"#5b8c6e";
 const rT=r=>r>18?"HIGH":r>15?"MED":"LOW";
 const rP=r=>'<span class="pill '+(r==="HIGH"?"ph":r==="MED"?"pm2":"pl")+'">'+r+'</span>';
 const coB=co=>{const m=COM[co]||{c:"#8c877d",a:"#8c877d"};return'<span class="pill" style="background:'+m.c+'1f;color:'+m.c+'">'+co.split(" ")[0]+'</span>';};
-const hC=h=>({Progressing:"#4f7d5e",Stable:"#6b675e",Slow:"#c2693f",Improving:"#4f7d5e",Worsening:"#c0392b",Healed:"#4f7d5e"}[h]||"#8f8a81");
+const hC=h=>({Progressing:"#4f8268",Stable:"#6b7077",Slow:"#b07d3c",Improving:"#4f8268",Worsening:"#b3433a",Healed:"#4f8268"}[h]||"#888d92");
 const sP=s=>{const p=(["Stage 4","Stage 3"].includes(s))?["#fee2e2","#991b1b"]:(s==="Stage 2")?["#fef3c7","#92400e"]:(["Unstageable","Deep Tissue Inj."].includes(s))?["#ede9fe","#5b21b6"]:["#eceae4","#6f6a61"];return'<span class="pill" style="background:'+p[0]+';color:'+p[1]+'">'+s+'</span>';};
 const e=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const gv=id=>(document.getElementById(id)||{}).value||"";
@@ -757,18 +819,19 @@ function go(id){
   document.querySelectorAll(".tb").forEach(function(t){t.classList.remove("A");});
   document.querySelectorAll("#mnav button").forEach(function(b){b.classList.remove("A");});
   document.getElementById("tab-"+id).classList.add("A");
-  var idx={dashboard:0,census:1,wound:2,reports:3}[id];
+  var idx={dashboard:0,census:1,wound:2,reports:3,help:4}[id];
   document.querySelectorAll("#mnav button")[idx].classList.add("A");
   var nv=document.getElementById("mnav");if(nv)nv.classList.remove("open");
   if(id==="census")  renderCensus();
   if(id==="wound")   wTab(wCurrentTab);
   if(id==="reports") renderReports();
+  if(id==="help")    renderHelp();
 }
 
 /* ── DASHBOARD ── */
 const MOS=["Jan","Feb","Mar","Apr","May","Jun"];
 const CO={border:{color:"rgba(20,20,20,0.07)"},ticks:{color:"#8c877d",font:{size:10}}};
-const COPTS={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#26282d",titleColor:"#fff",bodyColor:"#d8d3c8",borderColor:"#46443e",borderWidth:1}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
+const COPTS={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#26282d",titleColor:"#fff",bodyColor:"#d8d3c8",borderColor:"#41454b",borderWidth:1}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
 function initDash(){
   var actW=WOUNDS.filter(function(w){return!wIsHealed(w);});
   var prW=actW.filter(wIsPressure);
@@ -795,13 +858,13 @@ function initDash(){
   var MO=["Jan","Feb","Mar","Apr","May","Jun"];
   var CO={border:{color:"rgba(20,20,20,0.07)"},ticks:{color:"#8c877d",font:{size:9}}};
   var OP={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
-  new Chart(document.getElementById("c-hosp"),{type:"line",data:{labels:MO,datasets:[{data:[22,20,19,17,16,15],borderColor:"#c2693f",borderWidth:2,tension:.4,pointRadius:0,fill:false},{data:[18,18,18,18,18,18],borderColor:"#b8b3a8",borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false}]},options:OP});
-  new Chart(document.getElementById("c-wound"),{type:"bar",data:{labels:MO,datasets:[{data:[62,65,70,74,78,82],backgroundColor:"#6f9b7a",borderRadius:3},{data:[38,35,30,26,22,18],backgroundColor:"#d3cdc1",borderRadius:3}]},options:Object.assign({},OP,{scales:{x:Object.assign({},OP.scales.x,{stacked:true}),y:Object.assign({},OP.scales.y,{stacked:true})}})});
+  new Chart(document.getElementById("c-hosp"),{type:"line",data:{labels:MO,datasets:[{data:[22,20,19,17,16,15],borderColor:"#3f7d76",borderWidth:2,tension:.4,pointRadius:0,fill:false},{data:[18,18,18,18,18,18],borderColor:"#c4c9c8",borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false}]},options:OP});
+  new Chart(document.getElementById("c-wound"),{type:"bar",data:{labels:MO,datasets:[{data:[62,65,70,74,78,82],backgroundColor:"#5b8c6e",borderRadius:3},{data:[38,35,30,26,22,18],backgroundColor:"#d2d6d5",borderRadius:3}]},options:Object.assign({},OP,{scales:{x:Object.assign({},OP.scales.x,{stacked:true}),y:Object.assign({},OP.scales.y,{stacked:true})}})});
   new Chart(document.getElementById("c-th"),{type:"line",data:{labels:MO,datasets:[{data:[142,158,171,189,204,214],borderColor:"#3f7d76",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(63,125,118,0.12)"}]},options:OP});
-  new Chart(document.getElementById("c-inf"),{type:"line",data:{labels:MO,datasets:[{data:[8.2,7.8,7.1,6.5,5.9,5.4],borderColor:"#c0392b",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(192,57,43,0.1)"}]},options:OP});
+  new Chart(document.getElementById("c-inf"),{type:"line",data:{labels:MO,datasets:[{data:[8.2,7.8,7.1,6.5,5.9,5.4],borderColor:"#b3433a",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(179,67,58,0.10)"}]},options:OP});
 }
 
-function kv2(v,l,c){return'<div style="background:#faf8f4;border:1px solid var(--bd);border-radius:6px;padding:5px 7px"><div style="font-size:14px;font-weight:800;font-family:var(--mono);color:'+c+'">'+v+'</div><div style="font-size:9px;color:var(--mu)">'+l+'</div></div>';}
+function kv2(v,l,c){return'<div style="background:#f4f6f6;border:1px solid var(--bd);border-radius:6px;padding:5px 7px"><div style="font-size:14px;font-weight:800;font-family:var(--mono);color:'+c+'">'+v+'</div><div style="font-size:9px;color:var(--mu)">'+l+'</div></div>';}
 function alert2(bg,bdr,color,icon,title,items){return'<div style="background:'+bg+';border:1px solid '+bdr+';border-radius:6px;padding:8px 10px;margin-bottom:6px"><div style="font-size:11px;font-weight:700;color:'+color+';margin-bottom:4px">'+icon+' '+title+'</div>'+items+'</div>';}
 
 function renderDashWounds(){
@@ -1213,7 +1276,7 @@ function buildNotes(){
   var rec=_ctx.rec;
   var notes=[].concat(rec.chart||[]).filter(function(h){return h.notes;}).reverse();
   var el=document.getElementById("ch-p2");
-  el.innerHTML='<div class="st">Notes Log — All Entries</div>'+(notes.length?'<div style="display:flex;flex-direction:column;gap:7px">'+notes.map(function(n){return'<div style="background:#faf8f4;border:1px solid var(--bd);border-radius:7px;padding:9px 12px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:600;color:var(--tl)">'+(n.ev||n.tp||"Update")+'</span><span style="font-size:10px;color:var(--mu)">'+n.dt+(n.by?" · "+n.by:"")+'</span></div><div style="font-size:12px;color:var(--tx)">'+n.notes+'</div></div>';}).join("")+'</div>':'<p style="color:var(--mu);font-size:13px">No notes recorded yet.</p>');
+  el.innerHTML='<div class="st">Notes Log — All Entries</div>'+(notes.length?'<div style="display:flex;flex-direction:column;gap:7px">'+notes.map(function(n){return'<div style="background:#f4f6f6;border:1px solid var(--bd);border-radius:7px;padding:9px 12px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:600;color:var(--tl)">'+(n.ev||n.tp||"Update")+'</span><span style="font-size:10px;color:var(--mu)">'+n.dt+(n.by?" · "+n.by:"")+'</span></div><div style="font-size:12px;color:var(--tx)">'+n.notes+'</div></div>';}).join("")+'</div>':'<p style="color:var(--mu);font-size:13px">No notes recorded yet.</p>');
 }
 function discharge(){
   var rec=_ctx.rec;
@@ -1367,7 +1430,7 @@ function triggerPanelHtml(w){
   var resp=getWoundTriggers(w).filter(function(t){return (w.triggerResp||{})[t.key];});
   if(!open.length&&!resp.length)return "";
   var sevC={1:"#7dd3fc",2:"#fcd34d",3:"#f87171"};
-  var h='<div style="background:#faf8f4;border:1px solid #e3c9a8;border-radius:8px;padding:11px 13px;margin-bottom:13px">';
+  var h='<div style="background:#f4f6f6;border:1px solid #e3c9a8;border-radius:8px;padding:11px 13px;margin-bottom:13px">';
   h+='<div class="st" style="color:#fcd34d;margin-bottom:8px">🚩 Clinical Action Items'+(open.length?' <span class="pill pr2">'+open.length+' open</span>':' <span class="pill pt">all addressed</span>')+'</div>';
   open.forEach(function(t){var c=sevC[t.sev]||"#fcd34d";
     h+='<div style="border-left:3px solid '+c+';background:'+c+'10;border-radius:5px;padding:7px 9px;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:'+c+'">'+t.label+'</div><div style="font-size:11px;color:var(--mu);margin-bottom:5px">Recommended: '+t.rec+'</div><div style="display:flex;gap:6px"><button class="btn ba2 bsm" onclick="respondTrigger(\''+w.id+'\',\''+t.key+'\',\'planned\')">✓ Log Action / Plan</button><button class="btn bg3 bsm" onclick="respondTrigger(\''+w.id+'\',\''+t.key+'\',\'declined\')">✎ Document Reason</button></div></div>';
@@ -1424,6 +1487,42 @@ function emailWFacReport(){
   if(wFac==="All"){alert("Select a single facility (in the filter strip above) to email its weekly report, or use the per-facility “Email Report” buttons under Census & Facilities.");return;}
   emailFacReport(wFac);
 }
+/* ── ADD WOUND ── */
+function openAddWound(){
+  var fs=document.getElementById("aw-fac");
+  if(fs)fs.innerHTML='<option value="">— Select —</option>'+FACS.map(function(f){return'<option>'+e(f.name)+'</option>';}).join("");
+  if(fs&&wFac!=="All"){fs.value=wFac;awFacChange();}else{var pt=document.getElementById("aw-pt");if(pt)pt.innerHTML='<option value="">— Select facility first —</option>';}
+  ["aw-loc","aw-L","aw-W","aw-D","aw-braden","aw-tx","aw-notes"].forEach(function(id){sv(id,"");});
+  sv("aw-pv",(currentUser&&currentUser.name)||"");
+  var d=new Date(),mm=("0"+(d.getMonth()+1)).slice(-2),dd=("0"+d.getDate()).slice(-2);
+  sv("aw-onset",d.getFullYear()+"-"+mm+"-"+dd);
+  oM("m-addwound");
+}
+function awFacChange(){
+  var fac=gv("aw-fac");var pt=document.getElementById("aw-pt");if(!pt)return;
+  var ps=PATIENTS.filter(function(p){return p.fac===fac&&p.st==="Active";});
+  pt.innerHTML=(ps.length?'<option value="">— Select —</option>':'<option value="">No active residents — add in Census first</option>')+ps.map(function(p){return'<option value="'+p.id+'">'+e(p.name)+' ('+e(p.rm||"—")+')</option>';}).join("");
+}
+function saveNewWound(){
+  var fac=gv("aw-fac");var ptId=gv("aw-pt");var loc=gv("aw-loc").trim();var tp=gv("aw-tp");
+  if(!fac||!ptId||!loc){alert("Facility, resident, and location are required.");return;}
+  var p=PATIENTS.find(function(x){return x.id===ptId;});if(!p){alert("Select a resident.");return;}
+  var onsetRaw=gv("aw-onset");var onset=onsetRaw?onsetRaw.split("-")[1]+"/"+onsetRaw.split("-")[2]+"/"+onsetRaw.split("-")[0]:TDS();
+  var L=parseFloat(gv("aw-L"))||null,W=parseFloat(gv("aw-W"))||null,D=parseFloat(gv("aw-D"))||null;
+  var braden=gv("aw-braden")!==""?parseInt(gv("aw-braden")):null;
+  var id="w"+(Date.now());
+  var en={dt:onset,stage:gv("aw-stage"),tx:gv("aw-tx"),heal:gv("aw-heal"),inf:gv("aw-inf")==="Yes",L:L,W:W,D:D,braden:braden,poa:gv("aw-poa"),notes:gv("aw-notes")||"Wound added to watch list.",by:gv("aw-pv")||"Wound Team"};
+  var w={id:id,ptId:ptId,name:p.name,fac:fac,tp:tp,stage:gv("aw-stage"),loc:loc,etio:gv("aw-etio"),tx:gv("aw-tx"),ls:onset,heal:gv("aw-heal"),inf:gv("aw-inf")==="Yes",notes:gv("aw-notes")||"",
+    poa:gv("aw-poa"),braden:braden,debride:"None",vac:false,vacBrand:"",albumin:null,vascular:"Not assessed",dietary:false,
+    graft:gv("aw-graft")==="Yes",graftType:"",graftDate:"",collagen:gv("aw-collagen")==="Yes",pcrReq:gv("aw-pcr")==="Yes",pcrDone:false,pcrDate:"",
+    pv:gv("aw-pv")||"Wound Team",triggerResp:{},onset:onset,healedDate:"",chart:[en]};
+  WOUNDS.push(w);
+  cM("m-addwound");
+  wFac=fac;wProv="All";
+  go("wound");wTab(0);
+  renderDashAlerts&&renderDashAlerts();renderDashActions&&renderDashActions();
+  alert("✓ Wound added for "+p.name+" at "+fac+".\nIt's now on the wound-care watch list.");
+}
 
 /* ── WOUND SUB-TABS & ANALYTICS ── */
 var wCurrentTab=0;
@@ -1478,9 +1577,9 @@ function renderWAnalytics(){
     '<div style="display:grid;grid-template-columns:2fr 1fr;gap:11px;margin-bottom:13px"><div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Facility Benchmarks</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Census</th><th>Wounds</th><th>Prevalence</th><th>Pressure</th><th>Stage 2+</th><th>Infected</th><th>Healing</th><th>Avg Heal</th><th>Hosp</th></tr></thead><tbody>'+byFac.filter(function(f){return f.total>0;}).map(function(f){return'<tr><td class="b">'+f.fac+'</td><td>'+f.cs+'</td><td style="font-weight:700">'+f.total+'</td><td style="color:'+(f.prev>5?"#f87171":f.prev>3?"#fcd34d":"#6ee7b7")+';font-weight:700">'+f.prev+'%</td><td style="color:#fca5a5">'+f.pressure+'</td><td>'+f.s2+'</td><td style="color:'+(f.inf?"#f87171":"var(--mu)")+'">'+f.inf+'</td><td style="color:'+(f.hp>=70?"var(--tl)":f.hp>=40?"var(--am)":"#f87171")+';font-weight:700">'+f.hp+'%</td><td>'+f.avgHt+(f.avgHt!=="—"?"d":"")+'</td><td style="color:'+(f.wh?"#f87171":"var(--mu)")+'">'+f.wh+'</td></tr>';}).join("")+'</tbody></table></div></div>'+
     '<div class="card cp"><div class="st">Quarterly Metrics</div><table class="tbl" style="font-size:11px"><thead><tr><th>Quarter</th><th>New Wounds</th><th>Healed</th></tr></thead><tbody>'+(qArr.length?qArr.map(function(q){return'<tr><td class="b">'+q.q+'</td><td style="color:#7dd3fc;font-weight:700">'+q.nw+'</td><td style="color:#6ee7b7;font-weight:700">'+q.hl+'</td></tr>';}).join(""):'<tr><td colspan="3" style="color:var(--mu)">No dated wounds</td></tr>')+'</tbody></table><div style="font-size:10px;color:var(--mu);margin-top:8px;line-height:1.5">Marketable metrics for hospital partners & QAPI: healing rates, average healing time, and wound-related rehospitalizations.</div></div></div>';
   setTimeout(function(){
-    mkChart("wa-c1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#c2693f","#6f9b7a"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom"}},scales:{x:{display:false},y:{display:false}}});
-    mkChart("wa-c2","doughnut",["Progressing","Improving","Stable","Slow","Worsening","Healed"],[{data:["Progressing","Improving","Stable","Slow","Worsening","Healed"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#6f9b7a","#8fb89a","#b8b3a8","#c2693f","#c0392b","#4f7d5e"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
-    mkChart("wa-c3","bar",["Mar","Apr","May","Jun"],[{label:"New",data:[2,4,3,2],backgroundColor:"#cbb892",borderRadius:3},{label:"Healed",data:[1,1,2,2],backgroundColor:"#6f9b7a",borderRadius:3}]);
+    mkChart("wa-c1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#aeb4b3","#3f7d76"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom"}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wa-c2","doughnut",["Progressing","Improving","Stable","Slow","Worsening","Healed"],[{data:["Progressing","Improving","Stable","Slow","Worsening","Healed"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#5b8c6e","#9bbdb8","#d2d6d5","#b07d3c","#b3433a","#3f7d76"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wa-c3","bar",["Mar","Apr","May","Jun"],[{label:"New",data:[2,4,3,2],backgroundColor:"#d2d6d5",borderRadius:3},{label:"Healed",data:[1,1,2,2],backgroundColor:"#5b8c6e",borderRadius:3}]);
   },60);
 }
 
@@ -1504,8 +1603,8 @@ function renderWQuality(){
     '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Quality Measures by Facility</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Census</th><th>Pressure Injuries</th><th>Prevalence</th><th>Facility-Acquired</th><th>Infection Rate</th><th>RTH%</th></tr></thead><tbody>'+byFac.map(function(f){return'<tr style="'+(f.acq||f.prev>5?"background:#ef44440a;":"")+'"><td class="b">'+f.fac+'</td><td>'+coB(f.co)+'</td><td>'+f.cs+'</td><td style="font-weight:700;color:#fca5a5">'+f.pi+'</td><td style="font-weight:700;color:'+(f.prev>5?"#f87171":f.prev>3?"#fcd34d":"#6ee7b7")+'">'+f.prev+'%</td><td style="color:'+(f.acq?"#f87171":"var(--mu)")+';font-weight:700">'+f.acq+'</td><td style="color:'+(f.infRate>20?"#f87171":"var(--mu)")+'">'+f.infRate+'%</td><td style="font-weight:700;color:'+rC(f.rth)+'">'+f.rth+'%</td></tr>';}).join("")+'</tbody></table></div></div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px"><div class="card cp"><div class="st">Pressure Injury Origin</div><div style="height:160px"><canvas id="wq-c1"></canvas></div></div><div class="card cp"><div class="st">Prevalence by Facility</div><div style="height:160px"><canvas id="wq-c2"></canvas></div></div></div>';
   setTimeout(function(){
-    mkChart("wq-c1","doughnut",["Facility-Acquired","Present on Admission"],[{data:[acq.length,poa.length],backgroundColor:["#c0392b","#b8b3a8"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
-    mkChart("wq-c2","bar",byFac.map(function(f){return f.fac.split("–").pop().trim();}),[{label:"Prevalence %",data:byFac.map(function(f){return f.prev;}),backgroundColor:"#c2693f",borderRadius:3}]);
+    mkChart("wq-c1","doughnut",["Facility-Acquired","Present on Admission"],[{data:[acq.length,poa.length],backgroundColor:["#b3433a","#d2d6d5"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wq-c2","bar",byFac.map(function(f){return f.fac.split("–").pop().trim();}),[{label:"Prevalence %",data:byFac.map(function(f){return f.prev;}),backgroundColor:"#3f7d76",borderRadius:3}]);
   },60);
 }
 
@@ -1553,7 +1652,7 @@ function renderWRehosp(){
     '<div style="display:grid;grid-template-columns:2fr 1fr;gap:11px"><div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Transfer Detail</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Patient</th><th>Facility</th><th>Date</th><th>Type</th><th>Diagnosis</th><th>LOS</th><th>Readmit</th><th>Telehealth</th><th>Preventable</th></tr></thead><tbody>'+(hs.length?hs.map(function(h){return'<tr><td class="b"><span style="cursor:pointer;color:#7dd3fc" onclick="openChart(\'wound\',\''+h.woundId+'\')">'+h.name+'</span></td><td style="font-size:11px">'+h.fac+'</td><td>'+h.date+'</td><td><span class="pill pr2">'+h.type+'</span></td><td style="font-size:11px;max-width:220px">'+h.dx+'</td><td>'+h.los+'d</td><td>'+(h.readmit?'<span class="pill pr2">Yes</span>':'<span style="color:var(--tl)">No</span>')+'</td><td>'+h.thAttempted+'</td><td style="font-size:11px;color:'+((h.preventable||"").toLowerCase().indexOf("possibly")>=0?"#fcd34d":"var(--mu)")+'">'+h.preventable+'</td></tr>';}).join(""):'<tr><td colspan="9" style="color:var(--mu)">No wound-related transfers recorded.</td></tr>')+'</tbody></table></div></div>'+
     '<div class="card cp"><div class="st">Transfers by Type</div><div style="height:180px"><canvas id="wr-c1"></canvas></div></div></div>';
   setTimeout(function(){
-    mkChart("wr-c1","doughnut",["Sepsis","Osteomyelitis","Cellulitis"],[{data:[byType("Sepsis"),byType("Osteomyelitis"),byType("Cellulitis")],backgroundColor:["#c0392b","#c2693f","#cbb892"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wr-c1","doughnut",["Sepsis","Osteomyelitis","Cellulitis"],[{data:[byType("Sepsis"),byType("Osteomyelitis"),byType("Cellulitis")],backgroundColor:["#b3433a","#b07d3c","#d2d6d5"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
   },60);
 }
 
@@ -2456,9 +2555,9 @@ function renderRptWound(){
     +((!lowFacs.length&&!lowPorts.length&&!openTotal)?'<div style="font-size:11px;color:var(--tl)">✓ All facilities at or above the '+HEALTHRESH+'% healing target and no open action items. No education flags this period.</div>':"")
     +'</div>';
   setTimeout(function(){
-    mkChart("rc-w1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#c2693f","#6f9b7a"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
-    mkChart("rc-w2","doughnut",["Progressing","Stable","Slow","Worsening"],[{data:["Progressing","Stable","Improving","Slow","Worsening"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#6f9b7a","#b8b3a8","#8fb89a","#c2693f","#c0392b"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
-    mkChart("rc-w3","bar",byPort.map(function(p){return p.co.split(" ")[0];}), [{label:"Pressure",data:byPort.map(function(p){return p.pressure;}),backgroundColor:"#c2693f",borderRadius:3},{label:"Non-Pressure",data:byPort.map(function(p){return p.nonPressure;}),backgroundColor:"#6f9b7a",borderRadius:3}],{scales:{x:{stacked:true},y:{stacked:true}}});
+    mkChart("rc-w1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#aeb4b3","#3f7d76"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
+    mkChart("rc-w2","doughnut",["Progressing","Stable","Slow","Worsening"],[{data:["Progressing","Stable","Improving","Slow","Worsening"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#5b8c6e","#d2d6d5","#9bbdb8","#b07d3c","#b3433a"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
+    mkChart("rc-w3","bar",byPort.map(function(p){return p.co.split(" ")[0];}), [{label:"Pressure",data:byPort.map(function(p){return p.pressure;}),backgroundColor:"#aeb4b3",borderRadius:3},{label:"Non-Pressure",data:byPort.map(function(p){return p.nonPressure;}),backgroundColor:"#3f7d76",borderRadius:3}],{scales:{x:{stacked:true},y:{stacked:true}}});
   },50);
 }
 
@@ -2666,7 +2765,7 @@ function handleF2(files){
   var q=document.getElementById("up-q");if(!upFiles.length){q.style.display="none";return;}
   q.style.display="block";
   document.getElementById("up-ql").textContent=upFiles.length+" file"+(upFiles.length>1?"s":"")+" queued";
-  document.getElementById("up-fl").innerHTML=upFiles.map(function(f,i){return'<div style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:#faf8f4;border-radius:6px;margin-bottom:5px;border:1px solid var(--bd)"><span>📄</span><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">'+f.name+'</div><div class="pbar"><div id="pf-'+i+'" class="pfill" style="width:0%"></div></div></div><span id="sf-'+i+'" style="font-size:11px;color:var(--mu)">Pending</span></div>';}).join("");
+  document.getElementById("up-fl").innerHTML=upFiles.map(function(f,i){return'<div style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:#f4f6f6;border-radius:6px;margin-bottom:5px;border:1px solid var(--bd)"><span>📄</span><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">'+f.name+'</div><div class="pbar"><div id="pf-'+i+'" class="pfill" style="width:0%"></div></div></div><span id="sf-'+i+'" style="font-size:11px;color:var(--mu)">Pending</span></div>';}).join("");
 }
 function f64(file){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(",")[1]);};r.onerror=rej;r.readAsDataURL(file);});}
 async function procAll(){
@@ -2693,7 +2792,7 @@ async function procAll(){
 function renderUpRes(){
   var el=document.getElementById("up-res");var rl=document.getElementById("up-rl");
   if(!upExt.length)return;el.style.display="block";
-  rl.innerHTML=upExt.map(function(p,i){return'<div class="card" style="margin-bottom:9px;overflow:hidden"><div style="padding:7px 12px;background:#faf8f4;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--mu)">📄 '+p.srcFile+'</span><span class="pill '+(p._err?"pr2":"pt")+'">'+(p._err?"Error — fill manually":"AI Extracted")+'</span></div><div style="padding:11px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+[["ex-n-"+i,"Name *",p.name||""],["ex-dob-"+i,"DOB",p.dob||""],["ex-rm-"+i,"Room",p.room||""],["ex-adm-"+i,"Admit",p.admit||""],["ex-ins-"+i,"Insurance",p.ins||""],["ex-pv-"+i,"Provider",p.pv||""],["ex-cd-"+i,"Code",p.code||"Full Code"],["ex-mrn-"+i,"MRN",p.mrn||""]].map(function(f){return'<div><label class="fl">'+f[1]+'</label><input id="'+f[0]+'" value="'+e(f[2])+'"></div>';}).join("")+'<div style="grid-column:1/-1"><label class="fl">Primary Diagnosis</label><input id="ex-dx-'+i+'" value="'+e(p.dx||"")+'"></div><div><label class="fl">Allergies</label><input id="ex-al-'+i+'" value="'+e(p.al||"NKDA")+'"></div></div></div>';}).join("");
+  rl.innerHTML=upExt.map(function(p,i){return'<div class="card" style="margin-bottom:9px;overflow:hidden"><div style="padding:7px 12px;background:#f4f6f6;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--mu)">📄 '+p.srcFile+'</span><span class="pill '+(p._err?"pr2":"pt")+'">'+(p._err?"Error — fill manually":"AI Extracted")+'</span></div><div style="padding:11px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+[["ex-n-"+i,"Name *",p.name||""],["ex-dob-"+i,"DOB",p.dob||""],["ex-rm-"+i,"Room",p.room||""],["ex-adm-"+i,"Admit",p.admit||""],["ex-ins-"+i,"Insurance",p.ins||""],["ex-pv-"+i,"Provider",p.pv||""],["ex-cd-"+i,"Code",p.code||"Full Code"],["ex-mrn-"+i,"MRN",p.mrn||""]].map(function(f){return'<div><label class="fl">'+f[1]+'</label><input id="'+f[0]+'" value="'+e(f[2])+'"></div>';}).join("")+'<div style="grid-column:1/-1"><label class="fl">Primary Diagnosis</label><input id="ex-dx-'+i+'" value="'+e(p.dx||"")+'"></div><div><label class="fl">Allergies</label><input id="ex-al-'+i+'" value="'+e(p.al||"NKDA")+'"></div></div></div>';}).join("");
 }
 function importAll(){
   var cnt=0;var fac=gv("up-fac");
@@ -2737,6 +2836,114 @@ function renderCDTracker(){
     var pct=pts.length?Math.round(totals[cond]/pts.length*100):0;
     return'<div class="kt" style="border-left:3px solid '+colors[cond]+'"><div class="kv" style="color:'+colors[cond]+'">'+totals[cond]+'</div><div class="kl">'+cond+'</div><div style="font-size:10px;color:var(--mu);margin-top:3px">'+pct+'% of '+pts.length+' active</div></div>';
   }).join("");
+}
+
+/* ── HELP & TRAINING ── */
+function helpMock(screen,rows){
+  var W=620,x=14,top=8,navY=44,navH=24,startY=82,gap=9;
+  var navItems=["Dashboard","Census","Wound","Reports","Help"];
+  var y=startY,bodyS="";
+  rows.forEach(function(r){
+    var h=r.h||(r.type==="kpis"?40:r.type==="table"?60:34);
+    var rightRes=r.n?170:0,bw=W-28-rightRes;
+    if(r.type==="kpis"){
+      var nn=4,cw=(bw-(nn-1)*8)/nn,cx=x;
+      bodyS+='<text x="'+(x+2)+'" y="'+(y-5)+'" font-family="IBM Plex Mono,monospace" font-size="9" fill="#9aa0a4">'+e(r.label)+'</text>';
+      for(var i=0;i<nn;i++){bodyS+='<rect x="'+cx+'" y="'+y+'" width="'+cw+'" height="'+h+'" rx="6" fill="#f3f5f5" stroke="#e6e8e7"/>';cx+=cw+8;}
+    } else {
+      bodyS+='<rect x="'+x+'" y="'+y+'" width="'+bw+'" height="'+h+'" rx="6" fill="'+(r.hl?"#eaf2f0":"#f3f5f5")+'" stroke="'+(r.hl?"#bcd3cf":"#e6e8e7")+'"/>';
+      bodyS+='<text x="'+(x+12)+'" y="'+(y+h/2+4)+'" font-family="IBM Plex Mono,monospace" font-size="10.5" fill="#5a6066">'+e(r.label)+'</text>';
+    }
+    if(r.n){var cx2=W-152;
+      bodyS+='<line x1="'+(x+bw)+'" y1="'+(y+h/2)+'" x2="'+(cx2-2)+'" y2="'+(y+h/2)+'" stroke="#cdd3d1" stroke-dasharray="3 3"/>';
+      bodyS+='<circle cx="'+cx2+'" cy="'+(y+h/2)+'" r="11" fill="#3f7d76"/><text x="'+cx2+'" y="'+(y+h/2+4)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#fff">'+r.n+'</text>';
+      bodyS+='<text x="'+(cx2+18)+'" y="'+(y+h/2+4)+'" font-family="Inter,sans-serif" font-size="10" fill="#3f7d76">'+e(r.cap||("Step "+r.n))+'</text>';}
+    y+=h+gap;
+  });
+  var H=y+8,nav="",nx=x;
+  navItems.forEach(function(it){var on=screen.toLowerCase().indexOf(it.toLowerCase())>=0;var w2=it.length*6.0+18;
+    nav+='<rect x="'+nx+'" y="'+navY+'" width="'+w2+'" height="'+navH+'" rx="5" fill="'+(on?"#23262b":"transparent")+'"/>';
+    nav+='<text x="'+(nx+w2/2)+'" y="'+(navY+navH/2+4)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="10" fill="'+(on?"#fff":"#868b90")+'">'+it+'</text>';nx+=w2+6;});
+  return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="'+e(screen)+' screen illustration">'
+    +'<rect x="0.5" y="0.5" width="'+(W-1)+'" height="'+(H-1)+'" rx="10" fill="#fff" stroke="#e2e6e5"/>'
+    +'<circle cx="20" cy="'+(top+10)+'" r="3.5" fill="#d9c3a8"/><circle cx="33" cy="'+(top+10)+'" r="3.5" fill="#cfd6d4"/><circle cx="46" cy="'+(top+10)+'" r="3.5" fill="#cfd6d4"/>'
+    +'<text x="'+(W-14)+'" y="'+(top+14)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#2f5f59">clinilytics <tspan fill="#9aa0a4" font-weight="400">· '+e(screen)+'</tspan></text>'
+    +'<line x1="0" y1="'+(navY-7)+'" x2="'+W+'" y2="'+(navY-7)+'" stroke="#eceeed"/>'+nav+bodyS+'</svg>';
+}
+var HELP=[
+ {id:"overview",cat:"Getting started",title:"Welcome & how it’s organized",sub:"A two-minute tour",
+  intro:"Clinilytics — Wound Care helps your providers track every wound on their watch list, follow each one week to week, act on clinical alerts, and send weekly reports to facilities. Everything lives in five areas along the top:",
+  fig:["Dashboard",[{label:"Top bar — logo · Live · Admin · Sign out"},{label:"Navigation tabs",n:1,cap:"Switch areas"},{type:"kpis",label:"KPI summary cards"},{label:"Clinical alerts & action items"}]],
+  steps:["<b>Dashboard</b> — at-a-glance home: census, active wounds, healing rate, and the most urgent alerts and action items.","<b>Census & Facilities</b> — your residents and facilities; add facilities (with the DON’s email) and add/upload residents.","<b>Wound Care</b> — the core: every wound on the watch list, weekly rounds updates, action items, and the weekly facility report.","<b>Reports & Analytics</b> — leadership reports by enterprise, portfolio, or facility, with healing rates and education recommendations.","<b>Help &amp; Training</b> — you’re here: step-by-step guides for everything."],
+  tips:["On a phone or tablet, tap the ☰ menu to navigate.","Your role (set by an Admin) controls whether you see the Admin panel."]},
+ {id:"signin",cat:"Getting started",title:"Signing in & your account",sub:"Getting into the platform",
+  intro:"Each person has their own username and password. Sessions end when you close the browser tab.",
+  fig:["Sign in",[{label:"Username field",n:1},{label:"Password field",n:2},{label:"Sign In button",n:3,cap:"Enter"}]],
+  steps:["Open the platform link — you’ll see the <b>clinilytics</b> sign-in screen.","Type your <b>username</b> (1) — not case sensitive.","Type your <b>password</b> (2).","Click <span class='help-pill'>Sign In</span> (3); the app opens on the Dashboard."],
+  tips:["Forgot your password? An Admin can create a fresh account for you.","On shared devices, always use <span class='help-pill'>Sign out</span> (top-right)."]},
+ {id:"dashboard",cat:"Getting started",title:"Reading the Dashboard",sub:"What every panel means",
+  intro:"The Dashboard is your daily starting point — it surfaces the wounds that need attention first.",
+  fig:["Dashboard",[{type:"kpis",label:"KPIs: Census · Active Wounds · Infected · Healing Rate"},{label:"Clinical Alerts (stale / long-term)",n:1,cap:"Click a wound"},{label:"Open Clinical Action Items",n:2,cap:"Need a plan"},{label:"Facility Risk Overview + trend charts"}]],
+  steps:["The top <b>KPI cards</b> summarize the whole portfolio.","<b>Clinical Alerts</b> (1) lists stale (7+ days no update) and long-term wounds — click any to open it.","<b>Open Clinical Action Items</b> (2) shows wounds whose recommended action still needs a plan or a reason.","<b>Facility Risk Overview</b> and the charts give the big picture."],
+  tips:["Red means attention; green means on-track.","Use <span class='help-pill'>↻ Refresh</span> after changes."]},
+ {id:"facilities",cat:"Daily workflows",title:"Add a facility & report contact",sub:"So reports can reach the DON",
+  intro:"Before you can email a weekly report to a facility, it needs a contact email (usually the Director of Nursing).",
+  fig:["Census & Facilities",[{label:"🏢 Add Facility",n:1},{label:"Name · company / portfolio",n:2},{label:"DON name · email · phone",n:3,cap:"For reports"},{label:"Save"}]],
+  steps:["Open <span class='help-pill'>Census & Facilities</span>.","Click <span class='help-pill'>🏢 Add Facility</span> (1).","Enter the <b>facility name</b> and <b>company / portfolio</b> (2).","Add the <b>DON name, email, and phone</b> (3) — the email is where weekly reports go.","Click <b>Save</b>. Edit later with <span class='help-pill'>✏ Contact</span> on the facility row."],
+  tips:["No email on file? The app prompts you to add one when you try to send a report."]},
+ {id:"patients",cat:"Daily workflows",title:"Add residents (manual or facesheet)",sub:"Build your census",
+  intro:"Add residents one at a time, or upload PDF facesheets to add many at once.",
+  fig:["Census & Facilities",[{label:"＋ Add Patient   /   📤 Upload Facesheets",n:1},{label:"Manual form  OR  drop PDFs",n:2},{label:"Review extracted fields",n:3},{label:"Save / Import All"}]],
+  steps:["In <span class='help-pill'>Census & Facilities</span>, click <span class='help-pill'>＋ Add Patient</span> or <span class='help-pill'>📤 Upload Facesheets</span> (1).","Manual: fill name, facility, room, diagnosis, etc. (2), then Save.","Upload: choose the facility, drop the PDFs, and click <b>Extract</b> (2).","Review and correct the extracted fields (3), then <b>Import All</b>."],
+  tips:["Add the resident in Census first — the Add Wound form picks residents from your census."]},
+ {id:"addwound",cat:"Daily workflows",title:"Add a wound to a watch list",sub:"Start tracking a wound",
+  intro:"Each provider keeps a watch list of the wounds they round on — not every resident, just the ones with wounds.",
+  fig:["Wound Care",[{label:"＋ Add Wound",n:1},{label:"Facility → Resident",n:2},{label:"Type · stage · etiology · location · onset",n:3},{label:"Size · infection · graft / collagen / PCR",n:4},{label:"Save Wound"}]],
+  steps:["Go to <span class='help-pill'>Wound Care</span> and click <span class='help-pill'>＋ Add Wound</span> (1).","Pick the <b>facility</b>, then the <b>resident</b> (2). Add them in Census first if they’re not listed.","Enter <b>type, stage, etiology, location, and onset date</b> (3). Onset date drives the long-term tracker.","Record <b>size (L×W×D), infection, and graft / collagen / PCR</b> (4).","Click <b>Save Wound</b> — it joins the watch list."],
+  tips:["Set the <b>Wound Provider</b> so the list can be filtered by owner.","You can refine everything later from the wound’s chart."]},
+ {id:"rounds",cat:"Daily workflows",title:"Weekly rounds — update a wound",sub:"The weekly cadence",
+  intro:"Each week, open every wound on your list and record the new measurements and treatment. The app decides automatically whether it progressed or went stale.",
+  fig:["Wound Care",[{label:"Wound row → ✏ edit",n:1},{label:"New measurements L / W / D",n:2},{label:"Stage · healing · infection · treatment",n:3},{label:"Progress note (required if no change)",n:4},{label:"Save & Clear Alert"}]],
+  steps:["In <span class='help-pill'>Wound Care → Active Wounds</span>, click <span class='help-pill'>✏</span> on the wound’s row (1).","Enter this week’s <b>measurements</b> (2). Even a 0.2 cm change counts as progress; no change for 7 days marks it <b>stale</b>.","Update <b>stage, healing, infection, and treatment</b> (3).","Add a <b>progress note</b> (4) — required if measurements didn’t change, to explain why.","Click <span class='help-pill'>Save & Clear Alert</span>. History and trend update automatically."],
+  tips:["Each wound also tracks graft / collagen / PCR and a Braden score.","The <b>History</b> tab shows the full week-by-week trend."]},
+ {id:"actionitems",cat:"Daily workflows",title:"Clinical action items — plan or document",sub:"Nothing slips through",
+  intro:"The app watches each wound and raises a recommended action when criteria are met (stagnant, worsening, infection, non-healing without a graft, PCR not done, low albumin, high Braden risk). Each item stays open until you act OR document why you didn’t.",
+  fig:["Wound Care",[{label:"Open wound → 🚩 Clinical Action Items",n:1},{label:"Recommended action",n:2},{label:"✓ Log Action / Plan",n:3},{label:"✎ Document Reason",n:4,cap:"If not acting"}]],
+  steps:["Open a wound; the <b>🚩 Clinical Action Items</b> panel (1) lists anything open.","Read the <b>recommended action</b> (2).","Acting? Click <span class='help-pill'>✓ Log Action / Plan</span> (3) and describe the plan.","Not acting? Click <span class='help-pill'>✎ Document Reason</span> (4) and explain why — required, so nothing is silently ignored.","Either way it’s written to the chart and the alert clears. Open items also show on the Dashboard."],
+  tips:["You can <b>Reopen</b> an item later if circumstances change."]},
+ {id:"email",cat:"Daily workflows",title:"Email the weekly facility report",sub:"Keep facilities in sync",
+  intro:"Each week, send every facility a report of their residents’ wounds. Our documentation must match the facility’s records, so this keeps everyone aligned.",
+  fig:["Wound Care",[{label:"Filter to one facility",n:1},{label:"📧 Email Report",n:2},{label:"PDF generated + attached / downloaded",n:3},{label:"Email draft opens to the DON",n:4}]],
+  steps:["Filter the wound list to one facility (1), or use <span class='help-pill'>📧 Email Report</span> on the facility row in Census.","Click <span class='help-pill'>📧 Email Report</span> (2).","The app builds a <b>PDF</b> of the report (3) — attached automatically on phones/tablets, downloaded on a computer.","A pre-filled <b>email draft</b> to the DON opens (4). Attach the PDF if needed and send."],
+  tips:["Every send is recorded in the <b>Report Distribution Log</b> under Census & Facilities.","Fully automatic scheduled email needs a server — not available on this hosted demo."]},
+ {id:"reports",cat:"Reporting",title:"Leadership reports & analytics",sub:"Monthly / quarterly for partners",
+  intro:"Produce reports for nursing-home partners and leadership at three levels: the whole enterprise, a portfolio (company), or a single facility.",
+  fig:["Reports & Analytics",[{label:"Scope: Enterprise / Portfolio / Facility",n:1},{label:"Period: Monthly / Quarterly",n:2},{label:"Healing rate · pressure vs non-pressure · by provider",n:3},{label:"🖨 Generate Report",n:4,cap:"Print / PDF"}]],
+  steps:["Go to <span class='help-pill'>Reports & Analytics → Wound Reports</span>.","Choose the <b>scope</b> (1): Enterprise, a portfolio, or drill to one facility.","Pick the <b>period</b> (2): Current, Monthly, or Quarterly.","Review healing rate, pressure vs non-pressure, provider breakdown, and <b>education recommendations</b> for facilities below target (3).","Click <span class='help-pill'>🖨 Generate Report</span> (4) for a printable / PDF version to share."],
+  tips:["Education recommendations flag any facility or portfolio below the healing-rate target."]},
+ {id:"admin",cat:"Administration",title:"Admin — create user accounts",sub:"Set up your team",
+  intro:"Admins create sign-in accounts for staff and set each person’s role.",
+  fig:["Admin",[{label:"Admin button (top-right)",n:1},{label:"Username · full name · role",n:2},{label:"Temporary password",n:3},{label:"＋ Create User",n:4}]],
+  steps:["Click <span class='help-pill'>Admin</span> at the top-right (visible to Admins) (1).","Enter the <b>username, full name, and role</b> (2): Admin, Wound Provider, or Viewer.","Set a <b>temporary password</b> (3).","Click <span class='help-pill'>＋ Create User</span> (4) and share the username + temp password."],
+  tips:["Accounts are stored in this browser; cross-device accounts would require a backend.","You can’t remove the account you’re signed in as, or the last Admin."]}
+];
+var helpCur="overview";
+function helpGo(id){helpCur=id;renderHelp();var b=document.getElementById("help-body");if(b)b.scrollTop=0;}
+function renderHelp(){
+  var nav=document.getElementById("help-nav"),body=document.getElementById("help-body");if(!nav||!body)return;
+  var q=(gv("help-q")||"").toLowerCase();
+  var topics=HELP.filter(function(t){return!q||(t.title+" "+(t.intro||"")+" "+(t.steps||[]).join(" ")+" "+t.cat).toLowerCase().indexOf(q)>=0;});
+  if(!topics.find(function(t){return t.id===helpCur;}))helpCur=topics.length?topics[0].id:null;
+  var cats=[];topics.forEach(function(t){if(cats.indexOf(t.cat)<0)cats.push(t.cat);});
+  nav.innerHTML=cats.map(function(c){return'<div class="hcat">'+c+'</div>'+topics.filter(function(t){return t.cat===c;}).map(function(t){return'<button class="'+(t.id===helpCur?"A":"")+'" onclick="helpGo(\''+t.id+'\')">'+t.title+'</button>';}).join("");}).join("")||'<div style="padding:10px;font-size:12px;color:var(--mu)">No guides match “'+e(q)+'”.</div>';
+  var t=topics.find(function(x){return x.id===helpCur;});
+  if(!t){body.innerHTML='<p style="color:var(--mu)">No guide selected.</p>';return;}
+  body.innerHTML='<h2>'+e(t.title)+'</h2><div class="hsub">'+e(t.sub||"")+'</div>'
+    +(t.intro?'<p>'+t.intro+'</p>':'')
+    +(t.fig?'<div class="help-fig">'+helpMock(t.fig[0],t.fig[1])+'</div>':'')
+    +(t.steps&&t.steps.length?'<h3>Steps</h3>'+t.steps.map(function(s,i){return'<div class="help-step"><div class="hn">'+(i+1)+'</div><div class="ht">'+s+'</div></div>';}).join(""):'')
+    +(t.tips&&t.tips.length?'<h3>Tips</h3>'+t.tips.map(function(tp){return'<div class="help-tip">💡 '+tp+'</div>';}).join(""):'')
+    +(t.extra||'');
 }
 
 /* ── LOGIN GATE + USER MANAGEMENT (client-side) ── */
