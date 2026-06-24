@@ -79,11 +79,26 @@ The behavior is driven by the **wound-care skill** in
 prompt in `src/anthropic.js`). The in-browser **guideline knowledge base**
 (deterministic, cited) works with no AI at all.
 
-**PHI:** wound photos are PHI — use a **BAA-covered** Anthropic path (Anthropic
-commercial with a signed BAA, or Claude via **AWS Bedrock** with a BAA;
-point `ANTHROPIC_API_URL` at the gateway). All output is *decision support for a
-licensed clinician* (cited, human-in-the-loop) — never auto-orders, keeping it
-within the 21st-Century-Cures CDS exemption.
+**PHI:** wound photos are PHI — use a **BAA-covered** Claude path. All output is
+*decision support for a licensed clinician* (cited, human-in-the-loop) — never
+auto-orders, keeping it within the 21st-Century-Cures CDS exemption.
+
+#### Claude via AWS Bedrock (recommended BAA route)
+AWS signs a BAA covering Bedrock, so Claude runs in your AWS account.
+1. In the Bedrock console, **enable** the Anthropic Claude model you want and note
+   its model id / inference-profile id (e.g. `us.anthropic.claude-opus-4-8-v1:0`).
+2. Give the API host an **IAM role/credentials** with `bedrock:InvokeModel` on that model.
+3. In `server/`: `npm i @aws-sdk/client-bedrock-runtime`, then set in `.env`:
+   ```
+   BEDROCK_MODEL_ID=us.anthropic.claude-opus-4-8-v1:0
+   AWS_REGION=us-east-1
+   ```
+   (creds via the IAM role on the host, or `AWS_ACCESS_KEY_ID`/`AWS_SECRET_ACCESS_KEY`.)
+4. Restart. `provider()` auto-selects Bedrock when `BEDROCK_MODEL_ID` is set. No
+   key leaves your AWS account; the same `/api/ai/*` endpoints work unchanged.
+
+The **Compare to last** action sends the previous + current photos and Claude
+returns an interval `comparison` + `trajectory` (improving / stable / worsening).
 
 ## Restore from a backup
 ```bash

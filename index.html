@@ -1902,7 +1902,7 @@ function woundSuggestions(w){var c=clinContext(w);var out=[];WOUND_KB.forEach(fu
 function suggestionsPanelHtml(w){
   var list=woundSuggestions(w);window._sugCache={id:w.id,list:list};
   var h='<div style="background:rgba(63,125,118,.07);border:1px solid rgba(63,125,118,.22);border-radius:8px;padding:11px 13px;margin-bottom:13px">';
-  h+='<div class="st" style="color:#356b64;margin-bottom:3px">💡 Suggested Care &amp; Smart Notes <span class="pill pt">'+list.length+'</span> <span style="float:right"><button class="btn bg3 bsm" style="font-weight:600" onclick="analyzeWoundPhoto(\''+w.id+'\')">🔬 Analyze photo (AI)</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="draftAINote(\''+w.id+'\')">✨ Draft note (AI)</button></span></div>';
+  h+='<div class="st" style="color:#356b64;margin-bottom:3px">💡 Suggested Care &amp; Smart Notes <span class="pill pt">'+list.length+'</span> <span style="float:right"><button class="btn bg3 bsm" style="font-weight:600" onclick="analyzeWoundPhoto(\''+w.id+'\')">🔬 Analyze photo</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="compareWoundPhotos(\''+w.id+'\')">📊 Compare to last</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="draftAINote(\''+w.id+'\')">✨ Draft note</button></span></div>';
   h+='<div style="font-size:10px;color:var(--mu);margin-bottom:8px">Guideline-based decision support — review &amp; confirm before use.</div>';
   if(!list.length){h+='<div style="font-size:12px;color:var(--mu)">No specific guideline prompts for the current data.</div>';}
   list.forEach(function(s,i){
@@ -1923,34 +1923,51 @@ function draftAINote(woundId){
    .then(function(d){if(d.text){insertMacro("wf-notes",d.text);toast("AI draft inserted — review & verify before saving","ok");}})
    .catch(function(err){toast(err.message==="notcfg"?"AI drafting isn't configured on the server yet":"AI draft failed","err");});
 }
+function _woundPhotoURL(file,cb){var fr=new FileReader();fr.onload=function(){cb(fr.result);};fr.readAsDataURL(file);}
+function _chartPhotos(w){return (w.chart||[]).filter(function(h){return h.photo;}).map(function(h){return {dt:h.dt,url:h.photo};});}
 function analyzeWoundPhoto(woundId){
   if(!cloudOn()){toast("Photo analysis needs the cloud server — connect in Settings","err");return;}
   var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;
   var pin=document.getElementById("wf-photo");
-  if(pin&&pin.files&&pin.files[0]){var fr=new FileReader();fr.onload=function(){_sendAnalyze(w,fr.result);};fr.readAsDataURL(pin.files[0]);return;}
-  // else use the most recent photo on the chart
-  var withPhoto=(w.chart||[]).filter(function(h){return h.photo;});
-  if(withPhoto.length){_sendAnalyze(w,withPhoto[withPhoto.length-1].photo);return;}
+  if(pin&&pin.files&&pin.files[0]){_woundPhotoURL(pin.files[0],function(u){_sendAnalyze(w,u,null);});return;}
+  var ph=_chartPhotos(w);
+  if(ph.length){_sendAnalyze(w,ph[ph.length-1].url,null);return;}
   toast("Add a wound photo first (in this note or a prior visit)","err");
 }
-function _sendAnalyze(w,dataURL){
-  var m=(""+dataURL).match(/^data:([^;]+);base64,(.*)$/);
+function compareWoundPhotos(woundId){
+  if(!cloudOn()){toast("Photo analysis needs the cloud server — connect in Settings","err");return;}
+  var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;
+  var ph=_chartPhotos(w);var pin=document.getElementById("wf-photo");
+  if(pin&&pin.files&&pin.files[0]){ // selected = current, latest chart photo = previous
+    if(!ph.length){toast("Need a prior photo on the chart to compare","err");return;}
+    _woundPhotoURL(pin.files[0],function(u){_sendAnalyze(w,u,ph[ph.length-1].url);});return;
+  }
+  if(ph.length>=2){_sendAnalyze(w,ph[ph.length-1].url,ph[ph.length-2].url);return;}
+  toast("Need at least two photos (this visit + a prior visit) to compare","err");
+}
+function _sendAnalyze(w,curURL,prevURL){
+  var cm=(""+curURL).match(/^data:([^;]+);base64,(.*)$/);
+  var pm=prevURL?(""+prevURL).match(/^data:([^;]+);base64,(.*)$/):null;
   var c=clinContext(w);delete c.name; // de-identify
   var sugs=woundSuggestions(w).map(function(s){return s.cat+": "+s.sug+" ["+s.cite+"]";});
   var g=cloudGet();
-  toast("Analyzing photo with Claude…");
+  toast(prevURL?"Comparing photos with Claude…":"Analyzing photo with Claude…");
   fetch(g.api+"/api/ai/analyze-wound",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},
-    body:JSON.stringify({context:c,suggestions:sugs,image:m?m[2]:null,mime:m?m[1]:null})})
+    body:JSON.stringify({context:c,suggestions:sugs,image:cm?cm[2]:null,mime:cm?cm[1]:null,prevImage:pm?pm[2]:null,prevMime:pm?pm[1]:null})})
    .then(function(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();})
-   .then(function(d){renderWoundAnalysis(w.id,d.analysis||{});})
-   .catch(function(err){toast(err.message==="notcfg"?"Claude isn't configured on the server yet (set ANTHROPIC_API_KEY)":"Analysis failed","err");});
+   .then(function(d){renderWoundAnalysis(w.id,d.analysis||{},{cur:curURL,prev:prevURL});})
+   .catch(function(err){toast(err.message==="notcfg"?"Claude isn't configured on the server yet (set ANTHROPIC_API_KEY or BEDROCK_MODEL_ID)":"Analysis failed","err");});
 }
-function renderWoundAnalysis(woundId,a){
+function renderWoundAnalysis(woundId,a,imgs){
   window._lastAnalysis={id:woundId,a:a};
   function sec(t,arr){if(!arr||!arr.length)return"";return '<div style="margin-bottom:9px"><div class="st" style="margin-bottom:4px">'+e(t)+'</div><ul style="margin:0;padding-left:18px;font-size:12.5px;line-height:1.5;color:#42474d">'+arr.map(function(x){return"<li>"+e(x)+"</li>";}).join("")+'</ul></div>';}
   function para(t,s){if(!s)return"";return '<div style="margin-bottom:9px"><div class="st" style="margin-bottom:3px">'+e(t)+'</div><div style="font-size:12.5px;line-height:1.55;color:#42474d">'+e(s)+'</div></div>';}
+  var imgRow="";
+  if(imgs&&imgs.cur){imgRow='<div style="display:flex;gap:10px;margin-bottom:11px">'+(imgs.prev?'<div style="text-align:center"><img src="'+imgs.prev+'" style="height:120px;border-radius:7px;border:1px solid var(--bd)"><div style="font-size:10px;color:var(--mu)">Previous</div></div>':'')+'<div style="text-align:center"><img src="'+imgs.cur+'" style="height:120px;border-radius:7px;border:1px solid var(--bd)"><div style="font-size:10px;color:var(--mu)">Current</div></div></div>';}
+  var traj=a.trajectory?'<span class="pill '+(/improv|heal/i.test(a.trajectory)?"pl":/wors|deterior/i.test(a.trajectory)?"ph":"pm2")+'">'+e(a.trajectory)+'</span> ':"";
   var rf=(a.redFlags&&a.redFlags.length)?'<div style="background:rgba(179,67,58,.10);border:1px solid rgba(179,67,58,.3);border-radius:8px;padding:9px 12px;margin-bottom:11px"><div class="st" style="color:#a23a30;margin-bottom:4px">🚩 Red flags — urgent</div><ul style="margin:0;padding-left:18px;font-size:12.5px;color:#a23a30">'+a.redFlags.map(function(x){return"<li>"+e(x)+"</li>";}).join("")+'</ul></div>':"";
-  var body=rf+para("Assessment",a.assessment)+para("Wound bed / tissue",a.tissue)+para("Infection signs",a.infectionSigns)
+  var cmp=a.comparison?'<div style="margin-bottom:9px"><div class="st" style="margin-bottom:3px">Interval comparison '+traj+'</div><div style="font-size:12.5px;line-height:1.55;color:#42474d">'+e(a.comparison)+'</div></div>':"";
+  var body=imgRow+rf+cmp+para("Assessment",a.assessment)+para("Wound bed / tissue",a.tissue)+para("Infection signs",a.infectionSigns)
     +sec("Imaging",a.imaging)+sec("Medications",a.medications)+sec("Advanced therapy (grafts / CTP / NPWT)",a.advancedTherapy)
     +sec("Labs & wound-care PCR / cultures",a.labs)+sec("Debridement",a.debridement)+sec("Dressings & offloading",a.dressings)
     +sec("Referrals",a.referrals)
