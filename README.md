@@ -1,7 +1,15 @@
-# Care Connect — Wound & Skin Integrity Monitoring
+# Clinilytics — Wound Care
 
-Single-file clinical monitoring web app (`index.html`) for AMA SNF Provider Services.
+Single-file clinical monitoring web app (`index.html`). The product is branded
+**Clinilytics** with **Wound Care** as the module; the UI uses the Clinilytics
+light theme (white cards, charcoal text, sage-green + terracotta accents,
+monospace data, lowercase `clinilytics` wordmark + black module pill).
 Open `index.html` in a browser — no build step or server required.
+
+Report delivery: *Email Report* generates a real **PDF** (jsPDF) of the weekly
+wound report and either attaches it via the native share sheet (where supported)
+or downloads it for manual attachment, then opens the pre-filled email draft.
+Chart.js, jsPDF, and jsPDF-AutoTable load from CDN at runtime.
 
 This app is **focused exclusively on wound & skin integrity**. The Dashboard,
 Census & Facilities, Wound Care, and Reports tabs are all wound-centric; the

@@ -3,58 +3,65 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>SNF Provider Services: Care Connect</title>
+<title>Clinilytics · Wound Care</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#0d1117;--sf:#131920;--bd:#1e2a35;--b2:#2a3a4a;--tx:#e6eaf0;--mu:#8a9ab0;--tl:#3ecfb2;--bl:#2a7fff;--rd:#ef4444;--am:#f59e0b;--pu:#a78bfa;--gn:#10b981}
-body{font-family:system-ui,sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;font-size:13px}
+:root{--bg:#f6f5f2;--sf:#ffffff;--bd:#e7e3db;--b2:#d8d3c8;--tx:#26282d;--mu:#8c877d;--tl:#5f9a78;--bl:#3f7d76;--rd:#b23a2e;--am:#c27a4a;--pu:#8a6db0;--gn:#5f9a78;--ink:#17191e;--mono:ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
+body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;font-size:13px}
 #hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-shrink:0}
-.logo{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.lic{width:26px;height:26px;border-radius:6px;background:linear-gradient(135deg,#3ecfb2,#2a7fff);display:flex;align-items:center;justify-content:center;font-size:13px}
-.ltx{font-weight:800;font-size:13px;color:#fff}.ltx span{color:var(--tl)}
-nav{display:flex;overflow-x:auto;flex:1;margin:0 8px}
-nav button{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--mu);padding:4px 10px;font-size:11.5px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s}
-nav button.A{border-bottom-color:var(--tl);color:var(--tl);font-weight:700;background:rgba(62,207,178,.08)}
-.hdr-r{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.logo{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.lic{display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--mu);line-height:1}
+.ltx{font-weight:700;font-size:16px;color:var(--tx);letter-spacing:-.01em}.ltx span{color:var(--tl)}
+.modpill{background:var(--ink);color:#fff;border-radius:14px;padding:3px 11px;font-size:11px;font-weight:600;white-space:nowrap}
+nav{display:flex;overflow-x:auto;flex:1;margin:0 10px;gap:2px}
+nav button{background:transparent;border:none;color:#6f6a61;padding:5px 11px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;border-radius:14px;display:inline-flex;align-items:center;gap:6px}
+nav button::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tl);opacity:.55;flex-shrink:0}
+nav button:hover{color:var(--tx)}
+nav button.A{background:var(--ink);color:#fff;font-weight:600}
+nav button.A::before{background:#fff;opacity:.7}
+.hdr-r{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .live{width:6px;height:6px;border-radius:50%;background:var(--tl);box-shadow:0 0 5px var(--tl)}
 #main{flex:1;overflow-y:auto}
 .tb{display:none;padding:14px 16px}.tb.A{display:block}
 footer{background:var(--sf);border-top:1px solid var(--bd);padding:5px 16px;display:flex;justify-content:space-between;font-size:10px;color:var(--mu);flex-shrink:0}
-.card{background:var(--sf);border:1px solid var(--bd);border-radius:9px}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;box-shadow:0 1px 2px rgba(20,20,20,.03)}
 .cp{padding:12px 14px}
-.st{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px}
-.kt{background:var(--sf);border:1px solid var(--bd);border-radius:9px;padding:10px 12px}
-.kv{font-size:18px;font-weight:800;color:#fff;line-height:1}
+.st{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;font-family:var(--mono)}
+.kt{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(20,20,20,.03)}
+.kv{font-size:18px;font-weight:800;color:var(--tx);line-height:1;font-family:var(--mono)}
 .kl{font-size:10px;color:var(--mu);margin-top:2px}
 .tbl{width:100%;border-collapse:collapse}
-.tbl th{padding:7px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--bd);white-space:nowrap}
-.tbl td{padding:7px 10px;font-size:12px;color:var(--mu);border-bottom:1px solid #1a232e}
-.tbl tr:hover td{background:#ffffff05}
+.tbl th{padding:7px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--bd);white-space:nowrap;font-family:var(--mono)}
+.tbl td{padding:7px 10px;font-size:12px;color:#46443e;border-bottom:1px solid #efece5;font-family:var(--mono)}
+.tbl tr:hover td{background:#faf8f4}
 .tbl td.b{color:var(--tx);font-weight:600}
 .pill{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700}
-.ph{background:#fee2e222;color:#f87171}.pm2{background:#fef3c722;color:#fcd34d}.pl{background:#dcfce722;color:#4ade80}
-.pt{background:rgba(62,207,178,.15);color:var(--tl)}.pb2{background:rgba(42,127,255,.15);color:#7dd3fc}
-.pp{background:rgba(167,139,250,.15);color:var(--pu)}.pr2{background:#ef444422;color:#f87171}
-.btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:6px;font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid transparent;font-family:inherit;transition:all .15s;white-space:nowrap}
-.bt{background:var(--tl);color:#0d1117;border-color:var(--tl)}
-.bd2{background:var(--bd);color:var(--tx);border-color:var(--b2)}
-.bg3{background:transparent;color:var(--mu);border-color:var(--bd)}
-.bp2{background:#7c3aed;color:#fff;border-color:#7c3aed}
-.br2{background:#ef444422;color:#f87171;border-color:#ef444444}
+.ph{background:#f7e3df;color:#b23a2e}.pm2{background:#f6ecd7;color:#9a6a25}.pl{background:#e3efe1;color:#3f7d4e}
+.pt{background:rgba(95,154,120,.16);color:#477f5c}.pb2{background:rgba(63,125,118,.15);color:#356f68}
+.pp{background:rgba(138,109,176,.15);color:var(--pu)}.pr2{background:#f7e3df;color:#b23a2e}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:7px;font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid transparent;font-family:inherit;transition:all .15s;white-space:nowrap}
+.bt{background:var(--tl);color:#fff;border-color:var(--tl)}
+.bd2{background:#efece5;color:var(--tx);border-color:var(--bd)}
+.bg3{background:#fff;color:#6f6a61;border-color:var(--bd)}
+.bg3:hover{border-color:var(--b2);color:var(--tx)}
+.bp2{background:var(--ink);color:#fff;border-color:var(--ink)}
+.br2{background:#f7e3df;color:#b23a2e;border-color:#eccac3}
 .bb2{background:var(--bl);color:#fff;border-color:var(--bl)}
-.ba2{background:var(--am);color:#0d1117;border-color:var(--am)}
+.ba2{background:var(--am);color:#fff;border-color:var(--am)}
 .bsm{padding:3px 7px;font-size:10.5px}
-input,select,textarea{background:#0d1117;border:1px solid var(--bd);color:var(--tx);padding:6px 9px;border-radius:6px;font-size:12px;font-family:inherit;width:100%;outline:none}
-input:focus,select:focus,textarea:focus{border-color:var(--tl)}
-select option{background:#131920}
+input,select,textarea{background:#fff;border:1px solid var(--bd);color:var(--tx);padding:6px 9px;border-radius:6px;font-size:12px;font-family:inherit;width:100%;outline:none}
+input:focus,select:focus,textarea:focus{border-color:var(--tl);box-shadow:0 0 0 2px rgba(95,154,120,.15)}
+select option{background:#fff}
 .fl{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;display:block;margin-bottom:3px}
-.mo{position:fixed;inset:0;background:#000c;z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:16px 12px;overflow-y:auto}
+.mo{position:fixed;inset:0;background:rgba(28,28,26,.45);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:16px 12px;overflow-y:auto}
 .mo.h{display:none}
-.mb{background:var(--sf);border:1px solid var(--b2);border-radius:12px;width:100%;max-width:800px;overflow:hidden}
+.mb{background:var(--sf);border:1px solid var(--b2);border-radius:12px;width:100%;max-width:800px;overflow:hidden;box-shadow:0 24px 60px rgba(20,20,20,.22)}
 .mb.xl{max-width:1060px}
 .mh{padding:13px 18px;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between;align-items:center}
-.mtt{font-size:14px;font-weight:700;color:#fff}
+.mtt{font-size:14px;font-weight:700;color:var(--tx)}
 .mbd{padding:16px 18px}
 .mft{padding:10px 18px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:7px}
 .xb{background:none;border:none;color:var(--mu);font-size:17px;cursor:pointer;padding:2px 5px;border-radius:4px}
@@ -63,42 +70,42 @@ select option{background:#131920}
 .it{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--mu);padding:5px 10px;font-size:11.5px;cursor:pointer;font-family:inherit}
 .it.A{border-bottom-color:var(--tl);color:var(--tl);font-weight:700}
 .fs2{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:11px}
-.fb{background:#0d1117;border:1px solid var(--bd);color:var(--mu);padding:3px 9px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .12s}
+.fb{background:#fff;border:1px solid var(--bd);color:var(--mu);padding:3px 9px;border-radius:14px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .12s}
 .fb:hover{border-color:var(--b2);color:var(--tx)}.fb.A{font-weight:700}
 .ph2{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
-.pt3{font-size:15px;font-weight:700;color:#fff;margin-bottom:2px}
+.pt3{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:2px}
 .ps2{font-size:11px;color:var(--mu)}
 .tl2{position:relative;padding-left:17px}
 .tl2::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--b2)}
 .te{position:relative;margin-bottom:11px}
-.te::before{content:'';position:absolute;left:-15px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--tl);border:2px solid var(--bg)}
+.te::before{content:'';position:absolute;left:-15px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--tl);border:2px solid var(--sf)}
 .te.old::before{background:var(--mu)}
 .td2{font-size:10px;color:var(--mu);margin-bottom:2px}
-.tc{background:#0d1117;border:1px solid var(--bd);border-radius:6px;padding:8px 11px}
+.tc{background:#faf8f4;border:1px solid var(--bd);border-radius:6px;padding:8px 11px}
 .cw{position:relative;height:130px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
 .g4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:9px}
 .g6{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
 .g8{display:grid;grid-template-columns:repeat(8,1fr);gap:8px}
-.kwt{display:inline-flex;align-items:center;gap:3px;background:rgba(62,207,178,.15);border:1px solid rgba(62,207,178,.3);color:var(--tl);padding:3px 7px;border-radius:16px;font-size:11px;font-weight:600;margin:2px}
-.kwt button{background:none;border:none;color:var(--tl);cursor:pointer;font-size:12px;line-height:1;padding:0;opacity:.7}
+.kwt{display:inline-flex;align-items:center;gap:3px;background:rgba(95,154,120,.15);border:1px solid rgba(95,154,120,.3);color:#477f5c;padding:3px 7px;border-radius:16px;font-size:11px;font-weight:600;margin:2px}
+.kwt button{background:none;border:none;color:#477f5c;cursor:pointer;font-size:12px;line-height:1;padding:0;opacity:.7}
 .pbar{height:4px;background:var(--bd);border-radius:99px;overflow:hidden;margin-top:4px}
 .pfill{height:100%;border-radius:99px;background:var(--tl);transition:width .3s}
 .uz{border:2px dashed var(--b2);border-radius:9px;padding:22px;text-align:center;cursor:pointer;transition:all .2s}
-.uz:hover{border-color:var(--tl);background:rgba(62,207,178,.04)}
-#lgate{position:fixed;inset:0;z-index:9999;background:radial-gradient(1200px 600px at 50% -10%,#162132,#0d1117 70%);display:flex;align-items:center;justify-content:center}
+.uz:hover{border-color:var(--tl);background:rgba(95,154,120,.05)}
+#lgate{position:fixed;inset:0;z-index:9999;background:radial-gradient(1100px 560px at 50% -10%,#ffffff,#eef0ec 75%);display:flex;align-items:center;justify-content:center}
 #lgate.h{display:none}
-#lgate .lcard{width:340px;max-width:92vw;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:26px 24px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+#lgate .lcard{width:340px;max-width:92vw;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:26px 24px;box-shadow:0 24px 60px rgba(20,20,20,.12)}
 #lgate .lhd{display:flex;align-items:center;gap:9px;margin-bottom:4px}
-#lgate .lic2{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#0f172a,#1e3a5f);display:flex;align-items:center;justify-content:center;font-size:18px;color:#7dd3fc}
-#lgate h2{font-size:16px;font-weight:800;color:var(--tx);margin:0}
+#lgate .lic2{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#5f9a78,#3f7d76);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+#lgate h2{font-size:17px;font-weight:800;color:var(--tx);margin:0;letter-spacing:-.01em}
 #lgate .lsub{font-size:11px;color:var(--mu);margin:2px 0 18px}
 #lgate label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin:0 0 4px}
 #lgate .frow{margin-bottom:13px}
 #lgate input{padding:9px 11px;font-size:13px}
 #lgate .lbtn{width:100%;justify-content:center;padding:9px;font-size:13px;margin-top:4px}
-#lgate .lerr{font-size:11px;color:#fca5a5;min-height:15px;margin-top:8px;text-align:center}
+#lgate .lerr{font-size:11px;color:var(--rd);min-height:15px;margin-top:8px;text-align:center}
 #lgate .lft{font-size:10px;color:var(--mu);text-align:center;margin-top:16px;line-height:1.5}
 </style>
 </head>
@@ -106,27 +113,27 @@ select option{background:#131920}
 
 <div id="lgate">
   <div class="lcard">
-    <div class="lhd"><div class="lic2">⚕</div><h2>AMA Care Connect</h2></div>
-    <div class="lsub">Wound &amp; Skin Integrity Monitoring · Secure Sign-In</div>
+    <div class="lhd"><div class="lic2">☰</div><h2>clinilytics</h2></div>
+    <div class="lsub">Wound Care · Secure Sign-In</div>
     <form id="lform" onsubmit="return doLogin(event)">
       <div class="frow"><label for="lg-user">Username</label><input id="lg-user" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="username"></div>
       <div class="frow"><label for="lg-pass">Password</label><input id="lg-pass" type="password" autocomplete="current-password" placeholder="password"></div>
       <button type="submit" class="btn ba2 lbtn">Sign In</button>
       <div class="lerr" id="lg-err"></div>
     </form>
-    <div class="lft">Authorized AMA SNF Provider Services staff only.<br>Sessions end when the browser tab is closed.</div>
+    <div class="lft">Authorized Clinilytics staff only.<br>Sessions end when the browser tab is closed.</div>
   </div>
 </div>
 
 <header id="hdr">
-  <div class="logo"><div class="lic">⚕</div><span class="ltx">AMA <span>Care Connect</span></span></div>
+  <div class="logo"><span class="lic">☰</span><span class="ltx">clinilytics</span><span class="modpill">Wound Care</span></div>
   <nav id="mnav">
     <button class="A" onclick="go('dashboard')">Dashboard</button>
     <button onclick="go('census')">Census &amp; Facilities</button>
     <button onclick="go('wound')">Wound Care</button>
     <button onclick="go('reports')">Reports &amp; Analytics</button>
   </nav>
-  <div class="hdr-r"><div class="live"></div><span style="font-size:10px;color:var(--mu)">Live</span><span style="background:var(--bd);border-radius:16px;padding:3px 10px;font-size:11px">Wound &amp; Skin Integrity</span><button class="btn bg3 bsm" style="font-size:10px" onclick="ccLogout()">Sign Out</button></div>
+  <div class="hdr-r"><div class="live"></div><span style="font-size:10px;color:var(--mu)">Live</span><button class="btn bg3 bsm" style="font-size:10px" onclick="ccLogout()">Sign out</button></div>
 </header>
 <div id="main">
 
@@ -243,7 +250,7 @@ select option{background:#131920}
   </div>
 </div>
 </div>
-<footer><span>AMA SNF Provider Services · Care Connect v1.0 · HIPAA Compliant</span><span id="ftr">Loading…</span></footer>
+<footer><span>Clinilytics · Wound Care · HIPAA Compliant</span><span id="ftr">Loading…</span></footer>
 
 <!-- CHART EDITOR MODAL -->
 <!-- PSYCH MONTHLY REVIEW MODAL -->
@@ -469,7 +476,7 @@ select option{background:#131920}
 <div class="mb">
   <div class="mh"><div class="mtt">📤 Facesheet Upload</div><button class="xb" onclick="cM('m-upload')">✕</button></div>
   <div class="mbd">
-    <div style="padding:9px 11px;background:#0d1117;border-radius:7px;border-left:3px solid var(--tl);margin-bottom:11px">
+    <div style="padding:9px 11px;background:#faf8f4;border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:11px">
       <div style="font-size:12px;font-weight:600;margin-bottom:2px">AI-Powered OCR Extraction</div>
       <div style="font-size:11px;color:var(--mu)">Upload PDF facesheets — AI extracts Name, DOB, Dx, Insurance, Room, Provider, Code Status, Allergies, MRN.</div>
     </div>
@@ -643,9 +650,9 @@ const TDS=()=>new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digi
 const rC=r=>r>18?"#ef4444":r>15?"#f59e0b":"#10b981";
 const rT=r=>r>18?"HIGH":r>15?"MED":"LOW";
 const rP=r=>'<span class="pill '+(r==="HIGH"?"ph":r==="MED"?"pm2":"pl")+'">'+r+'</span>';
-const coB=co=>{const m=COM[co]||{c:"#8a9ab0",a:"#e2e8f0"};return'<span class="pill" style="background:'+m.c+'22;color:'+m.a+'">'+co.split(" ")[0]+'</span>';};
+const coB=co=>{const m=COM[co]||{c:"#8c877d",a:"#8c877d"};return'<span class="pill" style="background:'+m.c+'1f;color:'+m.c+'">'+co.split(" ")[0]+'</span>';};
 const hC=h=>({Progressing:"#16a34a",Stable:"#2563eb",Slow:"#d97706",Improving:"#059669",Worsening:"#dc2626",Healed:"#059669"}[h]||"#8a9ab0");
-const sP=s=>{const p=(["Stage 4","Stage 3"].includes(s))?["#fee2e2","#991b1b"]:(s==="Stage 2")?["#fef3c7","#92400e"]:(["Unstageable","Deep Tissue Inj."].includes(s))?["#ede9fe","#5b21b6"]:["#1e2a35","#8a9ab0"];return'<span class="pill" style="background:'+p[0]+';color:'+p[1]+'">'+s+'</span>';};
+const sP=s=>{const p=(["Stage 4","Stage 3"].includes(s))?["#fee2e2","#991b1b"]:(s==="Stage 2")?["#fef3c7","#92400e"]:(["Unstageable","Deep Tissue Inj."].includes(s))?["#ede9fe","#5b21b6"]:["#eceae4","#6f6a61"];return'<span class="pill" style="background:'+p[0]+';color:'+p[1]+'">'+s+'</span>';};
 const e=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const gv=id=>(document.getElementById(id)||{}).value||"";
 const sv=(id,v)=>{var el=document.getElementById(id);if(el)el.value=v;};
@@ -684,22 +691,22 @@ function go(id){
 
 /* ── DASHBOARD ── */
 const MOS=["Jan","Feb","Mar","Apr","May","Jun"];
-const CO={border:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#8a9ab0",font:{size:10}}};
-const COPTS={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#1e2a35",titleColor:"#e6eaf0",bodyColor:"#8a9ab0",borderColor:"#2a3a4a",borderWidth:1}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
+const CO={border:{color:"rgba(20,20,20,0.07)"},ticks:{color:"#8c877d",font:{size:10}}};
+const COPTS={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#26282d",titleColor:"#fff",bodyColor:"#d8d3c8",borderColor:"#46443e",borderWidth:1}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
 function initDash(){
   var actW=WOUNDS.filter(function(w){return!wIsHealed(w);});
   var prW=actW.filter(wIsPressure);
   var healRate=actW.length?Math.round(actW.filter(function(w){return["Progressing","Improving","Healed"].includes(w.heal);}).length/actW.length*100):0;
   var openAct=WOUNDS.reduce(function(a,w){return a+getOpenTriggers(w).length;},0);
   var kpis=[
-    {i:"&#x1F3E5;",l:"Census",v:FACS.reduce(function(a,f){return a+f.cs;},0),c:"#e2e8f0"},
-    {i:"&#x1FA79;",l:"Active Wounds",v:actW.length,c:"#7dd3fc"},
-    {i:"&#x1F534;",l:"Pressure",v:prW.length,c:"#fca5a5"},
-    {i:"&#x1F535;",l:"Non-Pressure",v:actW.length-prW.length,c:"#7dd3fc"},
-    {i:"&#x1F9A0;",l:"Infected",v:actW.filter(function(w){return w.inf;}).length,c:"#f87171"},
-    {i:"&#x1F6A9;",l:"Action Items",v:openAct,c:openAct?"#fca5a5":"#6ee7b7"},
-    {i:"&#x1F4C8;",l:"Healing Rate",v:healRate+"%",c:healRate>=70?"var(--tl)":healRate>=40?"#f59e0b":"#f87171"},
-    {i:"&#x1F3E2;",l:"Facilities",v:FACS.length,c:"var(--tl)"}
+    {i:"&#x1F3E5;",l:"Census",v:FACS.reduce(function(a,f){return a+f.cs;},0),c:"var(--tx)"},
+    {i:"&#x1FA79;",l:"Active Wounds",v:actW.length,c:"#356f68"},
+    {i:"&#x1F534;",l:"Pressure",v:prW.length,c:"#b23a2e"},
+    {i:"&#x1F535;",l:"Non-Pressure",v:actW.length-prW.length,c:"#3f7d76"},
+    {i:"&#x1F9A0;",l:"Infected",v:actW.filter(function(w){return w.inf;}).length,c:"#b23a2e"},
+    {i:"&#x1F6A9;",l:"Action Items",v:openAct,c:openAct?"#c27a4a":"#477f5c"},
+    {i:"&#x1F4C8;",l:"Healing Rate",v:healRate+"%",c:healRate>=70?"#477f5c":healRate>=40?"#c27a4a":"#b23a2e"},
+    {i:"&#x1F3E2;",l:"Facilities",v:FACS.length,c:"#477f5c"}
   ];
   document.getElementById("d-kpis").innerHTML=kpis.map(function(k){return'<div class="kt"><div style="font-size:14px;margin-bottom:2px">'+k.i+'</div><div class="kv" style="color:'+k.c+'">'+k.v+'</div><div class="kl">'+k.l+'</div></div>';}).join("");
   document.getElementById("d-fac").innerHTML='<thead><tr><th>Facility</th><th>Co.</th><th>Risk</th><th>RTH%</th><th>Census</th><th>HR</th><th>Inf.</th><th>TH</th></tr></thead><tbody>'+FACS.map(function(f){return'<tr><td class="b">'+f.name+'</td><td>'+coB(f.co)+'</td><td>'+rP(rT(f.rth))+'</td><td style="font-weight:700;color:'+rC(f.rth)+'">'+f.rth+'%</td><td>'+f.cs+'</td><td>'+f.hr+'</td><td style="color:'+(f.inf>3?"#f87171":"var(--mu)")+'">'+f.inf+'</td><td>'+f.th+'</td></tr>';}).join("")+'</tbody>';
@@ -707,7 +714,7 @@ function initDash(){
   renderDashWounds();
   renderDashActions();
   var MO=["Jan","Feb","Mar","Apr","May","Jun"];
-  var CO={border:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#8a9ab0",font:{size:9}}};
+  var CO={border:{color:"rgba(20,20,20,0.07)"},ticks:{color:"#8c877d",font:{size:9}}};
   var OP={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
   new Chart(document.getElementById("c-hosp"),{type:"line",data:{labels:MO,datasets:[{data:[22,20,19,17,16,15],borderColor:"#3b82f6",borderWidth:2,tension:.4,pointRadius:0,fill:false},{data:[18,18,18,18,18,18],borderColor:"#3ecfb2",borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false}]},options:OP});
   new Chart(document.getElementById("c-wound"),{type:"bar",data:{labels:MO,datasets:[{data:[62,65,70,74,78,82],backgroundColor:"#3ecfb2",borderRadius:3},{data:[38,35,30,26,22,18],backgroundColor:"#2a3a4a",borderRadius:3}]},options:Object.assign({},OP,{scales:{x:Object.assign({},OP.scales.x,{stacked:true}),y:Object.assign({},OP.scales.y,{stacked:true})}})});
@@ -715,7 +722,7 @@ function initDash(){
   new Chart(document.getElementById("c-inf"),{type:"line",data:{labels:MO,datasets:[{data:[8.2,7.8,7.1,6.5,5.9,5.4],borderColor:"#ef4444",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(239,68,68,0.1)"}]},options:OP});
 }
 
-function kv2(v,l,c){return'<div style="background:#0d1117;border:1px solid var(--bd);border-radius:6px;padding:5px 7px"><div style="font-size:14px;font-weight:800;color:'+c+'">'+v+'</div><div style="font-size:9px;color:var(--mu)">'+l+'</div></div>';}
+function kv2(v,l,c){return'<div style="background:#faf8f4;border:1px solid var(--bd);border-radius:6px;padding:5px 7px"><div style="font-size:14px;font-weight:800;font-family:var(--mono);color:'+c+'">'+v+'</div><div style="font-size:9px;color:var(--mu)">'+l+'</div></div>';}
 function alert2(bg,bdr,color,icon,title,items){return'<div style="background:'+bg+';border:1px solid '+bdr+';border-radius:6px;padding:8px 10px;margin-bottom:6px"><div style="font-size:11px;font-weight:700;color:'+color+';margin-bottom:4px">'+icon+' '+title+'</div>'+items+'</div>';}
 
 function renderDashWounds(){
@@ -724,8 +731,8 @@ function renderDashWounds(){
   var pressure=WOUNDS.filter(function(w){return w.etio==="Pressure"||w.tp==="Pressure Injury";});
   var slow=WOUNDS.filter(function(w){return w.heal==="Slow"||w.heal==="Worsening";});
   document.getElementById("d-wounds-kpis").innerHTML=
-    kv2(WOUNDS.length,"Total","#e2e8f0")+kv2(pressure.length,"Pressure","#fca5a5")+
-    kv2(WOUNDS.length-pressure.length,"Non-Pressure","#7dd3fc")+kv2(WOUNDS.filter(function(w){return w.inf;}).length,"Infected","#f87171");
+    kv2(WOUNDS.length,"Total","var(--tx)")+kv2(pressure.length,"Pressure","#b23a2e")+
+    kv2(WOUNDS.length-pressure.length,"Non-Pressure","#3f7d76")+kv2(WOUNDS.filter(function(w){return w.inf;}).length,"Infected","#b23a2e");
   var alerts="";
   if(stale.length)alerts+=alert2("#ef444412","#ef444433","#f87171","&#x26A0;",stale.length+" wound"+(stale.length>1?"s":"")+" stale 7d+",stale.slice(0,3).map(function(w){return'<div style="font-size:10px;color:#fca5a5">'+w.name+' &middot; '+w.loc+' ('+woundDaysSinceUpdate(w)+'d)</div>';}).join(""));
   if(lt.length)alerts+=alert2("#7c3aed12","#7c3aed33","#c4b5fd","&#x23F1;",lt.length+" near/past 100 days",lt.slice(0,2).map(function(w){return'<div style="font-size:10px;color:#a78bfa">'+w.name+' &middot; Day '+woundOnsetDays(w)+'</div>';}).join(""));
@@ -830,7 +837,7 @@ var cenFac="All";
 function renderCensus(){
   var q=(gv("cen-q")||"").toLowerCase();
   document.getElementById("cen-sub").textContent=PATIENTS.filter(function(p){return p.st==="Active";}).length+" active · "+FACS.length+" facilities";
-  document.getElementById("cen-port").innerHTML=Object.entries(COM).map(function(e2){var co=e2[0],m=e2[1];var cnt=PATIENTS.filter(function(p){return p.st==="Active"&&FACS.find(function(f){return f.name===p.fac&&f.co===co;});}).length;return'<div class="card" style="padding:9px 11px;border-left:3px solid '+m.c+'"><div style="font-size:16px;font-weight:800;color:'+m.a+'">'+cnt+'</div><div style="font-size:10px;color:var(--mu);margin-top:2px">'+co.split(" ")[0]+'</div></div>';}).join("")+'<div class="card" style="padding:9px 11px;border-left:3px solid var(--mu)"><div style="font-size:16px;font-weight:800">'+PATIENTS.filter(function(p){return p.st==="Active";}).length+'</div><div style="font-size:10px;color:var(--mu);margin-top:2px">Total Active</div></div>';
+  document.getElementById("cen-port").innerHTML=Object.entries(COM).map(function(e2){var co=e2[0],m=e2[1];var cnt=PATIENTS.filter(function(p){return p.st==="Active"&&FACS.find(function(f){return f.name===p.fac&&f.co===co;});}).length;return'<div class="card" style="padding:9px 11px;border-left:3px solid '+m.c+'"><div style="font-size:16px;font-weight:800;font-family:var(--mono);color:'+m.c+'">'+cnt+'</div><div style="font-size:10px;color:var(--mu);margin-top:2px">'+co.split(" ")[0]+'</div></div>';}).join("")+'<div class="card" style="padding:9px 11px;border-left:3px solid var(--mu)"><div style="font-size:16px;font-weight:800">'+PATIENTS.filter(function(p){return p.st==="Active";}).length+'</div><div style="font-size:10px;color:var(--mu);margin-top:2px">Total Active</div></div>';
   buildFS("cen-fs",cenFac,function(v){cenFac=v;renderCensus();});
   var rows=PATIENTS.filter(function(p){var mf=cenFac==="All"||p.fac===cenFac;var mq=!q||p.name.toLowerCase().includes(q)||p.dx.toLowerCase().includes(q)||(p.fac||"").toLowerCase().includes(q);return mf&&mq;});
   document.getElementById("cen-tb").innerHTML=rows.map(function(p){var co=FACS.find(function(f){return f.name===p.fac;});return'<tr><td><button class="btn bg3 bsm" onclick="openChart(\'census\',\''+p.id+'\')">✏ Edit</button></td><td class="b">'+p.name+'</td><td>'+p.dob+'</td><td>'+p.fac+'</td><td>'+(co?coB(co.co):"")+'</td><td>'+p.rm+'</td><td>'+p.adm+'</td><td class="b">'+p.dx+'</td><td>'+p.ins+'</td><td>'+p.pv+'</td><td style="font-size:10px;font-weight:700;color:'+(p.code==="Full Code"?"var(--tl)":p.code==="Comfort Care"?"var(--am)":"#94a3b8")+'">'+p.code+'</td><td style="font-size:10px;font-weight:700;color:'+(p.st==="Active"?"var(--tl)":"var(--mu)")+'">'+p.st+'</td></tr>';}).join("");
@@ -898,7 +905,38 @@ function woundReportText(name){
       +"\n   Tx: "+w.tx+"\n   Size: "+(sz?sz+" cm":"n/a")+" | Healing: "+w.heal+" | Infection: "+(w.inf?"ACTIVE":"none")+" | Last seen: "+w.ls;});
   return "WEEKLY WOUND REPORT — "+name+"\nDate: "+TD()+"\nActive wounds: "+ws.length
     +"\n\n"+(lines.join("\n\n")||"No active wounds on the wound-care watch list this week.")
-    +"\n\n— This summary is for facility records and must match facility (PointClickCare) documentation. A full printable report is available on request.\n\nAMA SNF Provider Services · Care Connect";
+    +"\n\n— This summary is for facility records and must match facility (PointClickCare) documentation. A full printable report is available on request.\n\nClinilytics · Wound Care";
+}
+function pdfFileName(name){return "WoundReport_"+name.replace(/[^a-z0-9]/gi,"_")+"_"+TDS().replace(/\//g,"-")+".pdf";}
+function buildFacReportPDF(name){
+  if(!window.jspdf||!window.jspdf.jsPDF)return null;
+  var f=FACS.find(function(x){return x.name===name;})||{};
+  var ws=facActiveWounds(name);
+  var heal=ws.filter(function(w){return["Progressing","Improving","Healed"].includes(w.heal);});
+  var hp=ws.length?Math.round(heal.length/ws.length*100):0;
+  var openA=ws.reduce(function(a,w){return a+getOpenTriggers(w).length;},0);
+  var doc=new window.jspdf.jsPDF({unit:"pt",format:"letter"});
+  doc.setFillColor(95,154,120);doc.rect(0,0,612,6,"F");
+  doc.setFont("helvetica","bold");doc.setFontSize(16);doc.setTextColor(38,40,45);
+  doc.text("clinilytics",40,42);
+  doc.setFont("helvetica","normal");doc.setFontSize(11);doc.setTextColor(95,154,120);
+  doc.text("Weekly Wound Report",128,42);
+  doc.setFontSize(10);doc.setTextColor(90,90,84);
+  doc.text(name+(f.co?"  ·  "+f.co:""),40,60);
+  doc.text(TD()+"   |   Prepared for: "+(f.don||"Director of Nursing")+(f.email?"  <"+f.email+">":""),40,74);
+  doc.setFontSize(9);doc.setTextColor(120,116,108);
+  doc.text("Active wounds: "+ws.length+"   |   Pressure: "+ws.filter(wIsPressure).length+"   |   Infected: "+ws.filter(function(w){return w.inf;}).length+"   |   Healing rate: "+hp+"%   |   Open action items: "+openA,40,90);
+  var rows=ws.map(function(w){var last=(w.chart&&w.chart.length?w.chart[w.chart.length-1]:{});return [w.name,w.tp,w.stage,w.loc,w.tx,[last.L,last.W,last.D].filter(function(x){return x!=null;}).join("×"),w.heal,(w.inf?"ACTIVE":"No"),(w.graft?"Y":"N"),(w.collagen?"Y":"N"),(w.pcrReq?(w.pcrDone?"Done":"Req"):"—"),w.ls];});
+  if(!rows.length)rows=[["No active wounds on the watch list.","","","","","","","","","","",""]];
+  doc.autoTable({startY:104,head:[["Patient","Type","Stage","Location","Treatment","L×W×D","Healing","Infx","Graft","Coll","PCR","Last Seen"]],body:rows,
+    styles:{font:"helvetica",fontSize:7,cellPadding:3,textColor:[60,58,52],lineColor:[231,227,219],lineWidth:.5},
+    headStyles:{fillColor:[95,154,120],textColor:[255,255,255],fontSize:7},
+    alternateRowStyles:{fillColor:[250,248,244]},margin:{left:40,right:40}});
+  var y=doc.lastAutoTable.finalY+18;
+  doc.setFontSize(8);doc.setTextColor(120,116,108);
+  doc.text("Compliance note: Clinilytics wound documentation must match facility (PointClickCare) documentation for this reporting period.",40,y);
+  doc.text("CONFIDENTIAL · HIPAA Protected · clinilytics — Wound Care · Generated "+TD(),40,y+14);
+  return doc;
 }
 function emailFacReport(name){
   var f=FACS.find(function(x){return x.name===name;});if(!f)return;
@@ -906,11 +944,26 @@ function emailFacReport(name){
   var ws=facActiveWounds(name);
   var subj="Weekly Wound Report — "+name+" — "+TD();
   var body=woundReportText(name);
-  var mailto="mailto:"+encodeURIComponent(f.email)+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);
+  var doc=buildFacReportPDF(name);
+  var fname=pdfFileName(name);
+  function logSent(){SENTLOG.push({fac:name,to:f.email,don:f.don||"",date:TDS(),count:ws.length,by:"You",pdf:!!doc});renderSendLog();renderFacList();}
+  // Best path: native share sheet WITH the PDF attached (mobile/desktop that support it)
+  if(doc){
+    try{
+      var blob=doc.output("blob");
+      var file=new File([blob],fname,{type:"application/pdf"});
+      if(navigator.canShare&&navigator.canShare({files:[file]})){
+        navigator.share({files:[file],title:subj,text:body}).then(logSent).catch(function(){});
+        return;
+      }
+    }catch(e){}
+    // Fallback: download the PDF so it can be attached, then open the email draft
+    try{doc.save(fname);}catch(e){}
+  }
+  var mailto="mailto:"+encodeURIComponent(f.email)+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body+"\n\n[Attach the downloaded PDF: "+fname+"]");
   window.location.href=mailto;
-  SENTLOG.push({fac:name,to:f.email,don:f.don||"",date:TDS(),count:ws.length,by:"You"});
-  renderSendLog();renderFacList();
-  setTimeout(function(){if(confirm("Email draft opened for "+name+" → "+f.email+".\n\nOpen the full printable report now (to print/attach as PDF)?"))facilityWeeklyReport(name);},300);
+  logSent();
+  setTimeout(function(){alert("📧 Email draft opened for "+name+" → "+f.email+".\n\n"+(doc?"📎 The report PDF (\""+fname+"\") was downloaded — attach it to the email before sending.\n\n":"")+"Note: browsers can't auto-attach a file to a mailto link, so the PDF is provided as a download to attach.");},250);
 }
 function renderSendLog(){
   var el=document.getElementById("send-log");if(!el)return;
@@ -1081,7 +1134,7 @@ function buildNotes(){
   var rec=_ctx.rec;
   var notes=[].concat(rec.chart||[]).filter(function(h){return h.notes;}).reverse();
   var el=document.getElementById("ch-p2");
-  el.innerHTML='<div class="st">Notes Log — All Entries</div>'+(notes.length?'<div style="display:flex;flex-direction:column;gap:7px">'+notes.map(function(n){return'<div style="background:#0d1117;border:1px solid var(--bd);border-radius:7px;padding:9px 12px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:600;color:var(--tl)">'+(n.ev||n.tp||"Update")+'</span><span style="font-size:10px;color:var(--mu)">'+n.dt+(n.by?" · "+n.by:"")+'</span></div><div style="font-size:12px;color:var(--tx)">'+n.notes+'</div></div>';}).join("")+'</div>':'<p style="color:var(--mu);font-size:13px">No notes recorded yet.</p>');
+  el.innerHTML='<div class="st">Notes Log — All Entries</div>'+(notes.length?'<div style="display:flex;flex-direction:column;gap:7px">'+notes.map(function(n){return'<div style="background:#faf8f4;border:1px solid var(--bd);border-radius:7px;padding:9px 12px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:600;color:var(--tl)">'+(n.ev||n.tp||"Update")+'</span><span style="font-size:10px;color:var(--mu)">'+n.dt+(n.by?" · "+n.by:"")+'</span></div><div style="font-size:12px;color:var(--tx)">'+n.notes+'</div></div>';}).join("")+'</div>':'<p style="color:var(--mu);font-size:13px">No notes recorded yet.</p>');
 }
 function discharge(){
   var rec=_ctx.rec;
@@ -1093,7 +1146,7 @@ function discharge(){
   var qaR=QA.filter(function(q){return q.ptId===rec.id;});
   var css="body{font-family:system-ui,sans-serif;max-width:900px;margin:0 auto;padding:24px;font-size:12px}h1{font-size:20px;margin-bottom:4px}h2{font-size:12px;font-weight:700;text-transform:uppercase;color:#475569;border-bottom:2px solid #e2e8f0;padding-bottom:4px;margin:14px 0 7px}table{width:100%;border-collapse:collapse;font-size:11px;margin-bottom:8px}th{padding:5px 8px;text-align:left;font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;background:#f1f5f9;border-bottom:2px solid #e2e8f0}td{padding:5px 8px;border-bottom:1px solid #e2e8f0}.hdr{background:linear-gradient(135deg,#0f172a,#1e3a5f);color:#fff;padding:18px 22px;border-radius:9px;margin-bottom:18px}";
   var html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Patient Summary</title><style>"+css+"</style></head><body>";
-  html+="<div class='hdr'><div style='font-size:9px;letter-spacing:.1em;color:#7dd3fc;text-transform:uppercase;font-weight:700;margin-bottom:4px'>AMA SNF Provider Services · Care Connect · Patient Summary</div>";
+  html+="<div class='hdr'><div style='font-size:9px;letter-spacing:.1em;color:#7dd3fc;text-transform:uppercase;font-weight:700;margin-bottom:4px'>Clinilytics · Wound Care · Patient Summary</div>";
   html+="<h1>"+rec.name+"</h1><div style='font-size:12px;color:#7dd3fc'>"+rec.fac+"</div><div style='font-size:10px;color:#94a3b8;margin-top:3px'>Admit: "+rec.adm+" · Discharge: "+TDS()+" · DOB: "+rec.dob+"</div></div>";
   html+="<h2>Demographics</h2><table><tbody><tr><td><b>MRN</b></td><td>"+(rec.mrn||"—")+"</td><td><b>Gender</b></td><td>"+(rec.gen||"—")+"</td></tr><tr><td><b>Insurance</b></td><td>"+rec.ins+"</td><td><b>Provider</b></td><td>"+rec.pv+"</td></tr><tr><td><b>Code Status</b></td><td>"+rec.code+"</td><td><b>Allergies</b></td><td>"+(rec.al||"NKDA")+"</td></tr><tr><td><b>Primary Dx</b></td><td colspan='3'>"+rec.dx+"</td></tr></tbody></table>";
   html+="<h2>Chart History ("+hist.length+" entries)</h2><table><thead><tr><th>Date</th><th>Updated By</th><th>Dx / Tx</th><th>Code</th><th>Notes</th></tr></thead><tbody>";
@@ -1120,7 +1173,7 @@ function discharge(){
     qaR.forEach(function(q){(q.chart||[]).forEach(function(h){html+="<tr><td>"+h.dt+"</td><td>"+(h.st||"—")+"</td><td>"+(h.tx||"—")+"</td><td>"+(h.notes||"")+"</td></tr>";});});
     html+="</tbody></table>";
   }
-  html+="<div style='margin-top:18px;border-top:1px solid #e2e8f0;padding-top:8px;font-size:10px;color:#94a3b8;text-align:center'>CONFIDENTIAL · HIPAA Protected · AMA SNF Provider Services · Generated "+TD()+"</div></body>";
+  html+="<div style='margin-top:18px;border-top:1px solid #e2e8f0;padding-top:8px;font-size:10px;color:#94a3b8;text-align:center'>CONFIDENTIAL · HIPAA Protected · Clinilytics · Generated "+TD()+"</div></body>";
   var blob=new Blob([html],{type:"text/html"});
   var url=URL.createObjectURL(blob);
   var a=document.createElement("a");a.href=url;a.download="PatientSummary_"+rec.name.replace(/[^a-z0-9]/gi,"_")+"_"+TDS().replace(/\//g,"-")+".html";
@@ -1235,7 +1288,7 @@ function triggerPanelHtml(w){
   var resp=getWoundTriggers(w).filter(function(t){return (w.triggerResp||{})[t.key];});
   if(!open.length&&!resp.length)return "";
   var sevC={1:"#7dd3fc",2:"#fcd34d",3:"#f87171"};
-  var h='<div style="background:#0d1117;border:1px solid #f59e0b44;border-radius:8px;padding:11px 13px;margin-bottom:13px">';
+  var h='<div style="background:#faf8f4;border:1px solid #e3c9a8;border-radius:8px;padding:11px 13px;margin-bottom:13px">';
   h+='<div class="st" style="color:#fcd34d;margin-bottom:8px">🚩 Clinical Action Items'+(open.length?' <span class="pill pr2">'+open.length+' open</span>':' <span class="pill pt">all addressed</span>')+'</div>';
   open.forEach(function(t){var c=sevC[t.sev]||"#fcd34d";
     h+='<div style="border-left:3px solid '+c+';background:'+c+'10;border-radius:5px;padding:7px 9px;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:'+c+'">'+t.label+'</div><div style="font-size:11px;color:var(--mu);margin-bottom:5px">Recommended: '+t.rec+'</div><div style="display:flex;gap:6px"><button class="btn ba2 bsm" onclick="respondTrigger(\''+w.id+'\',\''+t.key+'\',\'planned\')">✓ Log Action / Plan</button><button class="btn bg3 bsm" onclick="respondTrigger(\''+w.id+'\',\''+t.key+'\',\'declined\')">✎ Document Reason</button></div></div>';
@@ -1740,7 +1793,7 @@ function openPsyPolyrxRpt(){
   var pCSS="body{font-family:system-ui,sans-serif;max-width:960px;margin:0 auto;padding:24px;font-size:12px}h2{font-size:12px;font-weight:700;text-transform:uppercase;color:#475569;border-bottom:2px solid #e2e8f0;padding-bottom:4px;margin:14px 0 8px}table{width:100%;border-collapse:collapse;font-size:11px}th{padding:5px 8px;text-align:left;font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;background:#f1f5f9;border-bottom:2px solid #e2e8f0}td{padding:5px 8px;border-bottom:1px solid #e2e8f0}.flag{background:#fee2e2;color:#dc2626;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px}.np{margin-top:14px;display:flex;gap:7px}@media print{.np{display:none}}";
   var html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Polypharmacy Report</title><style>"+pCSS+"</style></head><body>";
   html+="<div style='background:linear-gradient(135deg,#1e1b4b,#3730a3);color:#fff;padding:18px 24px;border-radius:9px;margin-bottom:18px'>";
-  html+="<div style='font-size:9px;letter-spacing:.1em;color:#a5b4fc;text-transform:uppercase;font-weight:700;margin-bottom:4px'>AMA SNF Provider Services · Care Connect</div>";
+  html+="<div style='font-size:9px;letter-spacing:.1em;color:#a5b4fc;text-transform:uppercase;font-weight:700;margin-bottom:4px'>Clinilytics · Wound Care</div>";
   html+="<div style='font-size:20px;font-family:Georgia,serif;margin-bottom:3px'>Antipsychotic Polypharmacy Report</div>";
   html+="<div style='font-size:12px;color:#c7d2fe'>"+(port||"All Portfolios")+" · "+month+"</div>";
   html+="<div style='font-size:10px;color:#a5b4fc;margin-top:4px'>Generated: "+TD()+"</div>";
@@ -2281,7 +2334,7 @@ var _rc={};
 function mkChart(id,type,labels,datasets,opts){
   if(_rc[id]){_rc[id].destroy();delete _rc[id];}
   var el=document.getElementById(id);if(!el)return;
-  _rc[id]=new Chart(el,{type:type,data:{labels:labels,datasets:datasets},options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:datasets.length>1,labels:{color:"#8a9ab0",font:{size:10},boxWidth:12}},tooltip:{backgroundColor:"#1e2a35",titleColor:"#e6eaf0",bodyColor:"#8a9ab0"}},scales:{x:{grid:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#8a9ab0",font:{size:10}}},y:{grid:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#8a9ab0",font:{size:10}}}}},opts||{})});
+  _rc[id]=new Chart(el,{type:type,data:{labels:labels,datasets:datasets},options:Object.assign({responsive:true,maintainAspectRatio:false,plugins:{legend:{display:datasets.length>1,labels:{color:"#8c877d",font:{size:10},boxWidth:12}},tooltip:{backgroundColor:"#26282d",titleColor:"#fff",bodyColor:"#d8d3c8"}},scales:{x:{grid:{color:"rgba(20,20,20,0.07)"},ticks:{color:"#8c877d",font:{size:10}}},y:{grid:{color:"rgba(20,20,20,0.07)"},ticks:{color:"#8c877d",font:{size:10}}}}},opts||{})});
 }
 
 /* WOUND REPORT */
@@ -2408,7 +2461,7 @@ function renderRptQA(){
 /* print report helpers */
 function closeAllRpts(){["pm-wound","pm-psych","pm-ent","pm-prim","pm-polyrx"].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display="none";});}
 function mkPrintCss(){return "body{font-family:system-ui,sans-serif;max-width:1100px;margin:0 auto;padding:22px;font-size:11px}h2{font-size:11px;font-weight:700;text-transform:uppercase;color:#475569;border-bottom:2px solid #e2e8f0;padding-bottom:3px;margin:14px 0 7px}table{width:100%;border-collapse:collapse;margin-bottom:12px}th{padding:5px 7px;text-align:left;font-size:9px;font-weight:700;color:#475569;text-transform:uppercase;background:#f1f5f9;border-bottom:2px solid #e2e8f0}td{padding:5px 7px;border-bottom:1px solid #f1f5f9}.np{margin-top:14px;display:flex;gap:7px}@media print{.np{display:none}@page{margin:.4in;size:landscape}}";}
-function mkPrintHdr(title,sc,stats,gc){gc=gc||"#1e3a5f";return'<div style="background:linear-gradient(135deg,#0f172a,'+gc+');color:#fff;padding:18px 24px;border-radius:9px;margin-bottom:16px"><div style="font-size:9px;letter-spacing:.12em;color:#7dd3fc;text-transform:uppercase;font-weight:700;margin-bottom:4px">AMA SNF Provider Services &middot; Care Connect</div><div style="font-family:Georgia,serif;font-size:20px;margin-bottom:2px">'+title+'</div><div style="font-size:12px;color:#7dd3fc;font-weight:600">'+sc+'</div><div style="font-size:10px;color:#94a3b8">'+TD()+'</div><div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">'+stats.map(function(s){return'<div style="background:#ffffff15;border-radius:7px;padding:7px 13px;text-align:center"><div style="font-size:18px;font-weight:800;color:#fff">'+s.v+'</div><div style="font-size:9px;color:#94a3b8">'+s.l+'</div></div>';}).join("")+'</div></div>';}
+function mkPrintHdr(title,sc,stats,gc){gc=gc||"#1e3a5f";return'<div style="background:linear-gradient(135deg,#0f172a,'+gc+');color:#fff;padding:18px 24px;border-radius:9px;margin-bottom:16px"><div style="font-size:9px;letter-spacing:.12em;color:#7dd3fc;text-transform:uppercase;font-weight:700;margin-bottom:4px">Clinilytics &middot; Wound Care</div><div style="font-family:Georgia,serif;font-size:20px;margin-bottom:2px">'+title+'</div><div style="font-size:12px;color:#7dd3fc;font-weight:600">'+sc+'</div><div style="font-size:10px;color:#94a3b8">'+TD()+'</div><div style="display:flex;gap:10px;margin-top:10px;flex-wrap:wrap">'+stats.map(function(s){return'<div style="background:#ffffff15;border-radius:7px;padding:7px 13px;text-align:center"><div style="font-size:18px;font-weight:800;color:#fff">'+s.v+'</div><div style="font-size:9px;color:#94a3b8">'+s.l+'</div></div>';}).join("")+'</div></div>';}
 function mkPrintFtr(){var cb='<button onclick="closeAllRpts()" style="background:#e2e8f0;color:#475569;border:none;padding:7px 13px;border-radius:6px;font-size:12px;cursor:pointer">Close</button>';return'<div style="margin-top:18px;font-size:10px;color:#94a3b8;text-align:center">CONFIDENTIAL &middot; HIPAA Protected &middot; '+TD()+'</div><div class="np"><button onclick="window.print()" style="background:#1e3a5f;color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">Print / PDF</button>'+cb+'</div>';}
 function runWoundReport(){var sc=rptLabel();var facs=rptGetFacs();var w=facs.length===FACS.length?WOUNDS:WOUNDS.filter(function(x){return facs.find(function(f){return f.name===x.fac;});});var css=mkPrintCss();var html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Wound Report</title><style>"+css+"</style></head><body>"+mkPrintHdr("Wound Care Report",sc,[{l:"Total",v:w.length},{l:"Pressure",v:w.filter(function(x){return x.etio==="Pressure"||x.tp==="Pressure Injury";}).length},{l:"Non-Pressure",v:w.filter(function(x){return x.etio!=="Pressure"&&x.tp!=="Pressure Injury";}).length},{l:"New (30d)",v:w.filter(wIsNew).length},{l:"Healed",v:w.filter(wIsHealed).length},{l:"Stage 2+",v:w.filter(wStage2Plus).length},{l:"Infected",v:w.filter(function(x){return x.inf;}).length},{l:"Healing Rate",v:w.length?Math.round(w.filter(function(x){return["Progressing","Improving","Healed"].includes(x.heal);}).length/w.length*100)+"%":"N/A"},{l:"Stale 7d+",v:w.filter(function(x){return woundIsStale(x);}).length}],"#0e7490")+"<div style='padding:0 24px 24px'><h2>Wound Detail</h2><table><thead><tr><th>Patient</th><th>Facility</th><th>Type</th><th>Stage</th><th>Location</th><th>Treatment</th><th>Last Update</th><th>Healing</th><th>Infection</th><th>Days</th></tr></thead><tbody>"+w.map(function(x){return"<tr><td><b>"+x.name+"</b></td><td>"+x.fac+"</td><td>"+x.tp+"</td><td>"+x.stage+"</td><td>"+x.loc+"</td><td>"+x.tx+"</td><td>"+x.ls+"</td><td>"+x.heal+"</td><td>"+(x.inf?"ACTIVE":"No")+"</td><td>"+(woundIsStale(x)?"<b style='color:#dc2626'>"+woundDaysSinceUpdate(x)+"d</b>":woundDaysSinceUpdate(x)+"d")+"</td></tr>";}).join("")+"</tbody></table>"+(function(){var wh=WHOSP.filter(function(h){return facs.some(function(f){return f.name===h.fac;});});return wh.length?"<h2>Wound-Related Rehospitalizations</h2><table><thead><tr><th>Patient</th><th>Facility</th><th>Date</th><th>Type</th><th>Diagnosis</th><th>LOS</th><th>Readmit</th><th>Preventable</th></tr></thead><tbody>"+wh.map(function(h){return"<tr><td><b>"+h.name+"</b></td><td>"+h.fac+"</td><td>"+h.date+"</td><td>"+h.type+"</td><td>"+h.dx+"</td><td>"+h.los+"d</td><td>"+(h.readmit?"Yes":"No")+"</td><td>"+h.preventable+"</td></tr>";}).join("")+"</tbody></table>":"";})()+mkPrintFtr()+"</div></body></html>";showRpt("pm-ent",html);}
 function runPrimaryReport(){var sc=rptLabel();var facs=rptGetFacs();var rv=PR_REVIEWS.filter(function(r){return facs.find(function(f){return f.name===r.fac;});});var css=mkPrintCss();var html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Primary Report</title><style>"+css+"</style></head><body>"+mkPrintHdr("Primary Services Report",sc,[{l:"Reviews",v:rv.length+"/"+facs.length},{l:"QAPI%",v:rv.length?Math.round(rv.filter(function(r){return r.qapi==="Yes";}).length/rv.length*100)+"%":"N/A"},{l:"GDR%",v:rv.length?Math.round(rv.filter(function(r){return r.gdr==="Yes";}).length/rv.length*100)+"%":"N/A"},{l:"48-72hr%",v:rv.length?Math.round(rv.filter(function(r){return r.seen48==="Yes";}).length/rv.length*100)+"%":"N/A"}],"#1e3a5f")+"<div style='padding:0 24px 24px'><h2>Facility Summary</h2><table><thead><tr><th>Facility</th><th>Admits</th><th>48-72hr</th><th>QAPI</th><th>GDRs</th><th>AWV</th><th>CHF</th><th>COPD</th><th>HTN</th><th>APY</th><th>Braden</th><th>LPN Daily</th></tr></thead><tbody>"+facs.map(function(f){var r=rv.find(function(rv2){return rv2.fac===f.name;});if(!r)return"<tr><td><b>"+f.name+"</b></td><td colspan='11' style='color:#94a3b8'>Not reviewed</td></tr>";return"<tr><td><b>"+f.name+"</b></td><td>"+( r.admits||"0")+"</td><td>"+r.seen48+"</td><td>"+r.qapi+"</td><td>"+r.gdr+"</td><td>"+r.awv+"</td><td>"+( r.chf||"—")+"</td><td>"+( r.copd||"—")+"</td><td>"+( r.htn||"—")+"</td><td>"+( r.apy||"—")+"</td><td>"+r.braden+"</td><td>"+r.lpndaily+"</td></tr>";}).join("")+"</tbody></table>"+mkPrintFtr()+"</div></body></html>";showRpt("pm-prim",html);}
@@ -2443,7 +2496,7 @@ function renderKwResults(results){
   var el=document.getElementById("kw-results");
   if(!results.length){el.innerHTML='<div class="card cp" style="text-align:center"><div style="font-size:16px;margin-bottom:7px">🔍</div><div style="color:var(--mu)">No patients matched.</div></div>';return;}
   var byFac={};results.forEach(function(r){var f=r.pt.fac;if(!byFac[f])byFac[f]=[];byFac[f].push(r);});
-  var top='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"><div><span style="font-size:14px;font-weight:700;color:#fff">'+results.length+' resident'+(results.length!==1?"s":"")+" matched</span> <span class='ps2'>across "+Object.keys(byFac).length+" facilities</span></div><button class='btn bg3 bsm' onclick='exportKw()'>⬇ Export CSV</button></div>";
+  var top='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:9px"><div><span style="font-size:14px;font-weight:700;color:var(--tx)">'+results.length+' resident'+(results.length!==1?"s":"")+" matched</span> <span class='ps2'>across "+Object.keys(byFac).length+" facilities</span></div><button class='btn bg3 bsm' onclick='exportKw()'>⬇ Export CSV</button></div>";
   top+=Object.entries(byFac).map(function(e2){var fac=e2[0],recs=e2[1];var co=(FACS.find(function(f){return f.name===fac;})||{}).co||"";var m=COM[co]||{c:"#8a9ab0",a:"#e2e8f0"};
     return'<div style="margin-bottom:13px"><div style="display:flex;align-items:center;gap:7px;margin-bottom:5px"><div style="width:7px;height:7px;border-radius:2px;background:'+m.c+'"></div><span style="font-size:12px;font-weight:700">'+fac+'</span><span class="pill" style="background:'+m.c+'22;color:'+m.a+'">'+co.split(" ")[0]+'</span><span style="font-size:11px;color:var(--mu)">'+recs.length+' matched</span></div><div class="card"><table class="tbl"><thead><tr><th>Patient</th><th>DOB</th><th>Room</th><th>Primary Dx</th><th>Wounds</th><th>Psych</th><th>QA Status</th><th>Matched Keywords</th></tr></thead><tbody>'+recs.map(function(r){var p=r.pt;var qaS=(r.qaR[0]&&r.qaR[0].st)||"—";return'<tr><td class="b">'+p.name+'</td><td>'+p.dob+'</td><td>'+p.rm+'</td><td style="color:var(--tx)">'+p.dx+'</td><td>'+(r.wR.length?'<span class="pill pt">'+r.wR.length+' wound'+(r.wR.length>1?"s":"")+'</span>':"—")+'</td><td>'+(r.psR.length?'<span class="pill pp">'+r.psR.length+' psych</span>':"—")+'</td><td>'+(qaS!=="—"?rP(qaS):"—")+'</td><td>'+r.kws.map(function(k){return'<span style="background:#3ecfb222;border:1px solid #3ecfb244;color:var(--tl);font-size:10px;font-weight:600;padding:2px 6px;border-radius:10px;margin-right:2px">'+k+'</span>';}).join("")+'</td></tr>';}).join("")+'</tbody></table></div></div>';}).join("");
   el.innerHTML=top;
@@ -2482,7 +2535,7 @@ function showRpt(pmId,innerHtml){
   pm.style.display="block";
 }
 function closeRpt(pmId){document.getElementById(pmId).style.display="none";}
-function mkHdr(title,sub,badges,gradEnd){gradEnd=gradEnd||"#1e3a5f";return'<div class="hd" style="background:linear-gradient(135deg,#0f172a,'+gradEnd+')"><div style="font-size:9px;letter-spacing:.12em;color:#7dd3fc;text-transform:uppercase;font-weight:700;margin-bottom:4px">AMA SNF Provider Services · Care Connect</div><div style="font-family:Georgia,serif;font-size:20px;margin-bottom:3px">'+title+'</div><div style="font-size:12px;color:#7dd3fc;font-weight:600">'+sub+'</div><div style="font-size:10px;color:#94a3b8">'+TD()+'</div>'+( badges?'<div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">'+badges+'</div>':"")+'</div>';}
+function mkHdr(title,sub,badges,gradEnd){gradEnd=gradEnd||"#1e3a5f";return'<div class="hd" style="background:linear-gradient(135deg,#0f172a,'+gradEnd+')"><div style="font-size:9px;letter-spacing:.12em;color:#7dd3fc;text-transform:uppercase;font-weight:700;margin-bottom:4px">Clinilytics · Wound Care</div><div style="font-family:Georgia,serif;font-size:20px;margin-bottom:3px">'+title+'</div><div style="font-size:12px;color:#7dd3fc;font-weight:600">'+sub+'</div><div style="font-size:10px;color:#94a3b8">'+TD()+'</div>'+( badges?'<div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">'+badges+'</div>':"")+'</div>';}
 function mkBadge(l,v,c){return'<div style="background:#ffffff12;border-radius:7px;padding:7px 12px;text-align:center"><div style="font-size:16px;font-weight:800;color:'+(c||"#fff")+'">'+v+'</div><div style="font-size:9px;color:#94a3b8">'+l+'</div></div>';}
 function mkBtns(pmId,bg){return'<div class="np"><button onclick="window.print()" style="background:'+(bg||"#0f172a")+';color:#fff;border:none;padding:7px 16px;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer">🖨 Print / PDF</button><button onclick="closeRpt(\''+pmId+'\')" style="background:#e2e8f0;color:#475569;border:none;padding:7px 13px;border-radius:6px;font-size:12px;cursor:pointer">Close</button></div>';}
 function woundRpt(){
@@ -2534,7 +2587,7 @@ function handleF2(files){
   var q=document.getElementById("up-q");if(!upFiles.length){q.style.display="none";return;}
   q.style.display="block";
   document.getElementById("up-ql").textContent=upFiles.length+" file"+(upFiles.length>1?"s":"")+" queued";
-  document.getElementById("up-fl").innerHTML=upFiles.map(function(f,i){return'<div style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:#0d1117;border-radius:6px;margin-bottom:5px;border:1px solid var(--bd)"><span>📄</span><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">'+f.name+'</div><div class="pbar"><div id="pf-'+i+'" class="pfill" style="width:0%"></div></div></div><span id="sf-'+i+'" style="font-size:11px;color:var(--mu)">Pending</span></div>';}).join("");
+  document.getElementById("up-fl").innerHTML=upFiles.map(function(f,i){return'<div style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:#faf8f4;border-radius:6px;margin-bottom:5px;border:1px solid var(--bd)"><span>📄</span><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">'+f.name+'</div><div class="pbar"><div id="pf-'+i+'" class="pfill" style="width:0%"></div></div></div><span id="sf-'+i+'" style="font-size:11px;color:var(--mu)">Pending</span></div>';}).join("");
 }
 function f64(file){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(",")[1]);};r.onerror=rej;r.readAsDataURL(file);});}
 async function procAll(){
@@ -2561,7 +2614,7 @@ async function procAll(){
 function renderUpRes(){
   var el=document.getElementById("up-res");var rl=document.getElementById("up-rl");
   if(!upExt.length)return;el.style.display="block";
-  rl.innerHTML=upExt.map(function(p,i){return'<div class="card" style="margin-bottom:9px;overflow:hidden"><div style="padding:7px 12px;background:#0d1117;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--mu)">📄 '+p.srcFile+'</span><span class="pill '+(p._err?"pr2":"pt")+'">'+(p._err?"Error — fill manually":"AI Extracted")+'</span></div><div style="padding:11px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+[["ex-n-"+i,"Name *",p.name||""],["ex-dob-"+i,"DOB",p.dob||""],["ex-rm-"+i,"Room",p.room||""],["ex-adm-"+i,"Admit",p.admit||""],["ex-ins-"+i,"Insurance",p.ins||""],["ex-pv-"+i,"Provider",p.pv||""],["ex-cd-"+i,"Code",p.code||"Full Code"],["ex-mrn-"+i,"MRN",p.mrn||""]].map(function(f){return'<div><label class="fl">'+f[1]+'</label><input id="'+f[0]+'" value="'+e(f[2])+'"></div>';}).join("")+'<div style="grid-column:1/-1"><label class="fl">Primary Diagnosis</label><input id="ex-dx-'+i+'" value="'+e(p.dx||"")+'"></div><div><label class="fl">Allergies</label><input id="ex-al-'+i+'" value="'+e(p.al||"NKDA")+'"></div></div></div>';}).join("");
+  rl.innerHTML=upExt.map(function(p,i){return'<div class="card" style="margin-bottom:9px;overflow:hidden"><div style="padding:7px 12px;background:#faf8f4;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--mu)">📄 '+p.srcFile+'</span><span class="pill '+(p._err?"pr2":"pt")+'">'+(p._err?"Error — fill manually":"AI Extracted")+'</span></div><div style="padding:11px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+[["ex-n-"+i,"Name *",p.name||""],["ex-dob-"+i,"DOB",p.dob||""],["ex-rm-"+i,"Room",p.room||""],["ex-adm-"+i,"Admit",p.admit||""],["ex-ins-"+i,"Insurance",p.ins||""],["ex-pv-"+i,"Provider",p.pv||""],["ex-cd-"+i,"Code",p.code||"Full Code"],["ex-mrn-"+i,"MRN",p.mrn||""]].map(function(f){return'<div><label class="fl">'+f[1]+'</label><input id="'+f[0]+'" value="'+e(f[2])+'"></div>';}).join("")+'<div style="grid-column:1/-1"><label class="fl">Primary Diagnosis</label><input id="ex-dx-'+i+'" value="'+e(p.dx||"")+'"></div><div><label class="fl">Allergies</label><input id="ex-al-'+i+'" value="'+e(p.al||"NKDA")+'"></div></div></div>';}).join("");
 }
 function importAll(){
   var cnt=0;var fac=gv("up-fac");
