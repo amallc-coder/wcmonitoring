@@ -11,12 +11,14 @@
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#f6f5f2;--sf:#ffffff;--bd:#e7e3db;--b2:#d8d3c8;--tx:#26282d;--mu:#8c877d;--tl:#5f9a78;--bl:#3f7d76;--rd:#b23a2e;--am:#c27a4a;--pu:#8a6db0;--gn:#5f9a78;--ink:#17191e;--mono:ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
 body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;font-size:13px}
-#hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 16px;height:50px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-shrink:0}
+#hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 16px;display:flex;flex-direction:column;position:sticky;top:0;z-index:100;flex-shrink:0}
+.hdr-top{display:flex;align-items:center;justify-content:space-between;height:48px}
 .logo{display:flex;align-items:center;gap:9px;flex-shrink:0}
-.lic{display:flex;align-items:center;justify-content:center;font-size:17px;color:var(--mu);line-height:1}
-.ltx{font-weight:700;font-size:16px;color:var(--tx);letter-spacing:-.01em}.ltx span{color:var(--tl)}
-.modpill{background:var(--ink);color:#fff;border-radius:14px;padding:3px 11px;font-size:11px;font-weight:600;white-space:nowrap}
-nav{display:flex;overflow-x:auto;flex:1;margin:0 10px;gap:2px}
+.lic{display:flex;align-items:center;justify-content:center;line-height:0}
+.lic svg{display:block}
+.ltx{font-weight:700;font-size:17px;color:var(--tx);letter-spacing:-.02em}.ltx span{color:var(--tl)}
+.modpill{background:var(--ink);color:#fff;border-radius:14px;padding:4px 12px;font-size:11px;font-weight:600;white-space:nowrap}
+nav{display:flex;overflow-x:auto;gap:4px;padding-bottom:9px;margin:0}
 nav button{background:transparent;border:none;color:#6f6a61;padding:5px 11px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;border-radius:14px;display:inline-flex;align-items:center;gap:6px}
 nav button::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tl);opacity:.55;flex-shrink:0}
 nav button:hover{color:var(--tx)}
@@ -27,7 +29,7 @@ nav button.A::before{background:#fff;opacity:.7}
 #main{flex:1;overflow-y:auto}
 .tb{display:none;padding:14px 16px}.tb.A{display:block}
 footer{background:var(--sf);border-top:1px solid var(--bd);padding:5px 16px;display:flex;justify-content:space-between;font-size:10px;color:var(--mu);flex-shrink:0}
-.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;box-shadow:0 1px 2px rgba(20,20,20,.03)}
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;box-shadow:0 1px 2px rgba(20,20,20,.03);overflow-x:auto;-webkit-overflow-scrolling:touch}
 .cp{padding:12px 14px}
 .st{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;font-family:var(--mono)}
 .kt{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(20,20,20,.03)}
@@ -107,6 +109,38 @@ select option{background:#fff}
 #lgate .lbtn{width:100%;justify-content:center;padding:9px;font-size:13px;margin-top:4px}
 #lgate .lerr{font-size:11px;color:var(--rd);min-height:15px;margin-top:8px;text-align:center}
 #lgate .lft{font-size:10px;color:var(--mu);text-align:center;margin-top:16px;line-height:1.5}
+/* ── HAMBURGER + RESPONSIVE ── */
+#navtoggle{display:none;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--bd);border-radius:8px;background:#fff;cursor:pointer;color:var(--tx);font-size:16px;line-height:1;margin-right:4px;flex-shrink:0}
+#navtoggle:hover{border-color:var(--b2);background:#faf8f4}
+img,canvas,svg{max-width:100%}
+@media (max-width:1024px){
+  [style*="grid-template-columns"]{grid-template-columns:1fr 1fr!important}
+  .g3,.g4,.g6,.g8{grid-template-columns:1fr 1fr!important}
+  .mb,.mb.xl{max-width:96vw}
+}
+@media (max-width:760px){
+  #navtoggle{display:inline-flex}
+  #hdr nav{display:none;flex-direction:column;gap:3px;padding:4px 0 12px;max-height:64vh;overflow-y:auto}
+  #hdr nav.open{display:flex}
+  #hdr nav button{width:100%;justify-content:flex-start;border-radius:9px;padding:10px 12px;font-size:13px}
+  .tb{padding:11px 12px}
+  .ph2{flex-direction:column;align-items:stretch;gap:9px}
+  .ph2 > div:last-child{display:flex;flex-wrap:wrap;gap:6px}
+  [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  .g2,.g3,.g4,.g6,.g8{grid-template-columns:1fr!important}
+  #d-kpis,#w-kpis{grid-template-columns:repeat(2,1fr)!important}
+  .modpill{font-size:10px;padding:3px 9px}
+  .mbd [style*="grid-template-columns"]{grid-template-columns:1fr!important}
+  select,input,textarea{font-size:16px}
+}
+@media (max-width:440px){
+  #hdr{padding:0 11px}
+  .ltx{font-size:15px}
+  .live-tx{display:none}
+  .modpill{display:none}
+  #d-kpis,#w-kpis,.g6,.g8{grid-template-columns:1fr 1fr!important}
+  .hdr-r .btn{padding:4px 8px;font-size:10px}
+}
 </style>
 </head>
 <body>
@@ -126,14 +160,25 @@ select option{background:#fff}
 </div>
 
 <header id="hdr">
-  <div class="logo"><span class="lic">☰</span><span class="ltx">clinilytics</span><span class="modpill">Wound Care</span></div>
+  <div class="hdr-top">
+    <button id="navtoggle" onclick="toggleNav()" aria-label="Toggle navigation">☰</button>
+    <div class="logo">
+      <span class="lic"><svg width="22" height="22" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="3.4" width="18" height="3.5" rx="1.75" fill="#c2603f"/><rect x="2" y="9.25" width="12" height="3.5" rx="1.75" fill="#26282d"/><rect x="2" y="15.1" width="15.5" height="3.5" rx="1.75" fill="#26282d"/></svg></span>
+      <span class="ltx">clinilytics</span>
+      <span class="modpill">Wound Care</span>
+    </div>
+    <div class="hdr-r">
+      <div class="live"></div><span class="live-tx" style="font-size:10px;color:var(--mu)">Live</span>
+      <button id="admin-btn" class="btn bg3 bsm" style="display:none" onclick="openAdmin()">Admin</button>
+      <button class="btn bg3 bsm" onclick="ccLogout()">Sign out</button>
+    </div>
+  </div>
   <nav id="mnav">
     <button class="A" onclick="go('dashboard')">Dashboard</button>
     <button onclick="go('census')">Census &amp; Facilities</button>
     <button onclick="go('wound')">Wound Care</button>
     <button onclick="go('reports')">Reports &amp; Analytics</button>
   </nav>
-  <div class="hdr-r"><div class="live"></div><span style="font-size:10px;color:var(--mu)">Live</span><button class="btn bg3 bsm" style="font-size:10px" onclick="ccLogout()">Sign out</button></div>
 </header>
 <div id="main">
 
@@ -250,7 +295,7 @@ select option{background:#fff}
   </div>
 </div>
 </div>
-<footer><span>Clinilytics · Wound Care · HIPAA Compliant</span><span id="ftr">Loading…</span></footer>
+<footer><span>clinilytics · Wound Care · © 2026 Clinilytics · HIPAA Compliant</span><span id="ftr">Loading…</span></footer>
 
 <!-- CHART EDITOR MODAL -->
 <!-- PSYCH MONTHLY REVIEW MODAL -->
@@ -506,6 +551,30 @@ select option{background:#fff}
 </div>
 </div>
 
+<!-- ADMIN / USER MANAGEMENT -->
+<div id="m-admin" class="mo h">
+<div class="mb">
+  <div class="mh"><div class="mtt">👤 User Management</div><button class="xb" onclick="cM('m-admin')">✕</button></div>
+  <div class="mbd">
+    <div style="padding:9px 11px;background:#faf8f4;border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:13px">
+      <div style="font-size:12px;font-weight:600;margin-bottom:2px">Create sign-in accounts</div>
+      <div style="font-size:11px;color:var(--mu)">Each provider/admin signs in with their own username &amp; password. Passwords are stored as SHA-256 hashes in this browser. (For org-wide accounts across devices, a backend would be required.)</div>
+    </div>
+    <div class="st">Create User</div>
+    <div class="g4">
+      <div><label class="fl">Username *</label><input id="au-user" autocapitalize="none" placeholder="e.g. treeves"></div>
+      <div><label class="fl">Full Name</label><input id="au-name" placeholder="e.g. Tabitha Reeves"></div>
+      <div><label class="fl">Role</label><select id="au-role"><option>Wound Provider</option><option>Admin</option><option>Viewer</option></select></div>
+      <div><label class="fl">Temporary Password *</label><input id="au-pass" placeholder="set a password"></div>
+    </div>
+    <div style="margin-top:10px;display:flex;justify-content:flex-end"><button class="btn bt bsm" onclick="addUser()">＋ Create User</button></div>
+    <div class="st" style="margin-top:16px">Existing Users</div>
+    <div id="admin-users"></div>
+  </div>
+  <div class="mft"><button class="btn bg3" onclick="cM('m-admin')">Close</button></div>
+</div>
+</div>
+
 <!-- PRINT CONTAINERS -->
 <div id="pm-wound" style="position:fixed;inset:0;background:#000c;z-index:300;overflow-y:auto;padding:18px;display:none"></div>
 <div id="pm-psych" style="position:fixed;inset:0;background:#000c;z-index:300;overflow-y:auto;padding:18px;display:none"></div>
@@ -678,12 +747,14 @@ function buildFS(id,sel,cb,ac){
 }
 
 /* ── NAV ── */
+function toggleNav(){var n=document.getElementById("mnav");if(n)n.classList.toggle("open");}
 function go(id){
   document.querySelectorAll(".tb").forEach(function(t){t.classList.remove("A");});
   document.querySelectorAll("#mnav button").forEach(function(b){b.classList.remove("A");});
   document.getElementById("tab-"+id).classList.add("A");
   var idx={dashboard:0,census:1,wound:2,reports:3}[id];
   document.querySelectorAll("#mnav button")[idx].classList.add("A");
+  var nv=document.getElementById("mnav");if(nv)nv.classList.remove("open");
   if(id==="census")  renderCensus();
   if(id==="wound")   wTab(wCurrentTab);
   if(id==="reports") renderReports();
@@ -2660,9 +2731,15 @@ function renderCDTracker(){
   }).join("");
 }
 
-/* ── LOGIN GATE (client-side) ── */
-var LG_USER="ama";
-var LG_HASH="0d0a07438bcd6705edbfdd9104a39ce2d5399eccb25d6cd63d0b594ce3553e3d"; // SHA-256 of the password
+/* ── LOGIN GATE + USER MANAGEMENT (client-side) ── */
+var LG_HASH="0d0a07438bcd6705edbfdd9104a39ce2d5399eccb25d6cd63d0b594ce3553e3d"; // SHA-256 of the default password
+var currentUser=null;
+function loadUsers(){
+  try{var s=localStorage.getItem("cc_users");if(s){var a=JSON.parse(s);if(a&&a.length)return a;}}catch(e){}
+  return [{u:"ama",h:LG_HASH,name:"Clinilytics Administrator",role:"Admin"}];
+}
+var USERS=loadUsers();
+function saveUsers(){try{localStorage.setItem("cc_users",JSON.stringify(USERS));}catch(e){}}
 async function sha256hex(s){var b=new TextEncoder().encode(s);var h=await crypto.subtle.digest("SHA-256",b);return Array.from(new Uint8Array(h)).map(function(x){return x.toString(16).padStart(2,"0");}).join("");}
 async function doLogin(ev){
   ev.preventDefault();
@@ -2672,7 +2749,8 @@ async function doLogin(ev){
   if(!crypto||!crypto.subtle){err.textContent="Secure sign-in requires an https:// connection.";return false;}
   try{
     var h=await sha256hex(p);
-    if(u===LG_USER&&h===LG_HASH){sessionStorage.setItem("cc_auth","1");document.getElementById("lgate").classList.add("h");err.textContent="";}
+    var user=USERS.find(function(x){return x.u===u&&x.h===h;});
+    if(user){currentUser=user;sessionStorage.setItem("cc_auth",user.u);document.getElementById("lgate").classList.add("h");err.textContent="";updateUserUI();}
     else{err.textContent="Invalid username or password.";document.getElementById("lg-pass").value="";document.getElementById("lg-pass").focus();}
   }catch(e){err.textContent="Sign-in error. Please retry.";}
   return false;
@@ -2680,8 +2758,45 @@ async function doLogin(ev){
 function ccLogout(){sessionStorage.removeItem("cc_auth");location.reload();}
 function lgateInit(){
   var g=document.getElementById("lgate");if(!g)return;
-  if(sessionStorage.getItem("cc_auth")==="1"){g.classList.add("h");}
+  var au=sessionStorage.getItem("cc_auth");
+  var user=au?USERS.find(function(x){return x.u===au;}):null;
+  if(user){currentUser=user;g.classList.add("h");}
   else{var u=document.getElementById("lg-user");if(u)u.focus();}
+  updateUserUI();
+}
+function updateUserUI(){
+  var b=document.getElementById("admin-btn");
+  if(b)b.style.display=(currentUser&&currentUser.role==="Admin")?"inline-flex":"none";
+}
+function openAdmin(){
+  if(!currentUser||currentUser.role!=="Admin"){alert("Admin access required.");return;}
+  renderAdminUsers();oM("m-admin");
+}
+function renderAdminUsers(){
+  var el=document.getElementById("admin-users");if(!el)return;
+  el.innerHTML='<div class="card"><table class="tbl"><thead><tr><th>Username</th><th>Name</th><th>Role</th><th></th></tr></thead><tbody>'+USERS.map(function(x){
+    var me=currentUser&&currentUser.u===x.u;
+    return'<tr><td class="b">'+e(x.u)+(me?' <span class="pill pt">you</span>':'')+'</td><td>'+e(x.name||"")+'</td><td><span class="pill '+(x.role==="Admin"?"pp":x.role==="Wound Provider"?"pt":"pb2")+'">'+e(x.role||"Viewer")+'</span></td><td style="text-align:right">'+(me?'':'<button class="btn br2 bsm" onclick="delUser(\''+e(x.u)+'\')">Remove</button>')+'</td></tr>';
+  }).join("")+'</tbody></table></div>';
+}
+async function addUser(){
+  if(!currentUser||currentUser.role!=="Admin"){alert("Admin access required.");return;}
+  var u=(gv("au-user")||"").trim().toLowerCase();var nm=gv("au-name").trim();var role=gv("au-role");var p=gv("au-pass");
+  if(!u||!p){alert("Username and a temporary password are required.");return;}
+  if(!/^[a-z0-9._-]+$/.test(u)){alert("Username may only contain letters, numbers, dot, dash, underscore.");return;}
+  if(USERS.find(function(x){return x.u===u;})){alert("That username already exists.");return;}
+  if(!crypto||!crypto.subtle){alert("Secure password hashing requires an https:// connection.");return;}
+  var h=await sha256hex(p);
+  USERS.push({u:u,h:h,name:nm||u,role:role});saveUsers();
+  sv("au-user","");sv("au-name","");sv("au-pass","");
+  renderAdminUsers();
+  alert("User '"+u+"' created with role "+role+".\nThey can sign in with the temporary password you set.");
+}
+function delUser(u){
+  if(currentUser&&currentUser.u===u){alert("You can't remove the account you're signed in as.");return;}
+  if(USERS.filter(function(x){return x.role==="Admin";}).length<=1&&(USERS.find(function(x){return x.u===u;})||{}).role==="Admin"){alert("Can't remove the last Admin account.");return;}
+  if(!confirm("Remove user '"+u+"'? They will no longer be able to sign in."))return;
+  USERS=USERS.filter(function(x){return x.u!==u;});saveUsers();renderAdminUsers();
 }
 
 document.addEventListener("DOMContentLoaded",function(){
