@@ -4,13 +4,16 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <title>Clinilytics · Wound Care</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f6f5f2;--sf:#ffffff;--bd:#e7e3db;--b2:#d8d3c8;--tx:#26282d;--mu:#8c877d;--tl:#5f9a78;--bl:#3f7d76;--rd:#b23a2e;--am:#c27a4a;--pu:#8a6db0;--gn:#5f9a78;--ink:#17191e;--mono:ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
-body{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;font-size:13px}
+:root{--bg:#f7f7f5;--sf:#ffffff;--bd:#ebe9e4;--b2:#dedbd3;--tx:#202227;--mu:#8f8a81;--tl:#6f9b7a;--bl:#3f7d76;--rd:#c0392b;--am:#c2693f;--pu:#8a6db0;--gn:#6f9b7a;--ink:#1a1b1f;--mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
+body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;font-size:13px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 16px;display:flex;flex-direction:column;position:sticky;top:0;z-index:100;flex-shrink:0}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;height:48px}
 .logo{display:flex;align-items:center;gap:9px;flex-shrink:0}
@@ -30,11 +33,12 @@ nav button.A::before{background:#fff;opacity:.7}
 .tb{display:none;padding:14px 16px}.tb.A{display:block}
 footer{background:var(--sf);border-top:1px solid var(--bd);padding:5px 16px;display:flex;justify-content:space-between;font-size:10px;color:var(--mu);flex-shrink:0}
 .card{background:var(--sf);border:1px solid var(--bd);border-radius:10px;box-shadow:0 1px 2px rgba(20,20,20,.03);overflow-x:auto;-webkit-overflow-scrolling:touch}
-.cp{padding:12px 14px}
-.st{font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.09em;text-transform:uppercase;margin-bottom:6px;font-family:var(--mono)}
-.kt{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:10px 12px;box-shadow:0 1px 2px rgba(20,20,20,.03)}
-.kv{font-size:18px;font-weight:800;color:var(--tx);line-height:1;font-family:var(--mono)}
-.kl{font-size:10px;color:var(--mu);margin-top:2px}
+.cp{padding:15px 17px}
+.st{font-size:10.5px;font-weight:600;color:#7c776d;letter-spacing:.085em;text-transform:uppercase;margin-bottom:7px;font-family:var(--mono)}
+.kt{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:13px 15px;box-shadow:0 1px 2px rgba(20,20,20,.03)}
+.kv{font-size:23px;font-weight:700;color:var(--tx);line-height:1.05;letter-spacing:-.015em;font-family:"Inter",system-ui,sans-serif}
+.kl{font-size:10px;color:var(--mu);margin-top:2px;text-transform:uppercase;letter-spacing:.07em;font-family:var(--mono)}
+.ksub{font-size:10.5px;color:var(--mu);margin-top:4px}
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{padding:7px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--bd);white-space:nowrap;font-family:var(--mono)}
 .tbl td{padding:7px 10px;font-size:12px;color:#46443e;border-bottom:1px solid #efece5;font-family:var(--mono)}
@@ -68,14 +72,15 @@ select option{background:#fff}
 .mft{padding:10px 18px;border-top:1px solid var(--bd);display:flex;justify-content:flex-end;gap:7px}
 .xb{background:none;border:none;color:var(--mu);font-size:17px;cursor:pointer;padding:2px 5px;border-radius:4px}
 .xb:hover{color:var(--tx);background:var(--bd)}
-.itr{display:flex;gap:2px;border-bottom:1px solid var(--bd);margin-bottom:13px}
-.it{background:transparent;border:none;border-bottom:2px solid transparent;color:var(--mu);padding:5px 10px;font-size:11.5px;cursor:pointer;font-family:inherit}
-.it.A{border-bottom-color:var(--tl);color:var(--tl);font-weight:700}
+.itr{display:flex;gap:4px;margin-bottom:13px;flex-wrap:wrap}
+.it{background:transparent;border:none;color:var(--mu);padding:5px 12px;font-size:11.5px;cursor:pointer;font-family:inherit;border-radius:14px;font-weight:500}
+.it:hover{color:var(--tx)}
+.it.A{background:var(--ink);color:#fff;font-weight:600}
 .fs2{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:11px}
 .fb{background:#fff;border:1px solid var(--bd);color:var(--mu);padding:3px 9px;border-radius:14px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .12s}
 .fb:hover{border-color:var(--b2);color:var(--tx)}.fb.A{font-weight:700}
 .ph2{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
-.pt3{font-size:15px;font-weight:700;color:var(--tx);margin-bottom:2px}
+.pt3{font-size:21px;font-weight:700;color:var(--tx);margin-bottom:3px;letter-spacing:-.02em}
 .ps2{font-size:11px;color:var(--mu)}
 .tl2{position:relative;padding-left:17px}
 .tl2::before{content:'';position:absolute;left:5px;top:0;bottom:0;width:2px;background:var(--b2)}
@@ -769,17 +774,20 @@ function initDash(){
   var prW=actW.filter(wIsPressure);
   var healRate=actW.length?Math.round(actW.filter(function(w){return["Progressing","Improving","Healed"].includes(w.heal);}).length/actW.length*100):0;
   var openAct=WOUNDS.reduce(function(a,w){return a+getOpenTriggers(w).length;},0);
+  var totalW=WOUNDS.length;var infW=actW.filter(function(w){return w.inf;}).length;
+  var prPct=actW.length?Math.round(prW.length/actW.length*100)+"% of active":"—";
+  var npPct=actW.length?Math.round((actW.length-prW.length)/actW.length*100)+"% of active":"—";
   var kpis=[
-    {i:"&#x1F3E5;",l:"Census",v:FACS.reduce(function(a,f){return a+f.cs;},0),c:"var(--tx)"},
-    {i:"&#x1FA79;",l:"Active Wounds",v:actW.length,c:"#356f68"},
-    {i:"&#x1F534;",l:"Pressure",v:prW.length,c:"#b23a2e"},
-    {i:"&#x1F535;",l:"Non-Pressure",v:actW.length-prW.length,c:"#3f7d76"},
-    {i:"&#x1F9A0;",l:"Infected",v:actW.filter(function(w){return w.inf;}).length,c:"#b23a2e"},
-    {i:"&#x1F6A9;",l:"Action Items",v:openAct,c:openAct?"#c27a4a":"#477f5c"},
-    {i:"&#x1F4C8;",l:"Healing Rate",v:healRate+"%",c:healRate>=70?"#477f5c":healRate>=40?"#c27a4a":"#b23a2e"},
-    {i:"&#x1F3E2;",l:"Facilities",v:FACS.length,c:"#477f5c"}
+    {l:"Census",v:FACS.reduce(function(a,f){return a+f.cs;},0),c:"var(--tx)",s:FACS.length+" facilities"},
+    {l:"Active Wounds",v:actW.length,c:"var(--tx)",s:"of "+totalW+" tracked"},
+    {l:"Pressure",v:prW.length,c:"var(--tx)",s:prPct},
+    {l:"Non-Pressure",v:actW.length-prW.length,c:"var(--tx)",s:npPct},
+    {l:"Infected",v:infW,c:infW?"var(--rd)":"var(--tx)",s:"active infections"},
+    {l:"Action Items",v:openAct,c:openAct?"var(--rd)":"#477f5c",s:openAct?"need a plan":"all addressed"},
+    {l:"Healing Rate",v:healRate+"%",c:healRate>=70?"#477f5c":healRate>=40?"var(--am)":"var(--rd)",s:"progressing / improving"},
+    {l:"Facilities",v:FACS.length,c:"var(--tx)",s:"in portfolio"}
   ];
-  document.getElementById("d-kpis").innerHTML=kpis.map(function(k){return'<div class="kt"><div style="font-size:14px;margin-bottom:2px">'+k.i+'</div><div class="kv" style="color:'+k.c+'">'+k.v+'</div><div class="kl">'+k.l+'</div></div>';}).join("");
+  document.getElementById("d-kpis").innerHTML=kpis.map(function(k){return'<div class="kt"><div class="kl">'+k.l+'</div><div class="kv" style="color:'+k.c+'">'+k.v+'</div><div class="ksub">'+k.s+'</div></div>';}).join("");
   document.getElementById("d-fac").innerHTML='<thead><tr><th>Facility</th><th>Co.</th><th>Risk</th><th>RTH%</th><th>Census</th><th>HR</th><th>Inf.</th><th>TH</th></tr></thead><tbody>'+FACS.map(function(f){return'<tr><td class="b">'+f.name+'</td><td>'+coB(f.co)+'</td><td>'+rP(rT(f.rth))+'</td><td style="font-weight:700;color:'+rC(f.rth)+'">'+f.rth+'%</td><td>'+f.cs+'</td><td>'+f.hr+'</td><td style="color:'+(f.inf>3?"#f87171":"var(--mu)")+'">'+f.inf+'</td><td>'+f.th+'</td></tr>';}).join("")+'</tbody>';
   renderDashAlerts();
   renderDashWounds();
