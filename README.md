@@ -37,6 +37,14 @@ photos; **CSV export** of the wound list and area/PUSH in the weekly PDF;
 **dark theme**, and reduced motion; and it is an installable **offline PWA**
 (`manifest.json` + `sw.js`).
 
+**Guideline knowledge base + smart notes:** the wound editor shows a
+**Suggested Care** panel — deterministic, cited rules (NPIAP / IWGDF / WOCN /
+IDSA / TIME) keyed to patient demographics, comorbidities, meds, labs, and the
+live wound state — with one-click smart-note insertion. Optionally, an
+**AI Draft note** button uses a BAA-covered model on the backend to draft the
+narrative note from **de-identified** context (off until configured; always
+clinician-reviewed — decision support, not orders).
+
 **Clinical depth (EHR-grade):** the wound assessment note is organized into
 TIME/MEASURE-aligned sections and auto-calculates **area (cm²)**, **% healing vs
 baseline** (4-week ≥40% target), and the **PUSH score**. It captures tissue-type

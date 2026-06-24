@@ -187,6 +187,30 @@ function buildApp() {
     }
   }));
 
+  // ── AI draft note (optional; clinical decision support) ──
+  // Inert unless an LLM provider is configured. Use a BAA-covered, OpenAI-compatible
+  // endpoint (e.g. Azure OpenAI). Context arrives de-identified from the client.
+  const AI_URL = process.env.AI_API_URL, AI_KEY = process.env.AI_API_KEY, AI_MODEL = process.env.AI_MODEL || "gpt-4o-mini";
+  app.post("/api/ai/draft-note", authed, requireRole("Admin", "Wound Provider"), wrap(async (req, res) => {
+    if (!AI_URL || !AI_KEY) return res.status(501).json({ error: "AI not configured" });
+    const ctx = (req.body && req.body.context) || {};
+    const sugs = Array.isArray(req.body && req.body.suggestions) ? req.body.suggestions.slice(0, 30) : [];
+    const sys = "You are a wound-care documentation assistant for licensed clinicians. Write ONE concise, professional progress note (brief assessment + plan) for the wound described. Use ONLY the structured facts provided — never invent measurements, identifiers, dates, or history. Base recommendations on the provided guideline suggestions and cite the standard in parentheses. Do not include any patient identifiers. End with exactly: 'AI-drafted — clinician to verify.'";
+    const user = "De-identified wound/patient context:\n" + JSON.stringify(ctx) + "\n\nGuideline suggestions:\n" + (sugs.length ? sugs.map(s => "- " + s).join("\n") : "(none)");
+    try {
+      const r = await fetch(AI_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": "Bearer " + AI_KEY, "api-key": AI_KEY },
+        body: JSON.stringify({ model: AI_MODEL, temperature: 0.2, max_tokens: 450, messages: [{ role: "system", content: sys }, { role: "user", content: user }] })
+      });
+      if (!r.ok) return res.status(502).json({ error: "AI provider error" });
+      const d = await r.json();
+      const text = (d && d.choices && d.choices[0] && d.choices[0].message && d.choices[0].message.content || "").trim();
+      await audit(req, "ai.draft", "chars=" + text.length);
+      res.json({ text: text });
+    } catch (e) { res.status(502).json({ error: "AI request failed" }); }
+  }));
+
   // ── audit log (admin) ──
   app.get("/api/audit", authed, requireRole("Admin"), wrap(async (req, res) => {
     const r = await db.query("SELECT username,action,detail,ip,at FROM audit_log WHERE org_id=$1 ORDER BY at DESC LIMIT 500", [req.user.org]);

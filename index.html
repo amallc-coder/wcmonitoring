@@ -1473,7 +1473,7 @@ function buildFields(){
       {id:"wf-date",l:"Visit Date",v:TDS()},{id:"wf-by",l:"Updated By",v:(currentUser&&currentUser.name)||"",ph:"Clinician name"},
       {id:"wf-attest",l:"Attestation: accurate & complete",v:"No",sel:bsel},{id:"wf-cosign",l:"Co-sign (MD/DO if NP/PA)",v:lv("cosign",""),ph:"co-signing physician"}
     ];
-    el.innerHTML=staleAlert+ltAlert+triggerPanelHtml(rec)+'<div class="st" style="margin-bottom:10px">Wound Assessment &amp; Care Note</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+mathLine+flds.map(fldCell).join("")+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:space-between"><button class="btn br2 bsm" onclick="deleteWound(\''+rec.id+'\')">🗑 Delete</button><div style="display:flex;gap:7px"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div></div>';setTimeout(function(){restoreDraft(rec.id);},10);
+    el.innerHTML=staleAlert+ltAlert+triggerPanelHtml(rec)+suggestionsPanelHtml(rec)+'<div class="st" style="margin-bottom:10px">Wound Assessment &amp; Care Note</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+mathLine+flds.map(fldCell).join("")+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:space-between"><button class="btn br2 bsm" onclick="deleteWound(\''+rec.id+'\')">🗑 Delete</button><div style="display:flex;gap:7px"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div></div>';setTimeout(function(){restoreDraft(rec.id);},10);
     return;
   } else if(tp==="psych"){
     flds=[{id:"pf-ev",l:"Visit Type",v:"Follow-up Visit",sel:["Follow-up Visit","Initial Assessment","Medication Review","GDR Review","GDR Attempt","Telehealth Visit","Acute Hospitalization","Post-Discharge Follow-up","Behavioral Assessment"]},{id:"pf-date",l:"Visit Date",v:TDS()},{id:"pf-th",l:"Telehealth",v:rec.th?"Yes":"No",sel:["No","Yes"]},{id:"pf-apy",l:"Antipsychotic",v:rec.apy?"Yes":"No",sel:["No","Yes"]},{id:"pf-gdr",l:"GDR Status",v:rec.gdr},{id:"pf-lastH",l:"Last Acute Hosp.",v:rec.lastH},{id:"pf-dx",l:"Diagnoses",v:rec.dx.join(", "),full:true},{id:"pf-meds",l:"Medications (one per line)",v:rec.meds.join("\n"),ta:true,full:true},{id:"pf-notes",l:"Clinical Notes",v:"",ta:true,full:true,ph:"Mood, SI screening, plan…"},{id:"pf-by",l:"Updated By",v:"",ph:"Clinician name"}];
@@ -1809,6 +1809,110 @@ function triggerPanelHtml(w){
     h+='<div style="border-left:3px solid var(--tl);background:#10b98110;border-radius:5px;padding:7px 9px;margin-bottom:6px"><div style="display:flex;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--tl)">'+(r.status==="planned"?"✓ Action planned":"✎ Documented — no action")+' · '+t.label+'</span><button class="btn bg3 bsm" style="font-size:10px" onclick="reopenTrigger(\''+w.id+'\',\''+t.key+'\')">Reopen</button></div><div style="font-size:11px;color:var(--tx);margin-top:2px">'+e(r.note)+'</div><div style="font-size:10px;color:var(--mu)">'+r.by+' · '+r.dt+'</div></div>';
   });
   h+='</div>';return h;
+}
+
+/* ════ WOUND-CARE KNOWLEDGE BASE (guideline-based suggestions + smart notes) ════
+   Deterministic rules keyed to patient context + wound state, each cited to a
+   standard. Output is decision SUPPORT for a clinician to review — not orders. */
+function clinContext(w){
+  var p=(typeof PATIENTS!=="undefined"?PATIENTS:[]).find(function(x){return x.id===w.ptId;})||{};
+  var le=(w.chart||[]).slice(-1)[0]||{};
+  var blob=((p.dx||"")+" "+(w.notes||"")+" "+(p.meds?[].concat(p.meds).join(" "):"")).toLowerCase();
+  function has(){for(var i=0;i<arguments.length;i++)if(blob.indexOf(arguments[i])>=0)return true;return false;}
+  var age=null;var m=(""+(p.dob||"")).match(/(\d{4})\s*$/);if(m)age=2026-parseInt(m[1]);
+  return {
+    name:(p.name||w.name||"").split(",")[0], age:age,
+    diabetes:has("diab"," dm","t2 ","a1c","insulin"), pvd:has("pvd","pad","arterial","periph vasc","claudicat"),
+    chf:has("chf","heart failure"), esrd:has("esrd","dialysis","ckd"), immuno:has("immuno","chemo","steroid","prednis","transplant","hiv"),
+    anticoag:has("anticoag","warfarin","apixaban","eliquis","heparin","xarelto","rivarox"),
+    malnutrition:(w.albumin!=null&&w.albumin<3.0)||has("malnutr","cachexia","weight loss"),
+    tp:w.tp, etio:w.etio, stage:w.stage, inf:!!w.inf, infSev:le.infSev||w.infSev||"", abi:w.abi,
+    braden:w.braden, albumin:w.albumin, area:woundAreaOf(le), reduction:woundAreaReductionPct(w),
+    onset:woundOnsetDays(w), exAmt:le.exAmt||"", tissueS:le.tissueS||0, tissueE:le.tissueE||0,
+    goal:w.goal||"Healable", graft:!!w.graft, pcrReq:!!w.pcrReq, pcrDone:!!w.pcrDone,
+    offload:le.offload||"", compression:le.compression||"", osteo:le.osteo||""
+  };
+}
+var WOUND_KB=[
+  {cat:"Offloading",cite:"IWGDF 2023",test:function(c){return c.tp==="Diabetic Ulcer"&&!/cast|tcc|boot|offload/i.test(c.offload);},
+   sug:"Diabetic foot ulcer: offload pressure — total-contact cast is first-line (or removable knee-high device).",
+   note:function(c){return "Plan: pressure offloading per IWGDF (TCC/irremovable device preferred) for this diabetic foot ulcer.";}},
+  {cat:"Glycemic",cite:"IWGDF 2023",test:function(c){return c.tp==="Diabetic Ulcer"&&c.diabetes;},
+   sug:"Optimize glycemic control (target individualized, ~A1c <8%) — hyperglycemia impairs healing.",
+   note:function(c){return "Plan: coordinate glycemic optimization with primary/endocrine to support wound healing.";}},
+  {cat:"Perfusion",cite:"WOCN / IWGDF",test:function(c){return (c.tp==="Diabetic Ulcer"||c.tp==="Venous Ulcer"||c.tp==="Arterial Ulcer")&&c.abi==null;},
+   sug:"Lower-extremity wound with no ABI on file — obtain ABI/perfusion assessment before compression.",
+   note:function(c){return "Plan: obtain ABI to assess arterial perfusion prior to compression therapy.";}},
+  {cat:"Compression",cite:"WOCN VLU",test:function(c){return c.tp==="Venous Ulcer"&&(c.abi==null||c.abi>=0.8);},
+   sug:"Venous ulcer with adequate perfusion: apply graduated compression (gold standard) + elevation.",
+   note:function(c){return "Plan: graduated compression therapy and limb elevation for venous ulcer (ABI"+(c.abi!=null?" "+c.abi:"")+" adequate).";}},
+  {cat:"Vascular referral",cite:"WOCN / IWGDF",test:function(c){return c.abi!=null&&c.abi<0.8;},
+   sug:"ABI "+0+" indicates arterial insufficiency — AVOID compression; urgent vascular/revascularization referral.",
+   note:function(c){return "Plan: arterial insufficiency (ABI "+c.abi+") — hold compression; vascular surgery referral for revascularization evaluation.";}},
+  {cat:"Infection",cite:"IWGDF/IDSA 2023",test:function(c){return c.inf&&/systemic|stonees|spreading|deep/i.test(c.infSev);},
+   sug:"Spreading/systemic infection: obtain culture, start systemic antibiotics, and assess for osteomyelitis (probe-to-bone, imaging).",
+   note:function(c){return "Plan: wound culture obtained; empiric systemic antibiotics started; evaluate for osteomyelitis (probe-to-bone, X-ray/MRI).";}},
+  {cat:"Infection",cite:"NERDS/STONEES",test:function(c){return c.inf&&!/systemic|stonees|spreading|deep/i.test(c.infSev);},
+   sug:"Localized increased bacterial burden: topical antimicrobial dressing (silver/iodine/PHMB) + reassess in 1–2 weeks.",
+   note:function(c){return "Plan: topical antimicrobial dressing for local bacterial burden; reassess response in 1–2 weeks.";}},
+  {cat:"Osteomyelitis",cite:"IWGDF/IDSA 2023",test:function(c){return /suspect|confirm/i.test(c.osteo);},
+   sug:"Osteomyelitis suspected/confirmed — ID + orthopedic/podiatry referral, MRI, bone culture; prolonged targeted antibiotics.",
+   note:function(c){return "Plan: ID and orthopedic referral for osteomyelitis workup (MRI, bone culture) and targeted antibiotic therapy.";}},
+  {cat:"Debridement",cite:"TIME / WOCN",test:function(c){return (c.tissueS>=20||c.tissueE>=10)&&c.goal!=="Non-healable / Palliative";},
+   sug:"Non-viable tissue present: debride (sharp/surgical if appropriate, else enzymatic/autolytic) to support healing.",
+   note:function(c){return "Plan: debride non-viable tissue ("+(c.tissueE>=10?"eschar":"slough")+") per wound-bed preparation (method per perfusion & goal).";}},
+  {cat:"Advanced therapy",cite:"NPIAP / WHS",test:function(c){return c.reduction!=null&&c.onset>=28&&c.reduction<40&&!c.graft&&c.goal!=="Non-healable / Palliative";},
+   sug:"<40% area reduction by week 4 — reassess etiology/offloading/perfusion; consider advanced therapy (CTP/skin substitute, NPWT).",
+   note:function(c){return "Plan: stalled healing ("+c.reduction+"% area change at "+c.onset+"d) — reassess; consider cellular/tissue-based product or NPWT.";}},
+  {cat:"Exudate",cite:"TIME (Moisture)",test:function(c){return /large|copious|moderate/i.test(c.exAmt);},
+   sug:"Moderate–heavy exudate: use an absorptive dressing (foam/alginate/hydrofiber) and protect periwound from maceration.",
+   note:function(c){return "Plan: absorptive dressing for exudate management; periwound barrier to prevent maceration.";}},
+  {cat:"Exudate",cite:"TIME (Moisture)",test:function(c){return /none|scant/i.test(c.exAmt)&&c.goal==="Healable";},
+   sug:"Dry/low-exudate bed: maintain moisture balance (hydrogel/hydrocolloid) to promote granulation.",
+   note:function(c){return "Plan: maintain moist wound environment (hydrogel) to support granulation.";}},
+  {cat:"Pressure prevention",cite:"NPIAP 2019",test:function(c){return (c.etio==="Pressure"||c.tp==="Pressure Injury")&&(c.braden==null||c.braden<=18);},
+   sug:"Pressure-injury prevention bundle: repositioning q2h, pressure-redistribution surface, heel offloading, prophylactic dressing over bony prominences.",
+   note:function(c){return "Plan: repositioning q2h, pressure-redistribution support surface, heel offloading"+(c.braden!=null?" (Braden "+c.braden+")":"")+".";}},
+  {cat:"Nutrition",cite:"NPIAP nutrition",test:function(c){return c.malnutrition||["Stage 3","Stage 4","Unstageable"].indexOf(c.stage)>=0;},
+   sug:"Optimize nutrition for healing: protein 1.25–1.5 g/kg/day, 30–35 kcal/kg/day, hydration; registered-dietitian consult.",
+   note:function(c){return "Plan: registered-dietitian consult; protein 1.25–1.5 g/kg/day and 30–35 kcal/kg/day to support wound healing"+(c.albumin!=null?" (albumin "+c.albumin+")":"")+".";}},
+  {cat:"Meds",cite:"Healing factors",test:function(c){return c.anticoag||c.immuno;},
+   sug:"Healing-impairing medications noted ("+0+") — review necessity with prescriber; monitor for bleeding/poor healing.",
+   note:function(c){return "Note: patient on "+(c.anticoag?"anticoagulant ":"")+(c.immuno?"immunosuppressive ":"")+"therapy — monitor for impaired healing/bleeding; coordinate with prescriber.";}},
+  {cat:"Diagnostics",cite:"Wound-care PCR",test:function(c){return c.pcrReq&&!c.pcrDone;},
+   sug:"Wound-care PCR ordered but not completed — obtain to guide targeted therapy.",
+   note:function(c){return "Plan: complete wound-care PCR to guide pathogen-directed therapy.";}},
+  {cat:"Goal of care",cite:"WOCN (maintenance/palliative)",test:function(c){return c.goal==="Non-healable / Palliative";},
+   sug:"Non-healable / palliative goal: focus on comfort — moisture balance, odor and pain control, conservative (non-sharp) debridement only.",
+   note:function(c){return "Plan: palliative wound care — comfort-focused dressing, odor/pain control; avoid aggressive debridement consistent with goals of care.";}},
+  {cat:"Skin tear",cite:"ISTAP",test:function(c){return c.tp==="Skin Tear";},
+   sug:"Skin tear: approximate the flap, atraumatic silicone dressing, mark removal direction; institute skin-tear prevention (moisturize, limb protection).",
+   note:function(c){return "Plan: atraumatic silicone contact dressing; skin-tear prevention (twice-daily emollient, limb protection).";}}
+];
+function woundSuggestions(w){var c=clinContext(w);var out=[];WOUND_KB.forEach(function(r){try{if(r.test(c)){var sug=r.sug;if(r.cat==="Vascular referral"&&c.abi!=null)sug="ABI "+c.abi+" indicates arterial insufficiency — AVOID compression; urgent vascular/revascularization referral.";if(r.cat==="Meds"){var mm=[];if(c.anticoag)mm.push("anticoagulant");if(c.immuno)mm.push("immunosuppressant");sug="Healing-impairing medications noted ("+mm.join(", ")+") — review necessity with prescriber; monitor for bleeding/poor healing.";}out.push({cat:r.cat,sug:sug,note:r.note(c),cite:r.cite});}}catch(e){}});return out;}
+function suggestionsPanelHtml(w){
+  var list=woundSuggestions(w);window._sugCache={id:w.id,list:list};
+  var h='<div style="background:rgba(63,125,118,.07);border:1px solid rgba(63,125,118,.22);border-radius:8px;padding:11px 13px;margin-bottom:13px">';
+  h+='<div class="st" style="color:#356b64;margin-bottom:3px">💡 Suggested Care &amp; Smart Notes <span class="pill pt">'+list.length+'</span> <button class="btn bg3 bsm" style="float:right;font-weight:600" onclick="draftAINote(\''+w.id+'\')">✨ Draft note (AI)</button></div>';
+  h+='<div style="font-size:10px;color:var(--mu);margin-bottom:8px">Guideline-based decision support — review &amp; confirm before use.</div>';
+  if(!list.length){h+='<div style="font-size:12px;color:var(--mu)">No specific guideline prompts for the current data.</div>';}
+  list.forEach(function(s,i){
+    h+='<div style="border-left:3px solid var(--ac);background:var(--sf);border:1px solid var(--bd);border-radius:5px;padding:7px 9px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;gap:8px"><span style="font-size:12px;color:var(--tx)"><b>'+e(s.cat)+':</b> '+e(s.sug)+'</span><button class="btn bg3 bsm" style="flex-shrink:0" onclick="insertSuggestion('+i+')">＋ Note</button></div><div style="font-size:10px;color:var(--mu);margin-top:3px;font-family:var(--mono)">'+e(s.cite)+'</div></div>';
+  });
+  h+='</div>';return h;
+}
+function insertSuggestion(i){var c=window._sugCache;if(!c||!c.list[i])return;insertMacro("wf-notes",c.list[i].note);toast("Smart note inserted — review before saving");}
+function draftAINote(woundId){
+  if(!cloudOn()){toast("AI drafting needs the cloud server — connect in Settings","err");return;}
+  var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;
+  var c=clinContext(w);delete c.name; // de-identify: send minimum-necessary context only
+  var sugs=woundSuggestions(w).map(function(s){return s.cat+": "+s.sug+" ["+s.cite+"]";});
+  var g=cloudGet();
+  toast("Drafting note…");
+  fetch(g.api+"/api/ai/draft-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify({context:c,suggestions:sugs})})
+   .then(function(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();})
+   .then(function(d){if(d.text){insertMacro("wf-notes",d.text);toast("AI draft inserted — review & verify before saving","ok");}})
+   .catch(function(err){toast(err.message==="notcfg"?"AI drafting isn't configured on the server yet":"AI draft failed","err");});
 }
 
 function renderWound(){
