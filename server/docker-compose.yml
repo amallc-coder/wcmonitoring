@@ -86,9 +86,32 @@ services:
       ORG_NAME: ${ORG_NAME:-Clinilytics}
       BODY_LIMIT: ${BODY_LIMIT:-30mb}
       PORT: 8080
+    # Bound to localhost only — the public entrypoint is the TLS proxy below.
     ports:
-      - "${API_PORT:-8080}:8080"
+      - "127.0.0.1:${API_PORT:-8080}:8080"
+
+  # TLS reverse proxy (automatic HTTPS via Let's Encrypt). Opt-in profile:
+  #   docker compose --profile proxy up -d
+  # Requires DOMAIN + ACME_EMAIL in .env and ports 80/443 open. Skip it if you
+  # terminate TLS elsewhere (managed LB, Nginx, Cloudflare, etc.).
+  proxy:
+    image: caddy:2
+    profiles: ["proxy"]
+    restart: unless-stopped
+    depends_on: [api]
+    environment:
+      DOMAIN: ${DOMAIN}
+      ACME_EMAIL: ${ACME_EMAIL}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./proxy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
 
 volumes:
   db_primary:
   db_replica:
+  caddy_data:
+  caddy_config:
