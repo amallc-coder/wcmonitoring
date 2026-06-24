@@ -10,5 +10,5 @@ EOSQL
 
 # Allow the replica (any host on the compose network) to authenticate for replication.
 {
-  echo "host replication replicator all md5"
+  echo "host replication replicator all scram-sha-256"
 } >> "$PGDATA/pg_hba.conf"

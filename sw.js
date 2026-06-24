@@ -1,5 +1,5 @@
 /* Clinilytics — Wound Care · service worker (offline app shell) */
-var CACHE = "clinilytics-v1";
+var CACHE = "clinilytics-v2";
 var SHELL = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", function (e) {
@@ -19,6 +19,8 @@ self.addEventListener("fetch", function (e) {
   var req = e.request;
   if (req.method !== "GET") return;
   var url = new URL(req.url);
+  // Never cache API responses — they carry PHI and must not persist in Cache Storage.
+  if (url.pathname.indexOf("/api/") >= 0) return; // pass through to network, no caching
   // Same-origin: cache-first with background refresh (app shell works offline).
   if (url.origin === self.location.origin) {
     e.respondWith(
