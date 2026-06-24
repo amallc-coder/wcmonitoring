@@ -1,8 +1,10 @@
 "use strict";
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const fs = require("fs");
 
-const SECRET = process.env.JWT_SECRET;
+const SECRET = process.env.JWT_SECRET ||
+  (process.env.JWT_SECRET_FILE ? fs.readFileSync(process.env.JWT_SECRET_FILE, "utf8").trim() : "");
 const TTL_HOURS = parseInt(process.env.JWT_TTL_HOURS || "8", 10);
 
 if (!SECRET) {

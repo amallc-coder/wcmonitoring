@@ -24,6 +24,9 @@ async function seed() {
 }
 
 async function main() {
+  // Load the PHI data-encryption key (env / secret file / KMS) before serving.
+  try { await require("./crypto").init(); }
+  catch (e) { console.error("FATAL: " + e.message); process.exit(1); }
   // Retry DB connect (the replica/primary may still be starting under compose)
   for (let i = 0; i < 20; i++) {
     try { await db.init(); break; }

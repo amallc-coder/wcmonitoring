@@ -47,16 +47,23 @@ docker compose logs db-replica | grep -i "standby"   # replica caught up
 ls backups/                       # first dump appears within BACKUP_INTERVAL
 ```
 
-### 5. Put HTTPS in front (Caddy — automatic certificates)
+### 5. Put HTTPS in front (bundled Caddy — automatic certificates + HSTS)
+The stack ships a hardened TLS proxy (`server/proxy/Caddyfile`) as an opt-in
+profile. Set `DOMAIN` + `ACME_EMAIL` in `.env`, point the domain's DNS at the
+server, open ports 80/443, then:
 ```bash
-apt-get install -y caddy
-# /etc/caddy/Caddyfile:
-#   api.yourdomain.com {
-#     reverse_proxy localhost:8080
-#   }
-systemctl restart caddy
+docker compose --profile proxy up -d
 ```
-Now the API is at `https://api.yourdomain.com`. Connect from the app's Settings.
+Caddy obtains/renews Let's Encrypt certs automatically and adds HSTS + security
+headers; the API itself is bound to localhost (not public). The API is now at
+`https://api.yourdomain.com` — connect from the app's Settings.
+(Prefer Nginx? Use `server/proxy/nginx.conf` with certbot instead.)
+
+### 5a. (Recommended) Keep keys out of plaintext env
+Instead of `DATA_ENCRYPTION_KEY`/`JWT_SECRET` in `.env`, mount them as secret
+files (`DATA_ENCRYPTION_KEY_FILE`, `JWT_SECRET_FILE`) or use **AWS KMS**: set
+`KMS_DATA_KEY_CIPHERTEXT` + `KMS_KEY_ID` and `npm i @aws-sdk/client-kms` — the
+server decrypts the data key via KMS at boot. See `.env.example`.
 
 ### 6. Verify failover & restore (do this once)
 - **Replica:** `docker compose stop db` then read from `db-replica` — data is intact.
