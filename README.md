@@ -15,6 +15,20 @@ Chart.js, jsPDF, and jsPDF-AutoTable load from CDN at runtime.
 on top, navigation below) collapses to a **hamburger menu** on small screens, grids
 reflow to fewer columns, and wide tables scroll within their cards.
 
+**Clinical depth (EHR-grade):** the wound assessment note is organized into
+TIME/MEASURE-aligned sections and auto-calculates **area (cm²)**, **% healing vs
+baseline** (4-week ≥40% target), and the **PUSH score**. It captures tissue-type
+%, exudate (amount/type/odor), wound edges, periwound skin, undermining/tunneling
+(depth + clock), pain, infection severity (NERDS/STONEES) with culture/organism/
+antibiotic/osteomyelitis, **ABI** (with a compression-safety alert), the six
+**Braden subscores**, etiology classification (Wagner/UT/SINBAD/WIfI/CEAP/ISTAP),
+prevention bundle, structured dressings/NPWT/offloading/compression, nutrition,
+goal of care, consults, ICD-10/CPT billing, **serial photos**, e-sign attestation
++ co-sign, and an **audit trail**. The Quality tab reports CMS **MDS 3.0 Section M**
+measures (prevalence, facility-acquired incidence, new/worsened, avoidable/
+unavoidable F686). A **body-map** picker sets the location. Expanded triggers cover
+non-reduction at 4 weeks, ABI/compression, osteomyelitis, severe pain, and nutrition.
+
 **Calm UI:** the interface uses a near-monochrome system (neutral grays + a
 single teal accent) with muted status colors and muted, mostly-grayscale charts,
 for a quieter, easier-to-read workspace.

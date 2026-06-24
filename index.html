@@ -600,9 +600,16 @@ img,canvas,svg{max-width:100%}
     <div><label class="fl">Wound Type *</label><select id="aw-tp"><option>Pressure Injury</option><option>Diabetic Ulcer</option><option>Venous Ulcer</option><option>Arterial Ulcer</option><option>Surgical Wound</option><option>Skin Tear</option><option>Moisture-Associated</option><option>Other</option></select></div>
     <div><label class="fl">Etiology</label><select id="aw-etio"><option>Pressure</option><option>Non-Pressure</option><option>Traumatic</option></select></div>
     <div><label class="fl">Stage</label><select id="aw-stage"><option>N/A</option><option>Stage 1</option><option>Stage 2</option><option>Stage 3</option><option>Stage 4</option><option>Unstageable</option><option>Deep Tissue Inj.</option></select></div>
-    <div><label class="fl">Location *</label><input id="aw-loc" placeholder="e.g. Sacrum, L. Heel"></div>
+    <div><label class="fl">Location * <span style="color:var(--ac);cursor:pointer;font-weight:600" onclick="toggleBodyMap()">🧍 body map</span></label><input id="aw-loc" placeholder="e.g. Sacrum, L. Heel"></div>
     <div><label class="fl">Onset Date</label><input id="aw-onset" type="date"></div>
-    <div><label class="fl">Origin</label><select id="aw-poa"><option>Unknown</option><option>Present on Admission</option><option>Facility-Acquired</option></select></div>
+    <div><label class="fl">Origin (MDS)</label><select id="aw-poa"><option>Unknown</option><option>Present on Admission</option><option>Facility-Acquired</option></select></div>
+    <div id="aw-bodymap" style="grid-column:1/-1;display:none"></div>
+    <div><label class="fl">Classification System</label><select id="aw-classSys"><option>N/A</option><option>Wagner (DFU)</option><option>Univ. of Texas (DFU)</option><option>SINBAD (DFU)</option><option>WIfI (DFU/PAD)</option><option>CEAP (venous)</option><option>ISTAP (skin tear)</option></select></div>
+    <div><label class="fl">Grade / Score</label><input id="aw-classGrade" placeholder="e.g. Wagner 2"></div>
+    <div><label class="fl">Goal of Care</label><select id="aw-goal"><option>Healable</option><option>Maintenance</option><option>Non-healable / Palliative</option></select></div>
+    <div><label class="fl">ABI value</label><input id="aw-abi" placeholder="e.g. 0.9 (leg wounds)"></div>
+    <div><label class="fl">ABI date</label><input id="aw-abiDate" type="date"></div>
+    <div><label class="fl">Photo consent on file</label><select id="aw-consent"><option>No</option><option>Yes</option></select></div>
     <div><label class="fl">Length (cm)</label><input id="aw-L" placeholder="0.0"></div>
     <div><label class="fl">Width (cm)</label><input id="aw-W" placeholder="0.0"></div>
     <div><label class="fl">Depth (cm)</label><input id="aw-D" placeholder="0.0"></div>
@@ -1155,6 +1162,15 @@ function cht(idx){
   if(idx===1) buildHistory();
   if(idx===2) buildNotes();
 }
+function fldCell(f){
+  if(f.hdr)return '<div style="grid-column:1/-1;margin:8px 0 -1px;border-bottom:1px solid var(--bd);padding-bottom:3px"><span class="st" style="margin:0;color:#3a6f68">'+e(f.hdr)+'</span></div>';
+  var inner;
+  if(f.sel){inner='<select id="'+f.id+'">'+f.sel.map(function(o){return'<option'+(o===f.v?' selected':'')+'>'+o+'</option>';}).join("")+'</select>';}
+  else if(f.ta){inner='<textarea id="'+f.id+'" rows="'+(f.rows||3)+'" placeholder="'+(f.ph||"")+'">'+e(f.v||"")+'</textarea>';}
+  else if(f.file){inner='<input type="file" id="'+f.id+'" accept="image/*" style="font-size:11px;padding:5px">'+(f.thumb?'<img src="'+f.thumb+'" alt="last photo" style="margin-top:6px;max-height:96px;border-radius:6px;border:1px solid var(--bd)">':'');}
+  else {inner='<input id="'+f.id+'" value="'+e(f.v==null?"":f.v)+'" placeholder="'+(f.ph||"")+'">';}
+  return '<div style="grid-column:'+(f.full?"1/-1":"span 1")+'"><label class="fl">'+e(f.l)+'</label>'+inner+'</div>';
+}
 function buildFields(){
   var tp=_ctx.tp,rec=_ctx.rec;
   var el=document.getElementById("ch-p0");
@@ -1173,9 +1189,81 @@ function buildFields(){
       var od=woundOnsetDays(rec);
       ltAlert='<div style="background:#7c3aed12;border:1px solid #7c3aed44;border-radius:7px;padding:10px 13px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#c4b5fd;margin-bottom:4px">⏱ Day '+od+' — Pressure wound approaching 100-day threshold</div><div style="font-size:11px;color:#a78bfa">Long-term pressure wounds require enhanced documentation, care team review, and possible specialist referral.</div></div>';
     }
-    flds=[{id:"wf-stage",l:"Stage",v:rec.stage,sel:["N/A","Stage 1","Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."]},{id:"wf-heal",l:"Healing",v:rec.heal,sel:["Stable","Progressing","Improving","Slow","Worsening","Healed"]},{id:"wf-inf",l:"Infection",v:rec.inf?"Yes":"No",sel:["No","Yes"]},{id:"wf-L",l:"Length (cm)",v:last.L||""},{id:"wf-W",l:"Width (cm)",v:last.W||""},{id:"wf-D",l:"Depth (cm)",v:last.D||""},{id:"wf-poa",l:"Origin",v:rec.poa||"Unknown",sel:["Unknown","Present on Admission","Facility-Acquired"]},{id:"wf-braden",l:"Braden Score",v:rec.braden!=null?rec.braden:""},{id:"wf-debride",l:"Debridement",v:rec.debride||"None",sel:["None","Selective","Sharp","Excisional","Enzymatic","Autolytic"]},{id:"wf-vac",l:"Wound VAC",v:rec.vac?"Yes":"No",sel:["No","Yes"]},{id:"wf-collagen",l:"Collagen In Use",v:rec.collagen?"Yes":"No",sel:["No","Yes"]},{id:"wf-graft",l:"Graft In Place",v:rec.graft?"Yes":"No",sel:["No","Yes"]},{id:"wf-graftType",l:"Graft Type / Product",v:rec.graftType||"",ph:"e.g. skin substitute, CTP"},{id:"wf-pcrReq",l:"PCR Required",v:rec.pcrReq?"Yes":"No",sel:["No","Yes"]},{id:"wf-pcrDone",l:"PCR Completed",v:rec.pcrDone?"Yes":"No",sel:["No","Yes"]},{id:"wf-albumin",l:"Albumin (g/dL)",v:rec.albumin!=null?rec.albumin:""},{id:"wf-vascular",l:"Vascular Screening",v:rec.vascular||""},{id:"wf-dietary",l:"Nutrition Consult",v:rec.dietary?"Yes":"No",sel:["No","Yes"]},{id:"wf-pv",l:"Wound Provider",v:rec.pv||"",ph:"Provider on watch list"},{id:"wf-tx",l:"Treatment / New Intervention",v:rec.tx,full:true},{id:"wf-notes",l:"Progress Note (required if no measurement change)",v:"",ta:true,full:true,ph:"Document wound appearance, drainage, odor, patient response, or reason measurements unchanged…"},{id:"wf-date",l:"Visit Date",v:TDS()},{id:"wf-by",l:"Updated By",v:"",ph:"Clinician name"}];
-    var wflds=flds.map(function(f){return'<div style="grid-column:'+(f.full?"1/-1":"span 1")+'"><label class="fl">'+f.l+'</label>'+(f.sel?'<select id="'+f.id+'">'+f.sel.map(function(o){return'<option'+(o===f.v?' selected':'')+'>'+o+'</option>';}).join("")+'</select>':f.ta?'<textarea id="'+f.id+'" rows="3" placeholder="'+(f.ph||"")+'">'+e(f.v)+'</textarea>':'<input id="'+f.id+'" value="'+e(f.v||"")+'" placeholder="'+(f.ph||"")+'">') +'</div>';}).join("");
-    el.innerHTML=staleAlert+ltAlert+triggerPanelHtml(rec)+'<div class="st" style="margin-bottom:10px">Update Wound Chart</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+wflds+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:flex-end"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div>';
+    var lv=function(k,d){return (last[k]!=null&&last[k]!=="")?last[k]:((rec[k]!=null&&rec[k]!=="")?rec[k]:(d==null?"":d));};
+    var bsel=["No","Yes"];
+    var lastArea=woundAreaOf(last),redux=woundAreaReductionPct(rec);
+    var mathLine='<div style="grid-column:1/-1;font-size:11px;color:var(--mu);background:#f4f6f6;border:1px solid var(--bd);border-radius:7px;padding:7px 10px">'
+      +(lastArea!=null?'Last area: <b style="color:var(--tx)">'+lastArea+' cm²</b>':'No area on file yet')
+      +(redux!=null?' · Area change since baseline: <b style="color:'+(redux>=40?"#4f8268":redux>=0?"#b07d3c":"#b3433a")+'">'+(redux>=0?"−":"+")+Math.abs(redux)+'%</b>'+(woundOnsetDays(rec)>=28?' (target ≥40% by wk 4)':''):'')
+      +(last.push!=null?' · Last PUSH score: <b style="color:var(--tx)">'+last.push+'</b>':'')+'</div>';
+    flds=[
+      {hdr:"Measurements (cm) — area & PUSH auto-calculate"},
+      {id:"wf-L",l:"Length",v:last.L||""},{id:"wf-W",l:"Width",v:last.W||""},{id:"wf-D",l:"Depth",v:last.D||""},
+      {hdr:"Wound bed, edges & tissue"},
+      {id:"wf-stage",l:"Stage (NPIAP)",v:rec.stage,sel:["N/A","Stage 1","Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."]},
+      {id:"wf-tissueG",l:"% Granulation",v:lv("tissueG","")},{id:"wf-tissueS",l:"% Slough",v:lv("tissueS","")},
+      {id:"wf-tissueE",l:"% Eschar/Necrotic",v:lv("tissueE","")},{id:"wf-tissueEp",l:"% Epithelial",v:lv("tissueEp","")},
+      {id:"wf-edges",l:"Wound Edges",v:lv("edges","Attached"),sel:["Attached","Defined","Rolled / Epibole","Hyperkeratotic","Undermined","Macerated","Diffuse"]},
+      {id:"wf-periwound",l:"Periwound Skin",v:lv("periwound","Intact"),sel:["Intact","Macerated","Erythema","Induration","Callus","Denuded","Edematous","Dry / Scaly"]},
+      {id:"wf-underDepth",l:"Undermining depth",v:lv("underDepth","")},{id:"wf-underLoc",l:"Undermining (clock)",v:lv("underLoc",""),ph:"e.g. 3–6 o'clock"},
+      {id:"wf-tunDepth",l:"Tunneling depth",v:lv("tunDepth","")},{id:"wf-tunLoc",l:"Tunneling (clock)",v:lv("tunLoc",""),ph:"e.g. 7 o'clock"},
+      {hdr:"Exudate & symptoms"},
+      {id:"wf-exAmt",l:"Exudate Amount",v:lv("exAmt","None"),sel:["None","Scant","Small","Moderate","Large","Copious"]},
+      {id:"wf-exType",l:"Exudate Type",v:lv("exType","None"),sel:["None","Serous","Serosanguineous","Sanguineous","Purulent"]},
+      {id:"wf-odor",l:"Odor",v:lv("odor")?"Yes":"No",sel:bsel},{id:"wf-pain",l:"Pain (0–10)",v:lv("pain","")},
+      {hdr:"Healing & infection"},
+      {id:"wf-heal",l:"Healing Status",v:rec.heal,sel:["Stable","Progressing","Improving","Slow","Worsening","Healed"]},
+      {id:"wf-inf",l:"Infection Present",v:rec.inf?"Yes":"No",sel:bsel},
+      {id:"wf-infSev",l:"Infection Severity",v:lv("infSev","None"),sel:["None","Local (NERDS)","Spreading / Deep (STONEES)","Systemic / Sepsis"]},
+      {id:"wf-culture",l:"Wound Culture",v:lv("culture","Not indicated"),sel:["Not indicated","Ordered","Resulted"]},
+      {id:"wf-organism",l:"Organism(s)",v:lv("organism","")},{id:"wf-abx",l:"Antibiotic (name/route)",v:lv("abx","")},
+      {id:"wf-osteo",l:"Osteomyelitis",v:lv("osteo","N/A"),sel:["N/A","Suspected (probe-to-bone +)","Imaging ordered","Confirmed","Ruled out"]},
+      {hdr:"Vascular & pressure-injury risk"},
+      {id:"wf-abi",l:"ABI value",v:lv("abi",""),ph:"e.g. 0.9"},{id:"wf-abiDate",l:"ABI date",v:lv("abiDate","")},
+      {id:"wf-vascular",l:"Vascular Notes",v:rec.vascular||""},
+      {id:"wf-bSensory",l:"Braden: Sensory (1–4)",v:lv("bSensory","")},{id:"wf-bMoisture",l:"Braden: Moisture (1–4)",v:lv("bMoisture","")},
+      {id:"wf-bActivity",l:"Braden: Activity (1–4)",v:lv("bActivity","")},{id:"wf-bMobility",l:"Braden: Mobility (1–4)",v:lv("bMobility","")},
+      {id:"wf-bNutrition",l:"Braden: Nutrition (1–4)",v:lv("bNutrition","")},{id:"wf-bFriction",l:"Braden: Friction/Shear (1–3)",v:lv("bFriction","")},
+      {id:"wf-braden",l:"Braden Total (auto from subscores)",v:rec.braden!=null?rec.braden:""},
+      {hdr:"Etiology classification & origin"},
+      {id:"wf-classSys",l:"Classification System",v:lv("classSys","N/A"),sel:["N/A","Wagner (DFU)","Univ. of Texas (DFU)","SINBAD (DFU)","WIfI (DFU/PAD)","CEAP (venous)","ISTAP (skin tear)"]},
+      {id:"wf-classGrade",l:"Grade / Score",v:lv("classGrade",""),ph:"e.g. Wagner 2"},
+      {id:"wf-poa",l:"Origin (MDS Section M)",v:rec.poa||"Unknown",sel:["Unknown","Present on Admission","Facility-Acquired"]},
+      {id:"wf-avoidable",l:"Avoidable? (F686)",v:lv("avoidable","Not assessed"),sel:["Not assessed","Unavoidable","Avoidable"]},
+      {id:"wf-rootcause",l:"Root cause (if facility-acquired)",v:lv("rootcause",""),full:true},
+      {hdr:"Prevention bundle"},
+      {id:"wf-support",l:"Support Surface",v:lv("support","None"),sel:["None","Foam","Alternating Air","Low-Air-Loss","Air-Fluidized"]},
+      {id:"wf-reposition",l:"Repositioning",v:lv("reposition","q2h"),sel:["N/A","q2h","q3h","q4h","Self-repositions"]},
+      {id:"wf-heelOff",l:"Heel Offloading",v:lv("heelOff")?"Yes":"No",sel:bsel},
+      {id:"wf-prophyl",l:"Prophylactic Dressing",v:lv("prophyl")?"Yes":"No",sel:bsel},
+      {hdr:"Treatment, dressings & orders"},
+      {id:"wf-debride",l:"Debridement",v:rec.debride||"None",sel:["None","Selective","Sharp","Excisional","Enzymatic","Autolytic","Biologic"]},
+      {id:"wf-dressPrimary",l:"Primary Dressing",v:lv("dressPrimary","")},{id:"wf-dressFreq",l:"Change Frequency",v:lv("dressFreq",""),ph:"daily, q3d…"},
+      {id:"wf-offload",l:"Offloading Device",v:lv("offload",""),ph:"TCC, boot, cushion"},{id:"wf-compression",l:"Compression",v:lv("compression",""),ph:"type/strength"},
+      {id:"wf-vac",l:"NPWT / Wound VAC",v:rec.vac?"Yes":"No",sel:bsel},{id:"wf-vacSetting",l:"NPWT Setting",v:lv("vacSetting",""),ph:"-125 mmHg cont."},
+      {id:"wf-collagen",l:"Collagen In Use",v:rec.collagen?"Yes":"No",sel:bsel},
+      {id:"wf-graft",l:"Graft / CTP In Place",v:rec.graft?"Yes":"No",sel:bsel},{id:"wf-graftType",l:"Graft Type / Product",v:rec.graftType||"",ph:"skin substitute, CTP"},
+      {id:"wf-pcrReq",l:"PCR Required",v:rec.pcrReq?"Yes":"No",sel:bsel},{id:"wf-pcrDone",l:"PCR Completed",v:rec.pcrDone?"Yes":"No",sel:bsel},
+      {id:"wf-orderProvider",l:"Ordering Provider",v:lv("orderProvider","")},{id:"wf-orderDate",l:"Order Date",v:lv("orderDate","")},
+      {id:"wf-tx",l:"Treatment / New Intervention",v:rec.tx,full:true},
+      {hdr:"Nutrition"},
+      {id:"wf-albumin",l:"Albumin (g/dL)",v:rec.albumin!=null?rec.albumin:""},{id:"wf-prealbumin",l:"Prealbumin (mg/dL)",v:lv("prealbumin","")},
+      {id:"wf-weightTrend",l:"Weight Trend",v:lv("weightTrend","Stable"),sel:["Stable","Gaining","Losing"]},{id:"wf-dietary",l:"Nutrition Consult",v:rec.dietary?"Yes":"No",sel:bsel},
+      {hdr:"Goal of care, consults & billing"},
+      {id:"wf-goal",l:"Goal of Care",v:lv("goal","Healable"),sel:["Healable","Maintenance","Non-healable / Palliative"]},
+      {id:"wf-consults",l:"Consults (comma list)",v:lv("consults",""),ph:"Vascular, Surgery, ID, Podiatry, PT, RD",full:true},
+      {id:"wf-icd",l:"ICD-10 Code",v:lv("icd","")},{id:"wf-cpt",l:"CPT Code",v:lv("cpt","")},{id:"wf-units",l:"CTP Units",v:lv("units","")},
+      {hdr:"Photo & education"},
+      {id:"wf-photo",l:"Wound Photo (place ruler in frame)",file:true,thumb:(last.photo||"")},
+      {id:"wf-consent",l:"Photo Consent on File",v:lv("consent")?"Yes":"No",sel:bsel},
+      {id:"wf-education",l:"Patient / Family Education",v:lv("education",""),full:true,ph:"What was taught & teach-back understanding"},
+      {hdr:"Progress note & sign-off"},
+      {id:"wf-notes",l:"Progress Note (required if no measurement change)",v:"",ta:true,full:true,ph:"Wound appearance, drainage, odor, patient response, or reason measurements unchanged…"},
+      {id:"wf-pv",l:"Wound Provider (owner)",v:rec.pv||"",ph:"Provider on watch list"},
+      {id:"wf-date",l:"Visit Date",v:TDS()},{id:"wf-by",l:"Updated By",v:(currentUser&&currentUser.name)||"",ph:"Clinician name"},
+      {id:"wf-attest",l:"Attestation: accurate & complete",v:"No",sel:bsel},{id:"wf-cosign",l:"Co-sign (MD/DO if NP/PA)",v:lv("cosign",""),ph:"co-signing physician"}
+    ];
+    el.innerHTML=staleAlert+ltAlert+triggerPanelHtml(rec)+'<div class="st" style="margin-bottom:10px">Wound Assessment &amp; Care Note</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+mathLine+flds.map(fldCell).join("")+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:flex-end"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div>';
     return;
   } else if(tp==="psych"){
     flds=[{id:"pf-ev",l:"Visit Type",v:"Follow-up Visit",sel:["Follow-up Visit","Initial Assessment","Medication Review","GDR Review","GDR Attempt","Telehealth Visit","Acute Hospitalization","Post-Discharge Follow-up","Behavioral Assessment"]},{id:"pf-date",l:"Visit Date",v:TDS()},{id:"pf-th",l:"Telehealth",v:rec.th?"Yes":"No",sel:["No","Yes"]},{id:"pf-apy",l:"Antipsychotic",v:rec.apy?"Yes":"No",sel:["No","Yes"]},{id:"pf-gdr",l:"GDR Status",v:rec.gdr},{id:"pf-lastH",l:"Last Acute Hosp.",v:rec.lastH},{id:"pf-dx",l:"Diagnoses",v:rec.dx.join(", "),full:true},{id:"pf-meds",l:"Medications (one per line)",v:rec.meds.join("\n"),ta:true,full:true},{id:"pf-notes",l:"Clinical Notes",v:"",ta:true,full:true,ph:"Mood, SI screening, plan…"},{id:"pf-by",l:"Updated By",v:"",ph:"Clinician name"}];
@@ -1184,39 +1272,84 @@ function buildFields(){
   } else if(tp==="primary"){
     flds=[{id:"prf-vwk",l:"Visits/Week",v:rec.vwk},{id:"prf-th",l:"Telehealth Visits",v:rec.th},{id:"prf-inf",l:"Infections",v:rec.inf},{id:"prf-rth",l:"RTH %",v:rec.rth},{id:"prf-wn",l:"Active Wounds",v:rec.wn},{id:"prf-cs",l:"Census",v:rec.cs},{id:"prf-hr",l:"High-Risk Res.",v:rec.hr},{id:"prf-pv",l:"Provider",v:rec.pv},{id:"prf-notes",l:"Monthly Notes",v:"",ta:true,full:true,ph:"Trends, interventions…"},{id:"prf-by",l:"Updated By",v:rec.pv}];
   }
-  el.innerHTML='<div class="st" style="margin-bottom:10px">Update Chart Record</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+flds.map(function(f){return'<div style="grid-column:'+(f.full?"1/-1":"span 1")+'"><label class="fl">'+f.l+'</label>'+(f.sel?'<select id="'+f.id+'">'+f.sel.map(function(o){return'<option'+(o===f.v?' selected':'')+'>'+o+'</option>';}).join("")+'</select>':f.ta?'<textarea id="'+f.id+'" rows="3" placeholder="'+(f.ph||"")+'">'+e(f.v)+'</textarea>':'<input id="'+f.id+'" value="'+e(f.v||"")+'" placeholder="'+(f.ph||"")+'">')+'</div>';}).join("")+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:flex-end"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveEntry()">💾 Save &amp; Archive</button></div>';
+  el.innerHTML='<div class="st" style="margin-bottom:10px">Update Chart Record</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+flds.map(fldCell).join("")+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:flex-end"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveEntry()">💾 Save &amp; Archive</button></div>';
+}
+function gnum(id){var v=gv(id);return (v!==""&&v!=null)?parseFloat(v):null;}
+function nowStamp(){try{return new Date().toLocaleString();}catch(e){return TDS();}}
+function woundAreaOf(h){return (h&&h.L&&h.W)?+(h.L*h.W).toFixed(1):null;}
+function woundFirstMeasured(w){return (w.chart||[]).filter(function(h){return h.L&&h.W;})[0]||null;}
+function woundLastMeasured(w){var m=(w.chart||[]).filter(function(h){return h.L&&h.W;});return m.length?m[m.length-1]:null;}
+function woundAreaReductionPct(w){var f=woundFirstMeasured(w),l=woundLastMeasured(w);if(!f||!l||f===l)return null;var fa=f.L*f.W,la=l.L*l.W;if(fa<=0)return null;return Math.round((fa-la)/fa*100);}
+function pushScore(en){
+  if(en.area==null&&!(en.L&&en.W))return null;
+  var area=en.area!=null?en.area:en.L*en.W;
+  var a=area<=0?0:area<0.3?1:area<=0.6?2:area<=1.0?3:area<=2.0?4:area<=3.0?5:area<=4.0?6:area<=8.0?7:area<=12.0?8:area<=24.0?9:10;
+  var exMap={None:0,Scant:1,Small:1,Moderate:2,Large:3,Copious:3};var ex=exMap[en.exAmt]!=null?exMap[en.exAmt]:0;
+  var g=en.tissueG||0,s=en.tissueS||0,esc=en.tissueE||0,ep=en.tissueEp||0,t=0;
+  if(esc>0&&esc>=s&&esc>=g&&esc>=ep)t=4;else if(s>0&&s>=g&&s>=ep)t=3;else if(g>0&&g>=ep)t=2;else if(ep>0)t=1;else t=0;
+  if(en.heal==="Healed"){a=0;t=0;}
+  return a+ex+t;
 }
 function saveWoundEntry(){
   var rec=_ctx.rec;
+  var pin=document.getElementById("wf-photo");
+  if(pin&&pin.files&&pin.files[0]){
+    var fr=new FileReader();fr.onload=function(){_saveWoundEntry2(rec,fr.result);};fr.onerror=function(){_saveWoundEntry2(rec,"");};fr.readAsDataURL(pin.files[0]);
+  } else { _saveWoundEntry2(rec,""); }
+}
+function _saveWoundEntry2(rec,photoData){
   var today=TDS();
-  var newL=parseFloat(gv("wf-L"))||null;
-  var newW=parseFloat(gv("wf-W"))||null;
+  var newL=gnum("wf-L"),newW=gnum("wf-W"),newD=gnum("wf-D");
   var notes=gv("wf-notes").trim();
-  // If stale, require either new measurements OR a progress note
   if(woundIsStale(rec)){
     var last=rec.chart&&rec.chart.length?rec.chart[rec.chart.length-1]:{};
     var hasMeasChange=(newL&&newL!==last.L)||(newW&&newW!==last.W);
-    if(!hasMeasChange&&!notes){
-      alert("⚠ Alert: This wound has not been updated in "+woundDaysSinceUpdate(rec)+" days.\n\nTo clear the alert you must:\n• Enter updated measurements (L/W), OR\n• Add a progress note explaining why measurements are unchanged.\n\nPlease complete one of the above.");
-      return;
-    }
+    if(!hasMeasChange&&!notes){alert("⚠ This wound has not been updated in "+woundDaysSinceUpdate(rec)+" days.\n\nTo clear the alert, enter updated measurements (L/W) OR add a progress note explaining why measurements are unchanged.");return;}
   }
-  if(!rec.chart)rec.chart=[];
-  var braden=gv("wf-braden")!==""?parseInt(gv("wf-braden")):rec.braden;
-  var albumin=gv("wf-albumin")!==""?parseFloat(gv("wf-albumin")):rec.albumin;
-  var en={dt:gv("wf-date")||today,stage:gv("wf-stage"),tx:gv("wf-tx"),heal:gv("wf-heal"),inf:gv("wf-inf")==="Yes",L:newL,W:parseFloat(gv("wf-W"))||null,D:parseFloat(gv("wf-D"))||null,poa:gv("wf-poa"),braden:braden,debride:gv("wf-debride"),vac:gv("wf-vac")==="Yes",albumin:albumin,vascular:gv("wf-vascular"),dietary:gv("wf-dietary")==="Yes",graft:gv("wf-graft")==="Yes",collagen:gv("wf-collagen")==="Yes",pcrReq:gv("wf-pcrReq")==="Yes",pcrDone:gv("wf-pcrDone")==="Yes",notes:notes,by:gv("wf-by")||"Wound Team"};
+  // Braden total from subscores when all present
+  var subs=["wf-bSensory","wf-bMoisture","wf-bActivity","wf-bMobility","wf-bNutrition","wf-bFriction"].map(gnum);
+  var braden=subs.every(function(x){return x!=null;})?subs.reduce(function(a,b){return a+b;},0):(gv("wf-braden")!==""?parseInt(gv("wf-braden")):rec.braden);
+  var albumin=gnum("wf-albumin");if(albumin==null)albumin=rec.albumin;
+  var abi=gnum("wf-abi");
+  // ── Safety checks ──
+  var compression=gv("wf-compression").trim();
+  if(compression&&abi!=null&&abi<0.8){if(!confirm("⚠ SAFETY: ABI is "+abi+" (<0.8), suggesting arterial insufficiency. Compression may be unsafe.\n\nRecommend vascular referral and reduced/no compression. Save anyway?"))return;}
+  var allerg=((PATIENTS.find(function(p){return p.id===rec.ptId;})||{}).al||"").toLowerCase();
+  var txStr=(gv("wf-tx")+" "+gv("wf-dressPrimary")).toLowerCase();
+  if(allerg&&allerg!=="nkda"){var conflict=["silver","iodine","sulfa","latex","adhesive","collagen"].filter(function(a){return allerg.indexOf(a)>=0&&txStr.indexOf(a)>=0;});
+    if(conflict.length){if(!confirm("⚠ Possible allergy conflict ("+conflict.join(", ")+") between the resident's allergies and the dressing/treatment.\n\nSave anyway?"))return;}}
+  if(!rec.chart)rec.chart=[];if(!rec.audit)rec.audit=[];
+  var en={dt:gv("wf-date")||today,stage:gv("wf-stage"),tx:gv("wf-tx"),heal:gv("wf-heal"),inf:gv("wf-inf")==="Yes",
+    L:newL,W:newW,D:newD,
+    tissueG:gnum("wf-tissueG"),tissueS:gnum("wf-tissueS"),tissueE:gnum("wf-tissueE"),tissueEp:gnum("wf-tissueEp"),
+    edges:gv("wf-edges"),periwound:gv("wf-periwound"),underDepth:gnum("wf-underDepth"),underLoc:gv("wf-underLoc"),tunDepth:gnum("wf-tunDepth"),tunLoc:gv("wf-tunLoc"),
+    exAmt:gv("wf-exAmt"),exType:gv("wf-exType"),odor:gv("wf-odor")==="Yes",pain:gnum("wf-pain"),
+    infSev:gv("wf-infSev"),culture:gv("wf-culture"),organism:gv("wf-organism"),abx:gv("wf-abx"),osteo:gv("wf-osteo"),
+    abi:abi,abiDate:gv("wf-abiDate"),vascular:gv("wf-vascular"),
+    bSensory:gnum("wf-bSensory"),bMoisture:gnum("wf-bMoisture"),bActivity:gnum("wf-bActivity"),bMobility:gnum("wf-bMobility"),bNutrition:gnum("wf-bNutrition"),bFriction:gnum("wf-bFriction"),braden:braden,
+    classSys:gv("wf-classSys"),classGrade:gv("wf-classGrade"),poa:gv("wf-poa"),avoidable:gv("wf-avoidable"),rootcause:gv("wf-rootcause"),
+    support:gv("wf-support"),reposition:gv("wf-reposition"),heelOff:gv("wf-heelOff")==="Yes",prophyl:gv("wf-prophyl")==="Yes",
+    debride:gv("wf-debride"),dressPrimary:gv("wf-dressPrimary"),dressFreq:gv("wf-dressFreq"),offload:gv("wf-offload"),compression:compression,vac:gv("wf-vac")==="Yes",vacSetting:gv("wf-vacSetting"),
+    collagen:gv("wf-collagen")==="Yes",graft:gv("wf-graft")==="Yes",graftType:gv("wf-graftType"),pcrReq:gv("wf-pcrReq")==="Yes",pcrDone:gv("wf-pcrDone")==="Yes",
+    orderProvider:gv("wf-orderProvider"),orderDate:gv("wf-orderDate"),
+    albumin:albumin,prealbumin:gnum("wf-prealbumin"),weightTrend:gv("wf-weightTrend"),dietary:gv("wf-dietary")==="Yes",
+    goal:gv("wf-goal"),consults:gv("wf-consults"),icd:gv("wf-icd"),cpt:gv("wf-cpt"),units:gv("wf-units"),
+    photo:photoData||"",consent:gv("wf-consent")==="Yes",education:gv("wf-education"),
+    notes:notes,by:gv("wf-by")||"Wound Team",attest:gv("wf-attest")==="Yes",cosign:gv("wf-cosign")};
+  en.area=(en.L&&en.W)?+(en.L*en.W).toFixed(1):null;
+  en.push=pushScore(en);
   rec.chart.push(en);
   rec.stage=en.stage;if(en.tx)rec.tx=en.tx;rec.heal=en.heal;rec.inf=en.inf;rec.ls=en.dt;if(en.notes)rec.notes=en.notes;
   rec.poa=en.poa;rec.braden=braden;rec.debride=en.debride;rec.vac=en.vac;rec.albumin=albumin;rec.vascular=en.vascular;rec.dietary=en.dietary;
-  rec.graft=en.graft;rec.collagen=en.collagen;rec.pcrReq=en.pcrReq;rec.pcrDone=en.pcrDone;if(en.graft&&!rec.graftDate)rec.graftDate=en.dt;if(en.pcrDone&&!rec.pcrDate)rec.pcrDate=en.dt;
+  rec.graft=en.graft;rec.collagen=en.collagen;rec.pcrReq=en.pcrReq;rec.pcrDone=en.pcrDone;if(en.graftType)rec.graftType=en.graftType;
+  rec.abi=en.abi;rec.goal=en.goal;rec.classSys=en.classSys;rec.classGrade=en.classGrade;rec.osteo=en.osteo;rec.infSev=en.infSev;rec.avoidable=en.avoidable;
+  if(en.graft&&!rec.graftDate)rec.graftDate=en.dt;if(en.pcrDone&&!rec.pcrDate)rec.pcrDate=en.dt;
   var pvv=gv("wf-pv");if(pvv)rec.pv=pvv;
   if(en.heal==="Healed"&&!rec.healedDate)rec.healedDate=en.dt;
   if(en.heal!=="Healed")rec.healedDate="";
-  cht(0);
-  wRefresh();
-  // Also refresh dashboard alerts
-  renderDashAlerts();renderDashActions();
-  alert("✓ Wound chart updated."+(woundIsStale(rec)?"":"\n\n✅ Stale alert cleared."));
+  rec.audit.push({dt:nowStamp(),by:en.by,action:"Assessment saved ("+en.dt+")"+(en.attest?" · attested":"")+(en.cosign?" · co-sign "+en.cosign:"")+(en.photo?" · photo added":"")});
+  cht(0);wRefresh();renderDashAlerts();renderDashActions();
+  alert("✓ Wound chart updated."+(woundIsStale(rec)?"":"\n\n✅ Alert cleared.")+(en.area!=null?"\nArea: "+en.area+" cm²"+(en.push!=null?" · PUSH "+en.push:""):""));
 }
 
 function saveEntry(){
@@ -1259,7 +1392,10 @@ function buildHistory(){
   var trend="";
   if(tp==="wound"&&hist.some(function(h){return h.L;})){
     var pts=[].concat(rec.chart||[]).filter(function(h){return h.L;});
-    trend='<div class="card cp" style="margin-bottom:13px"><div class="st">Wound Size Trend</div><table class="tbl" style="font-size:11px"><thead><tr><th>Date</th><th>L</th><th>W</th><th>D</th><th>Stage</th><th>Healing</th><th>Infection</th></tr></thead><tbody>'+pts.map(function(h){return'<tr><td>'+h.dt+'</td><td>'+(h.L||"—")+'</td><td>'+(h.W||"—")+'</td><td>'+(h.D||"—")+'</td><td>'+sP(h.stage)+'</td><td style="color:'+hC(h.heal)+';font-weight:700">'+h.heal+'</td><td>'+(h.inf?'<span class="pill pr2">Active</span>':'<span style="color:var(--tl)">✓</span>')+'</td></tr>';}).join("")+'</tbody></table></div>';
+    var base=pts[0]?pts[0].L*pts[0].W:0;
+    trend='<div class="card cp" style="margin-bottom:13px"><div class="st">Wound Size & Healing Trajectory</div><div style="overflow-x:auto"><table class="tbl" style="font-size:11px"><thead><tr><th>Date</th><th>L</th><th>W</th><th>D</th><th>Area cm²</th><th>Δ vs base</th><th>PUSH</th><th>Stage</th><th>Healing</th><th>Infection</th></tr></thead><tbody>'+pts.map(function(h){var ar=h.area!=null?h.area:woundAreaOf(h);var dlt=(base>0&&ar!=null)?Math.round((base-ar)/base*100):null;return'<tr><td>'+h.dt+'</td><td>'+(h.L||"—")+'</td><td>'+(h.W||"—")+'</td><td>'+(h.D||"—")+'</td><td class="b">'+(ar!=null?ar:"—")+'</td><td style="color:'+(dlt==null?"var(--mu)":dlt>=40?"#4f8268":dlt>=0?"#b07d3c":"#b3433a")+';font-weight:700">'+(dlt==null?"—":(dlt>=0?"−":"+")+Math.abs(dlt)+"%")+'</td><td>'+(h.push!=null?h.push:"—")+'</td><td>'+sP(h.stage)+'</td><td style="color:'+hC(h.heal)+';font-weight:700">'+h.heal+'</td><td>'+(h.inf?'<span class="pill pr2">Active</span>':'<span style="color:var(--tl)">✓</span>')+'</td></tr>';}).join("")+'</tbody></table></div></div>';
+    var photos=[].concat(rec.chart||[]).filter(function(h){return h.photo;});
+    if(photos.length){trend+='<div class="card cp" style="margin-bottom:13px"><div class="st">Serial Photos</div><div style="display:flex;gap:9px;flex-wrap:wrap">'+photos.map(function(h){return'<div style="text-align:center"><img src="'+h.photo+'" style="height:120px;border-radius:7px;border:1px solid var(--bd);display:block"><div style="font-size:10px;color:var(--mu);margin-top:3px">'+h.dt+'</div></div>';}).join("")+'</div></div>';}
   }
   if(tp==="psych"){
     var chgs=(rec.chart||[]).filter(function(h,i){return i===0||JSON.stringify(h.meds)!==JSON.stringify((rec.chart||[])[i-1].meds);});
@@ -1271,6 +1407,7 @@ function buildHistory(){
   if(tp==="primary"&&(rec.chart||[]).length){
     trend='<div class="card cp" style="margin-bottom:13px"><div class="st">Monthly Metrics History</div><table class="tbl" style="font-size:11px"><thead><tr><th>Date</th><th>RTH%</th><th>Infections</th><th>TH Visits</th><th>Visits/Wk</th><th>Census</th><th>By</th></tr></thead><tbody>'+[].concat(rec.chart||[]).map(function(h){return'<tr><td>'+h.dt+'</td><td style="font-weight:700;color:'+rC(h.rth)+'">'+h.rth+'%</td><td>'+h.inf+'</td><td>'+h.thVisits+'</td><td>'+h.vwk+'</td><td>'+h.cs+'</td><td>'+(h.by||"—")+'</td></tr>';}).join("")+'</tbody></table></div>';
   }
+  if(tp==="wound"&&rec.audit&&rec.audit.length){trend+='<div class="card cp" style="margin-bottom:13px"><div class="st">Audit Trail</div><table class="tbl" style="font-size:11px"><thead><tr><th>Timestamp</th><th>User</th><th>Action</th></tr></thead><tbody>'+[].concat(rec.audit).reverse().map(function(a){return'<tr><td>'+e(a.dt)+'</td><td class="b">'+e(a.by||"—")+'</td><td>'+e(a.action)+'</td></tr>';}).join("")+'</tbody></table></div>';}
   el.innerHTML=trend+'<div class="st">Full Archive — newest first</div><div class="tl2">'+hist.map(function(h,i){return'<div class="te'+(i>0?" old":"")+'"><div class="td2">'+h.dt+(h.by?" · "+h.by:"")+'</div><div class="tc">'+(h.ev?'<div style="font-size:11px;font-weight:700;color:var(--tl);margin-bottom:3px">'+h.ev+'</div>':"")+( (h.st&&tp==="qa")?'<div style="margin-bottom:3px">'+rP(h.st)+(h.h30!==undefined?' <span style="font-size:11px;color:var(--mu)">· Hosps: '+h.h30+'</span>':'')+'</div>':"")+(h.stage?'<div style="font-size:12px;margin-bottom:2px"><b>Stage:</b> '+sP(h.stage)+(h.heal?' · <span style="color:'+hC(h.heal)+';font-weight:700">'+h.heal+'</span>':'')+'</div>':"")+( h.L?'<div style="font-size:12px;color:var(--mu);margin-bottom:2px">Size: '+h.L+'×'+h.W+(h.D?'×'+h.D:'')+'cm</div>':"")+( h.tx?'<div style="font-size:12px;margin-bottom:2px"><b>Tx:</b> '+h.tx+'</div>':"")+( h.meds&&h.meds.length?'<div style="font-size:11px;color:var(--mu);margin-bottom:2px">Meds: '+h.meds.join(" · ")+'</div>':"")+( h.dx?'<div style="font-size:12px;margin-bottom:2px"><b>Dx:</b> '+h.dx+'</div>':"")+( h.notes?'<div style="font-size:12px;color:var(--mu);font-style:italic">'+h.notes+'</div>':"")+'</div></div>';}).join("")+'</div>';
 }
 function buildNotes(){
@@ -1380,9 +1517,9 @@ function woundAlertBadge(w){
   if(!stale&&!lt)return "";
   var parts=[];
   if(stale)parts.push('<span class="pill pr2" title="No measurement update in '+woundDaysSinceUpdate(w)+' days">⚠ Stale '+woundDaysSinceUpdate(w)+'d</span>');
-  if(lt)parts.push('<span class="pill" style="background:#7c3aed22;color:#c4b5fd" title="Day '+woundOnsetDays(w)+' pressure wound">⏱ Day '+woundOnsetDays(w)+'</span>');
+  if(lt)parts.push('<span class="pill" style="background:rgba(138,109,156,.16);color:#6d5a86" title="Day '+woundOnsetDays(w)+' pressure wound">⏱ Day '+woundOnsetDays(w)+'</span>');
   var ot=getOpenTriggers(w).length;
-  if(ot)parts.push('<span class="pill" style="background:#f59e0b22;color:#fcd34d" title="'+ot+' open clinical action item(s)">🚩 '+ot+' action'+(ot>1?"s":"")+'</span>');
+  if(ot)parts.push('<span class="pill" style="background:rgba(176,125,60,.16);color:#946325" title="'+ot+' open clinical action item(s)">🚩 '+ot+' action'+(ot>1?"s":"")+'</span>');
   return parts.join(" ");
 }
 
@@ -1402,6 +1539,16 @@ function getWoundTriggers(w){
   if(w.albumin!=null&&w.albumin<3.0)t.push({key:"nutrition",sev:1,label:"Low albumin ("+w.albumin+" g/dL)",rec:"Dietary / nutrition consult; protein optimization"});
   if(woundNearingLongTerm(w))t.push({key:"longterm",sev:2,label:"Pressure wound near/past 100 days (Day "+onset+")",rec:"Enhanced documentation, care-team review, possible specialist referral"});
   if(w.braden!=null&&w.braden<=12)t.push({key:"braden",sev:1,label:"High pressure-injury risk (Braden "+w.braden+")",rec:"Reinforce repositioning & prevention; weekly skin checks"});
+  var le=(w.chart||[]).slice(-1)[0]||{};
+  var redux=woundAreaReductionPct(w);
+  if(onset>=28&&redux!=null&&redux<40)t.push({key:"noreduce",sev:3,label:"<40% area reduction at 4+ weeks ("+(redux>=0?redux:"+"+Math.abs(redux))+"%)",rec:"Reassess etiology/offloading/perfusion; consider advanced therapy (CTP/graft) or specialist referral"});
+  var lower=(w.tp==="Venous Ulcer"||w.tp==="Arterial Ulcer"||w.tp==="Diabetic Ulcer");
+  if(w.abi!=null&&w.abi<0.8&&(w.tp==="Venous Ulcer"||(le.compression&&le.compression!=="")))t.push({key:"abicomp",sev:3,label:"ABI "+w.abi+" (<0.8) with compression",rec:"Hold/reduce compression; urgent vascular referral — risk of arterial compromise"});
+  if(lower&&w.abi==null)t.push({key:"abimiss",sev:1,label:"No ABI documented for a lower-extremity wound",rec:"Obtain ABI to assess perfusion before compression"});
+  if(le.osteo&&(le.osteo.indexOf("Suspected")>=0||le.osteo==="Confirmed"))t.push({key:"osteo",sev:3,label:"Osteomyelitis: "+le.osteo,rec:"ID/ortho referral, MRI, bone culture; consider IV antibiotics"});
+  if(le.pain!=null&&le.pain>=7)t.push({key:"pain",sev:2,label:"Severe wound pain ("+le.pain+"/10)",rec:"Pain management; reassess dressing choice & procedural analgesia"});
+  if(le.bNutrition!=null&&le.bNutrition<=2)t.push({key:"nutsub",sev:1,label:"Braden nutrition subscore "+le.bNutrition,rec:"Registered dietitian consult; protein 1.25–1.5 g/kg, 30–35 kcal/kg"});
+  if(w.poa==="Facility-Acquired"&&(!w.avoidable||w.avoidable==="Not assessed"))t.push({key:"avoid",sev:2,label:"Facility-acquired wound — avoidability not determined",rec:"Complete avoidable/unavoidable determination & root-cause (F686)"});
   return t;
 }
 function getOpenTriggers(w){var r=w.triggerResp||{};return getWoundTriggers(w).filter(function(t){return!r[t.key];});}
@@ -1493,11 +1640,27 @@ function openAddWound(){
   var fs=document.getElementById("aw-fac");
   if(fs)fs.innerHTML='<option value="">— Select —</option>'+FACS.map(function(f){return'<option>'+e(f.name)+'</option>';}).join("");
   if(fs&&wFac!=="All"){fs.value=wFac;awFacChange();}else{var pt=document.getElementById("aw-pt");if(pt)pt.innerHTML='<option value="">— Select facility first —</option>';}
-  ["aw-loc","aw-L","aw-W","aw-D","aw-braden","aw-tx","aw-notes"].forEach(function(id){sv(id,"");});
+  ["aw-loc","aw-L","aw-W","aw-D","aw-braden","aw-tx","aw-notes","aw-classGrade","aw-abi","aw-abiDate"].forEach(function(id){sv(id,"");});
   sv("aw-pv",(currentUser&&currentUser.name)||"");
   var d=new Date(),mm=("0"+(d.getMonth()+1)).slice(-2),dd=("0"+d.getDate()).slice(-2);
   sv("aw-onset",d.getFullYear()+"-"+mm+"-"+dd);
+  var bm=document.getElementById("aw-bodymap");if(bm)bm.style.display="none";
   oM("m-addwound");
+}
+function toggleBodyMap(){var bm=document.getElementById("aw-bodymap");if(!bm)return;if(bm.style.display==="none"){bm.innerHTML=bodyMapHtml();bm.style.display="block";}else{bm.style.display="none";}}
+function pickBodySite(s){sv("aw-loc",s);var bm=document.getElementById("aw-bodymap");if(bm)bm.innerHTML=bodyMapHtml(s);}
+function bodyMapHtml(sel){
+  var sites=[
+    {x:150,y:24,r:"Occiput"},{x:120,y:70,r:"R. Scapula"},{x:180,y:70,r:"L. Scapula"},
+    {x:118,y:120,r:"R. Elbow"},{x:182,y:120,r:"L. Elbow"},
+    {x:150,y:150,r:"Sacrum"},{x:150,y:168,r:"Coccyx"},
+    {x:128,y:150,r:"R. Ischium"},{x:172,y:150,r:"L. Ischium"},
+    {x:120,y:138,r:"R. Trochanter"},{x:180,y:138,r:"L. Trochanter"},
+    {x:132,y:250,r:"R. Heel"},{x:168,y:250,r:"L. Heel"},
+    {x:130,y:205,r:"R. Lat. Malleolus"},{x:170,y:205,r:"L. Lat. Malleolus"}
+  ];
+  var dots=sites.map(function(s){var on=sel===s.r;return '<g style="cursor:pointer" onclick="pickBodySite(\''+s.r+'\')"><circle cx="'+s.x+'" cy="'+s.y+'" r="'+(on?7:5)+'" fill="'+(on?"#3f7d76":"#fff")+'" stroke="#3f7d76" stroke-width="1.5"/><title>'+s.r+'</title></g>';}).join("");
+  return '<div style="display:flex;gap:16px;align-items:center;background:#fbfcfc;border:1px solid var(--bd);border-radius:9px;padding:12px"><svg viewBox="0 0 300 280" width="170" height="160"><ellipse cx="150" cy="24" rx="16" ry="18" fill="#eef1f1" stroke="#cfd6d4"/><rect x="120" y="44" width="60" height="92" rx="14" fill="#eef1f1" stroke="#cfd6d4"/><rect x="100" y="60" width="20" height="70" rx="9" fill="#eef1f1" stroke="#cfd6d4"/><rect x="180" y="60" width="20" height="70" rx="9" fill="#eef1f1" stroke="#cfd6d4"/><rect x="122" y="135" width="24" height="115" rx="11" fill="#eef1f1" stroke="#cfd6d4"/><rect x="154" y="135" width="24" height="115" rx="11" fill="#eef1f1" stroke="#cfd6d4"/>'+dots+'</svg><div style="font-size:11px;color:var(--mu);line-height:1.6"><div style="font-weight:700;color:var(--tx);margin-bottom:3px">Posterior pressure points</div>Click a common pressure-injury site to set the location.<div style="margin-top:6px">Selected: <b style="color:#356b64">'+(sel||"—")+'</b></div></div></div>';
 }
 function awFacChange(){
   var fac=gv("aw-fac");var pt=document.getElementById("aw-pt");if(!pt)return;
@@ -1512,11 +1675,16 @@ function saveNewWound(){
   var L=parseFloat(gv("aw-L"))||null,W=parseFloat(gv("aw-W"))||null,D=parseFloat(gv("aw-D"))||null;
   var braden=gv("aw-braden")!==""?parseInt(gv("aw-braden")):null;
   var id="w"+(Date.now());
-  var en={dt:onset,stage:gv("aw-stage"),tx:gv("aw-tx"),heal:gv("aw-heal"),inf:gv("aw-inf")==="Yes",L:L,W:W,D:D,braden:braden,poa:gv("aw-poa"),notes:gv("aw-notes")||"Wound added to watch list.",by:gv("aw-pv")||"Wound Team"};
+  var abi=gv("aw-abi")!==""?parseFloat(gv("aw-abi")):null;
+  var en={dt:onset,stage:gv("aw-stage"),tx:gv("aw-tx"),heal:gv("aw-heal"),inf:gv("aw-inf")==="Yes",L:L,W:W,D:D,braden:braden,poa:gv("aw-poa"),
+    abi:abi,abiDate:gv("aw-abiDate"),classSys:gv("aw-classSys"),classGrade:gv("aw-classGrade"),goal:gv("aw-goal"),consent:gv("aw-consent")==="Yes",
+    area:(L&&W)?+(L*W).toFixed(1):null,notes:gv("aw-notes")||"Wound added to watch list.",by:gv("aw-pv")||"Wound Team"};
+  en.push=pushScore(en);
   var w={id:id,ptId:ptId,name:p.name,fac:fac,tp:tp,stage:gv("aw-stage"),loc:loc,etio:gv("aw-etio"),tx:gv("aw-tx"),ls:onset,heal:gv("aw-heal"),inf:gv("aw-inf")==="Yes",notes:gv("aw-notes")||"",
     poa:gv("aw-poa"),braden:braden,debride:"None",vac:false,vacBrand:"",albumin:null,vascular:"Not assessed",dietary:false,
+    abi:abi,goal:gv("aw-goal"),classSys:gv("aw-classSys"),classGrade:gv("aw-classGrade"),avoidable:(gv("aw-poa")==="Facility-Acquired"?"Not assessed":""),
     graft:gv("aw-graft")==="Yes",graftType:"",graftDate:"",collagen:gv("aw-collagen")==="Yes",pcrReq:gv("aw-pcr")==="Yes",pcrDone:false,pcrDate:"",
-    pv:gv("aw-pv")||"Wound Team",triggerResp:{},onset:onset,healedDate:"",chart:[en]};
+    pv:gv("aw-pv")||"Wound Team",triggerResp:{},onset:onset,healedDate:"",audit:[{dt:nowStamp(),by:(gv("aw-pv")||"Wound Team"),action:"Wound created on watch list"}],chart:[en]};
   WOUNDS.push(w);
   cM("m-addwound");
   wFac=fac;wProv="All";
@@ -1540,6 +1708,7 @@ function wTab(i){
 function wRefresh(){wTab(wCurrentTab);}
 function wIsPressure(w){return w.etio==="Pressure"||w.tp==="Pressure Injury";}
 function wStage2Plus(w){return["Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."].indexOf(w.stage)>=0;}
+function stageNum(s){return ({"Stage 1":1,"Stage 2":2,"Stage 3":3,"Stage 4":4,"Unstageable":4,"Deep Tissue Inj.":3})[s]||0;}
 function wIsHealed(w){return w.heal==="Healed";}
 function wIsNew(w){var d=parseDate(w.onset);return d?daysBetween(d,new Date())<=30:false;}
 function wHealTimeDays(w){if(w.heal!=="Healed")return null;var a=parseDate(w.onset),b=parseDate(w.healedDate);return(a&&b)?daysBetween(a,b):null;}
@@ -1572,11 +1741,11 @@ function renderWAnalytics(){
   var qs={};w.forEach(function(x){var q=wQuarter(x.onset);if(q){qs[q]=qs[q]||{q:q,nw:0,hl:0};qs[q].nw++;}if(wIsHealed(x)){var hq=wQuarter(x.healedDate);if(hq){qs[hq]=qs[hq]||{q:hq,nw:0,hl:0};qs[hq].hl++;}}});
   var qArr=Object.keys(qs).sort().map(function(k){return qs[k];});
   el.innerHTML='<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:13px">'+
-    wk(w.length,"Total Wounds","#e2e8f0")+wk(neu.length,"New (30d)","#7dd3fc")+wk(healed.length,"Healed","#6ee7b7")+wk(hp+"%","Healing Rate","#3ecfb2")+
-    wk(avgHt!=null?avgHt+"d":"—","Avg Healing Time","#a78bfa")+wk(s2.length,"Stage 2+","#fca5a5")+wk(whCount,"Wound-Rel. Hosp.",whCount?"#f87171":"#6ee7b7",whCount>0)+wk(inf.length,"Infected",inf.length?"#f87171":"#6ee7b7",inf.length>0)+'</div>'+
+    wk(w.length,"Total Wounds","var(--tx)")+wk(neu.length,"New (30d)","var(--bl)")+wk(healed.length,"Healed","var(--gn)")+wk(hp+"%","Healing Rate","var(--ac)")+
+    wk(avgHt!=null?avgHt+"d":"—","Avg Healing Time","var(--pu)")+wk(s2.length,"Stage 2+","var(--am)")+wk(whCount,"Wound-Rel. Hosp.",whCount?"var(--rd)":"var(--gn)",whCount>0)+wk(inf.length,"Infected",inf.length?"var(--rd)":"var(--gn)",inf.length>0)+'</div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:13px"><div class="card cp"><div class="st">Etiology</div><div style="height:160px"><canvas id="wa-c1"></canvas></div></div><div class="card cp"><div class="st">Healing Status</div><div style="height:160px"><canvas id="wa-c2"></canvas></div></div><div class="card cp"><div class="st">New vs Healed Trend</div><div style="height:160px"><canvas id="wa-c3"></canvas></div></div></div>'+
     '<div style="display:grid;grid-template-columns:2fr 1fr;gap:11px;margin-bottom:13px"><div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Facility Benchmarks</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Census</th><th>Wounds</th><th>Prevalence</th><th>Pressure</th><th>Stage 2+</th><th>Infected</th><th>Healing</th><th>Avg Heal</th><th>Hosp</th></tr></thead><tbody>'+byFac.filter(function(f){return f.total>0;}).map(function(f){return'<tr><td class="b">'+f.fac+'</td><td>'+f.cs+'</td><td style="font-weight:700">'+f.total+'</td><td style="color:'+(f.prev>5?"#f87171":f.prev>3?"#fcd34d":"#6ee7b7")+';font-weight:700">'+f.prev+'%</td><td style="color:#fca5a5">'+f.pressure+'</td><td>'+f.s2+'</td><td style="color:'+(f.inf?"#f87171":"var(--mu)")+'">'+f.inf+'</td><td style="color:'+(f.hp>=70?"var(--tl)":f.hp>=40?"var(--am)":"#f87171")+';font-weight:700">'+f.hp+'%</td><td>'+f.avgHt+(f.avgHt!=="—"?"d":"")+'</td><td style="color:'+(f.wh?"#f87171":"var(--mu)")+'">'+f.wh+'</td></tr>';}).join("")+'</tbody></table></div></div>'+
-    '<div class="card cp"><div class="st">Quarterly Metrics</div><table class="tbl" style="font-size:11px"><thead><tr><th>Quarter</th><th>New Wounds</th><th>Healed</th></tr></thead><tbody>'+(qArr.length?qArr.map(function(q){return'<tr><td class="b">'+q.q+'</td><td style="color:#7dd3fc;font-weight:700">'+q.nw+'</td><td style="color:#6ee7b7;font-weight:700">'+q.hl+'</td></tr>';}).join(""):'<tr><td colspan="3" style="color:var(--mu)">No dated wounds</td></tr>')+'</tbody></table><div style="font-size:10px;color:var(--mu);margin-top:8px;line-height:1.5">Marketable metrics for hospital partners & QAPI: healing rates, average healing time, and wound-related rehospitalizations.</div></div></div>';
+    '<div class="card cp"><div class="st">Quarterly Metrics</div><table class="tbl" style="font-size:11px"><thead><tr><th>Quarter</th><th>New Wounds</th><th>Healed</th></tr></thead><tbody>'+(qArr.length?qArr.map(function(q){return'<tr><td class="b">'+q.q+'</td><td style="color:var(--bl);font-weight:700">'+q.nw+'</td><td style="color:var(--gn);font-weight:700">'+q.hl+'</td></tr>';}).join(""):'<tr><td colspan="3" style="color:var(--mu)">No dated wounds</td></tr>')+'</tbody></table><div style="font-size:10px;color:var(--mu);margin-top:8px;line-height:1.5">Marketable metrics for hospital partners & QAPI: healing rates, average healing time, and wound-related rehospitalizations.</div></div></div>';
   setTimeout(function(){
     mkChart("wa-c1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#aeb4b3","#3f7d76"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom"}},scales:{x:{display:false},y:{display:false}}});
     mkChart("wa-c2","doughnut",["Progressing","Improving","Stable","Slow","Worsening","Healed"],[{data:["Progressing","Improving","Stable","Slow","Worsening","Healed"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#5b8c6e","#9bbdb8","#d2d6d5","#b07d3c","#b3433a","#3f7d76"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
@@ -1596,12 +1765,20 @@ function renderWQuality(){
   var prev=totalCs?Math.round(pr.length/totalCs*1000)/10:0;
   var infRate=w.length?Math.round(w.filter(function(x){return x.inf;}).length/w.length*100):0;
   var avgRth=facs.length?(facs.reduce(function(a,f){return a+f.rth;},0)/facs.length).toFixed(1):"—";
-  document.getElementById("w-sub").textContent="QAPI Quality Measures · "+pr.length+" pressure injuries · "+prev+"% prevalence";
+  var worsened=pr.filter(function(x){var c=x.chart||[];var fs=c.length?stageNum(c[0].stage):0;return stageNum(x.stage)>fs&&fs>0;});
+  var newWorsened=pr.filter(function(x){var fa=(x.poa||"").indexOf("Facility")>=0;var c=x.chart||[];var fs=c.length?stageNum(c[0].stage):0;return fa||(stageNum(x.stage)>fs&&fs>0);});
+  var avoidableN=acq.filter(function(x){return x.avoidable==="Avoidable";}).length;
+  var unavoidN=acq.filter(function(x){return x.avoidable==="Unavoidable";}).length;
+  var undet=acq.filter(function(x){return!x.avoidable||x.avoidable==="Not assessed";}).length;
+  var incidence=totalCs?Math.round(acq.length/totalCs*1000)/10:0;
+  document.getElementById("w-sub").textContent="QAPI / MDS Section M · "+pr.length+" pressure injuries · "+prev+"% prevalence";
   var byFac=facs.map(function(f){var fw=w.filter(function(x){return x.fac===f.name;});var fp=fw.filter(wIsPressure);var fac=fp.filter(function(x){return(x.poa||"").indexOf("Facility")>=0;});return{fac:f.name,co:f.co,cs:f.cs,pi:fp.length,prev:f.cs?Math.round(fp.length/f.cs*1000)/10:0,acq:fac.length,inf:fw.filter(function(x){return x.inf;}).length,infRate:fw.length?Math.round(fw.filter(function(x){return x.inf;}).length/fw.length*100):0,rth:f.rth};});
-  el.innerHTML='<div style="background:#0ea5e912;border:1px solid #0ea5e933;border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#7dd3fc;margin-bottom:4px">📋 QAPI Key Targets — Quality Measure Support</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Tracking the four CMS-aligned targets the wound team reports into monthly QAPI: <b style="color:#e2e8f0">Pressure Ulcer Prevalence</b>, <b style="color:#e2e8f0">New / Facility-Acquired Pressure Injuries</b>, <b style="color:#e2e8f0">Infection Rates</b>, and <b style="color:#e2e8f0">Return-to-Hospital Rates</b>.</div></div>'+
-    '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:13px">'+
-    wk(prev+"%","PI Prevalence",prev>5?"#f87171":"#fcd34d",prev>5)+wk(acq.length,"Facility-Acquired PI",acq.length?"#f87171":"#6ee7b7",acq.length>0)+wk(poa.length,"Present-on-Admission","#7dd3fc")+wk(infRate+"%","Infection Rate",infRate>20?"#f87171":"#fcd34d",infRate>20)+wk(avgRth+"%","Avg RTH Rate",parseFloat(avgRth)>18?"#f87171":"#fcd34d",parseFloat(avgRth)>18)+'</div>'+
-    '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Quality Measures by Facility</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Census</th><th>Pressure Injuries</th><th>Prevalence</th><th>Facility-Acquired</th><th>Infection Rate</th><th>RTH%</th></tr></thead><tbody>'+byFac.map(function(f){return'<tr style="'+(f.acq||f.prev>5?"background:#ef44440a;":"")+'"><td class="b">'+f.fac+'</td><td>'+coB(f.co)+'</td><td>'+f.cs+'</td><td style="font-weight:700;color:#fca5a5">'+f.pi+'</td><td style="font-weight:700;color:'+(f.prev>5?"#f87171":f.prev>3?"#fcd34d":"#6ee7b7")+'">'+f.prev+'%</td><td style="color:'+(f.acq?"#f87171":"var(--mu)")+';font-weight:700">'+f.acq+'</td><td style="color:'+(f.infRate>20?"#f87171":"var(--mu)")+'">'+f.infRate+'%</td><td style="font-weight:700;color:'+rC(f.rth)+'">'+f.rth+'%</td></tr>';}).join("")+'</tbody></table></div></div>'+
+  el.innerHTML='<div style="background:rgba(63,125,118,.08);border:1px solid rgba(63,125,118,.22);border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#356b64;margin-bottom:4px">📋 QAPI &amp; CMS MDS 3.0 Section M / F686</div><div style="font-size:11px;color:var(--mu);line-height:1.5">CMS-aligned measures reported into monthly QAPI: <b style="color:var(--tx)">prevalence</b>, <b style="color:var(--tx)">incidence (facility-acquired)</b>, <b style="color:var(--tx)">new or worsened pressure injuries</b> (deepest stage, no back-staging), infection and return-to-hospital rates, and <b style="color:var(--tx)">avoidable vs unavoidable (F686)</b> determinations.</div></div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:9px">'+
+    wk(prev+"%","PI Prevalence",prev>5?"var(--rd)":"var(--am)",prev>5)+wk(incidence+"%","PI Incidence (FA)",incidence>0?"var(--rd)":"var(--gn)",incidence>0)+wk(newWorsened.length,"New / Worsened PI",newWorsened.length?"var(--rd)":"var(--gn)",newWorsened.length>0)+wk(worsened.length,"Worsened in-stay","var(--am)")+'</div>'+
+    '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px">'+
+    wk(poa.length,"Present-on-Admission","var(--bl)")+wk(infRate+"%","Infection Rate",infRate>20?"var(--rd)":"var(--am)",infRate>20)+wk(avgRth+"%","Avg RTH Rate",parseFloat(avgRth)>18?"var(--rd)":"var(--am)",parseFloat(avgRth)>18)+wk(unavoidN+"/"+avoidableN,"Unavoid / Avoid"+(undet?" ("+undet+"?)":""),undet?"var(--am)":"var(--gn)",undet>0)+'</div>'+
+    '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Quality Measures by Facility</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Census</th><th>Pressure Injuries</th><th>Prevalence</th><th>Facility-Acquired</th><th>Infection Rate</th><th>RTH%</th></tr></thead><tbody>'+byFac.map(function(f){return'<tr style="'+(f.acq||f.prev>5?"background:rgba(179,67,58,.05);":"")+'"><td class="b">'+f.fac+'</td><td>'+coB(f.co)+'</td><td>'+f.cs+'</td><td style="font-weight:700">'+f.pi+'</td><td style="font-weight:700;color:'+(f.prev>5?"var(--rd)":f.prev>3?"var(--am)":"var(--gn)")+'">'+f.prev+'%</td><td style="color:'+(f.acq?"var(--rd)":"var(--mu)")+';font-weight:700">'+f.acq+'</td><td style="color:'+(f.infRate>20?"var(--rd)":"var(--mu)")+'">'+f.infRate+'%</td><td style="font-weight:700;color:'+rC(f.rth)+'">'+f.rth+'%</td></tr>';}).join("")+'</tbody></table></div></div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px"><div class="card cp"><div class="st">Pressure Injury Origin</div><div style="height:160px"><canvas id="wq-c1"></canvas></div></div><div class="card cp"><div class="st">Prevalence by Facility</div><div style="height:160px"><canvas id="wq-c2"></canvas></div></div></div>';
   setTimeout(function(){
     mkChart("wq-c1","doughnut",["Facility-Acquired","Present on Admission"],[{data:[acq.length,poa.length],backgroundColor:["#b3433a","#d2d6d5"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
@@ -1618,9 +1795,9 @@ function renderWSkin(){
   var withW=rows.filter(function(r){return r.wd.length;});
   var acqAll=WOUNDS.filter(function(x){return wIsPressure(x)&&(x.poa||"").indexOf("Facility")>=0&&(wFac==="All"||x.fac===wFac);});
   document.getElementById("w-sub").textContent="Skin Integrity Program · "+rows.length+" residents on watch · "+hot.length+" high-risk (Braden ≤14)";
-  el.innerHTML='<div style="background:#7c3aed12;border:1px solid #7c3aed33;border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#c4b5fd;margin-bottom:4px">🧴 Comprehensive Skin Integrity Program</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Every resident — not just pressure ulcers — is on the watch list. Residents with <b style="color:#e2e8f0">Braden ≤ 14</b> are flagged to the hot list for <b style="color:#e2e8f0">twice-weekly oversight</b> and active pressure-prevention review.</div></div>'+
+  el.innerHTML='<div style="background:rgba(138,109,156,.08);border:1px solid rgba(138,109,156,.22);border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#6d5a86;margin-bottom:4px">🧴 Comprehensive Skin Integrity Program</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Every resident — not just pressure ulcers — is on the watch list. Residents with <b style="color:var(--tx)">Braden ≤ 14</b> are flagged to the hot list for <b style="color:var(--tx)">twice-weekly oversight</b> and active pressure-prevention review.</div></div>'+
     '<div style="display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:13px">'+
-    wk(rows.length,"Residents Monitored","#e2e8f0")+wk(hot.length,"Hot List (≤14)",hot.length?"#f87171":"#6ee7b7",hot.length>0)+wk(withW.length,"With Active Wound","#7dd3fc")+wk(acqAll.length,"Facility-Acquired",acqAll.length?"#fca5a5":"#6ee7b7",acqAll.length>0)+wk(rows.filter(function(r){return!r.wd.length&&r.hot;}).length,"At-Risk, No Wound","#fcd34d")+'</div>'+
+    wk(rows.length,"Residents Monitored","var(--tx)")+wk(hot.length,"Hot List (≤14)",hot.length?"var(--rd)":"var(--gn)",hot.length>0)+wk(withW.length,"With Active Wound","var(--bl)")+wk(acqAll.length,"Facility-Acquired",acqAll.length?"var(--rd)":"var(--gn)",acqAll.length>0)+wk(rows.filter(function(r){return!r.wd.length&&r.hot;}).length,"At-Risk, No Wound","var(--am)")+'</div>'+
     '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Braden Watch List — sorted by risk</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Resident</th><th>Facility</th><th>Braden</th><th>Risk</th><th>Active Wound</th><th>Oversight</th><th>Pressure Prevention</th></tr></thead><tbody>'+rows.map(function(r){return'<tr style="'+(r.hot?"background:#ef44440a;":"")+'"><td class="b">'+r.p.name+'</td><td style="font-size:11px">'+r.p.fac+'</td><td style="font-weight:800;color:'+r.risk.c+'">'+(r.b==null?"—":r.b)+'</td><td><span class="pill" style="background:'+r.risk.c+'22;color:'+r.risk.c+'">'+r.risk.l+'</span></td><td>'+(r.wd.length?r.wd.map(function(x){return'<span class="pill pr2" style="cursor:pointer" onclick="openChart(\'wound\',\''+x.id+'\')">'+x.tp+'</span>';}).join(" "):'<span style="color:var(--tl)">none</span>')+'</td><td style="font-weight:700;color:'+(r.hot?"#f87171":"var(--mu)")+'">'+r.freq+'</td><td style="font-size:11px;color:var(--mu)">'+(r.hot?"Repositioning q2h · surface eval · nutrition":r.b<=18?"Repositioning · skin checks":"Standard skin care")+'</td></tr>';}).join("")+'</tbody></table></div></div>';
 }
 
@@ -1633,10 +1810,10 @@ function renderWRounds(){
   var totalOver=rows.reduce(function(a,r){return a+r.overdue;},0);
   var onTrack=rows.filter(function(r){return r.status==="On Track";}).length;
   document.getElementById("w-sub").textContent="Weekly Wound Rounds · "+rows.filter(function(r){return r.wounds;}).length+" facilities with active wounds · "+totalOver+" overdue";
-  el.innerHTML='<div style="background:#10b98112;border:1px solid #10b98133;border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#6ee7b7;margin-bottom:4px">📅 Weekly Wound Rounds — the most important program element</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Each facility runs dedicated wound rounds on a set day each week. Protocol: any wound with <b style="color:#e2e8f0">no change in 7 days is re-evaluated</b>. Wounds overdue for documentation appear below as Action Needed.</div></div>'+
+  el.innerHTML='<div style="background:rgba(91,140,110,.10);border:1px solid rgba(91,140,110,.25);border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#3f7d5e;margin-bottom:4px">📅 Weekly Wound Rounds — the most important program element</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Each facility runs dedicated wound rounds on a set day each week. Protocol: any wound with <b style="color:var(--tx)">no change in 7 days is re-evaluated</b>. Wounds overdue for documentation appear below as Action Needed.</div></div>'+
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px">'+
-    wk(rows.filter(function(r){return r.wounds;}).length,"Facilities w/ Rounds","#e2e8f0")+wk(onTrack,"On Track","#6ee7b7")+wk(rows.filter(function(r){return r.status==="Action Needed";}).length,"Action Needed",totalOver?"#f87171":"#6ee7b7",totalOver>0)+wk(totalOver,"Wounds Overdue",totalOver?"#f87171":"#6ee7b7",totalOver>0)+'</div>'+
-    '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Rounds Schedule & Compliance</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Rounds Day</th><th>Active Wounds</th><th>Most Recent Update</th><th>Overdue (7d+)</th><th>Status</th></tr></thead><tbody>'+rows.map(function(r){var sc=r.status==="On Track"?"#6ee7b7":r.status==="Action Needed"?"#f87171":"#8a9ab0";return'<tr style="'+(r.overdue?"background:#ef44440a;":"")+'"><td class="b">'+r.fac+'</td><td>'+coB(r.co)+'</td><td style="color:var(--tl)">'+r.day+'</td><td style="font-weight:700">'+r.wounds+'</td><td>'+(r.last==null?"—":r.last+"d ago")+'</td><td style="color:'+(r.overdue?"#f87171":"var(--mu)")+';font-weight:700">'+r.overdue+'</td><td><span class="pill" style="background:'+sc+'22;color:'+sc+'">'+r.status+'</span></td></tr>';}).join("")+'</tbody></table></div></div>';
+    wk(rows.filter(function(r){return r.wounds;}).length,"Facilities w/ Rounds","var(--tx)")+wk(onTrack,"On Track","var(--gn)")+wk(rows.filter(function(r){return r.status==="Action Needed";}).length,"Action Needed",totalOver?"var(--rd)":"var(--gn)",totalOver>0)+wk(totalOver,"Wounds Overdue",totalOver?"var(--rd)":"var(--gn)",totalOver>0)+'</div>'+
+    '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Rounds Schedule & Compliance</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Rounds Day</th><th>Active Wounds</th><th>Most Recent Update</th><th>Overdue (7d+)</th><th>Status</th></tr></thead><tbody>'+rows.map(function(r){var sc=r.status==="On Track"?"#4f8268":r.status==="Action Needed"?"#b3433a":"#8a8f93";return'<tr style="'+(r.overdue?"background:rgba(179,67,58,.05);":"")+'"><td class="b">'+r.fac+'</td><td>'+coB(r.co)+'</td><td style="color:var(--ac)">'+r.day+'</td><td style="font-weight:700">'+r.wounds+'</td><td>'+(r.last==null?"—":r.last+"d ago")+'</td><td style="color:'+(r.overdue?"#b3433a":"var(--mu)")+';font-weight:700">'+r.overdue+'</td><td><span class="pill" style="background:'+sc+'22;color:'+sc+'">'+r.status+'</span></td></tr>';}).join("")+'</tbody></table></div></div>';
 }
 
 function renderWRehosp(){
@@ -1647,10 +1824,10 @@ function renderWRehosp(){
   var readmit=hs.filter(function(h){return h.readmit;}).length;
   var prevent=hs.filter(function(h){return(h.preventable||"").toLowerCase().indexOf("possibly")>=0||((h.preventable||"").toLowerCase().indexOf("yes")>=0);}).length;
   document.getElementById("w-sub").textContent="Wound-Related Rehospitalizations · "+hs.length+" transfers tracked";
-  el.innerHTML='<div style="background:#ef444412;border:1px solid #ef444433;border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#f87171;margin-bottom:4px">🏥 Wound-Related Rehospitalization Tracking</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Monitoring wound-related transfers — <b style="color:#e2e8f0">Cellulitis</b>, <b style="color:#e2e8f0">Osteomyelitis</b>, and <b style="color:#e2e8f0">Sepsis</b> admissions — to drive down rehospitalization. Marketable to SNFs and hospital partners.</div></div>'+
+  el.innerHTML='<div style="background:rgba(179,67,58,.09);border:1px solid rgba(179,67,58,.22);border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#a23a30;margin-bottom:4px">🏥 Wound-Related Rehospitalization Tracking</div><div style="font-size:11px;color:var(--mu);line-height:1.5">Monitoring wound-related transfers — <b style="color:var(--tx)">Cellulitis</b>, <b style="color:var(--tx)">Osteomyelitis</b>, and <b style="color:var(--tx)">Sepsis</b> admissions — to drive down rehospitalization. Marketable to SNFs and hospital partners.</div></div>'+
     '<div style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:13px">'+
-    wk(hs.length,"Total Transfers",hs.length?"#f87171":"#6ee7b7",hs.length>0)+wk(byType("Sepsis"),"Sepsis","#fca5a5")+wk(byType("Osteomyelitis"),"Osteomyelitis","#fca5a5")+wk(byType("Cellulitis"),"Cellulitis","#fcd34d")+wk(readmit,"30-Day Readmits","#f87171")+wk(prevent,"Potentially Preventable",prevent?"#fcd34d":"#6ee7b7",prevent>0)+'</div>'+
-    '<div style="display:grid;grid-template-columns:2fr 1fr;gap:11px"><div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Transfer Detail</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Patient</th><th>Facility</th><th>Date</th><th>Type</th><th>Diagnosis</th><th>LOS</th><th>Readmit</th><th>Telehealth</th><th>Preventable</th></tr></thead><tbody>'+(hs.length?hs.map(function(h){return'<tr><td class="b"><span style="cursor:pointer;color:#7dd3fc" onclick="openChart(\'wound\',\''+h.woundId+'\')">'+h.name+'</span></td><td style="font-size:11px">'+h.fac+'</td><td>'+h.date+'</td><td><span class="pill pr2">'+h.type+'</span></td><td style="font-size:11px;max-width:220px">'+h.dx+'</td><td>'+h.los+'d</td><td>'+(h.readmit?'<span class="pill pr2">Yes</span>':'<span style="color:var(--tl)">No</span>')+'</td><td>'+h.thAttempted+'</td><td style="font-size:11px;color:'+((h.preventable||"").toLowerCase().indexOf("possibly")>=0?"#fcd34d":"var(--mu)")+'">'+h.preventable+'</td></tr>';}).join(""):'<tr><td colspan="9" style="color:var(--mu)">No wound-related transfers recorded.</td></tr>')+'</tbody></table></div></div>'+
+    wk(hs.length,"Total Transfers",hs.length?"var(--rd)":"var(--gn)",hs.length>0)+wk(byType("Sepsis"),"Sepsis","var(--rd)")+wk(byType("Osteomyelitis"),"Osteomyelitis","var(--rd)")+wk(byType("Cellulitis"),"Cellulitis","var(--am)")+wk(readmit,"30-Day Readmits","var(--rd)")+wk(prevent,"Potentially Preventable",prevent?"var(--am)":"var(--gn)",prevent>0)+'</div>'+
+    '<div style="display:grid;grid-template-columns:2fr 1fr;gap:11px"><div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Transfer Detail</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Patient</th><th>Facility</th><th>Date</th><th>Type</th><th>Diagnosis</th><th>LOS</th><th>Readmit</th><th>Telehealth</th><th>Preventable</th></tr></thead><tbody>'+(hs.length?hs.map(function(h){return'<tr><td class="b"><span style="cursor:pointer;color:var(--bl)" onclick="openChart(\'wound\',\''+h.woundId+'\')">'+h.name+'</span></td><td style="font-size:11px">'+h.fac+'</td><td>'+h.date+'</td><td><span class="pill pr2">'+h.type+'</span></td><td style="font-size:11px;max-width:220px">'+h.dx+'</td><td>'+h.los+'d</td><td>'+(h.readmit?'<span class="pill pr2">Yes</span>':'<span style="color:var(--gn)">No</span>')+'</td><td>'+h.thAttempted+'</td><td style="font-size:11px;color:'+((h.preventable||"").toLowerCase().indexOf("possibly")>=0?"var(--am)":"var(--mu)")+'">'+h.preventable+'</td></tr>';}).join(""):'<tr><td colspan="9" style="color:var(--mu)">No wound-related transfers recorded.</td></tr>')+'</tbody></table></div></div>'+
     '<div class="card cp"><div class="st">Transfers by Type</div><div style="height:180px"><canvas id="wr-c1"></canvas></div></div></div>';
   setTimeout(function(){
     mkChart("wr-c1","doughnut",["Sepsis","Osteomyelitis","Cellulitis"],[{data:[byType("Sepsis"),byType("Osteomyelitis"),byType("Cellulitis")],backgroundColor:["#b3433a","#b07d3c","#d2d6d5"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
@@ -2901,12 +3078,17 @@ var HELP=[
   intro:"Each provider keeps a watch list of the wounds they round on — not every resident, just the ones with wounds.",
   fig:["Wound Care",[{label:"＋ Add Wound",n:1},{label:"Facility → Resident",n:2},{label:"Type · stage · etiology · location · onset",n:3},{label:"Size · infection · graft / collagen / PCR",n:4},{label:"Save Wound"}]],
   steps:["Go to <span class='help-pill'>Wound Care</span> and click <span class='help-pill'>＋ Add Wound</span> (1).","Pick the <b>facility</b>, then the <b>resident</b> (2). Add them in Census first if they’re not listed.","Enter <b>type, stage, etiology, location, and onset date</b> (3). Onset date drives the long-term tracker.","Record <b>size (L×W×D), infection, and graft / collagen / PCR</b> (4).","Click <b>Save Wound</b> — it joins the watch list."],
-  tips:["Set the <b>Wound Provider</b> so the list can be filtered by owner.","You can refine everything later from the wound’s chart."]},
+  tips:["Use the <b>🧍 body map</b> link by Location to click a pressure point instead of typing.","For leg/foot wounds, add the <b>ABI</b> and an etiology <b>classification</b> (Wagner / SINBAD / CEAP…); set the <b>goal of care</b>.","Set the <b>Wound Provider</b> so the list can be filtered by owner — refine everything later from the chart."]},
  {id:"rounds",cat:"Daily workflows",title:"Weekly rounds — update a wound",sub:"The weekly cadence",
   intro:"Each week, open every wound on your list and record the new measurements and treatment. The app decides automatically whether it progressed or went stale.",
   fig:["Wound Care",[{label:"Wound row → ✏ edit",n:1},{label:"New measurements L / W / D",n:2},{label:"Stage · healing · infection · treatment",n:3},{label:"Progress note (required if no change)",n:4},{label:"Save & Clear Alert"}]],
   steps:["In <span class='help-pill'>Wound Care → Active Wounds</span>, click <span class='help-pill'>✏</span> on the wound’s row (1).","Enter this week’s <b>measurements</b> (2). Even a 0.2 cm change counts as progress; no change for 7 days marks it <b>stale</b>.","Update <b>stage, healing, infection, and treatment</b> (3).","Add a <b>progress note</b> (4) — required if measurements didn’t change, to explain why.","Click <span class='help-pill'>Save & Clear Alert</span>. History and trend update automatically."],
   tips:["Each wound also tracks graft / collagen / PCR and a Braden score.","The <b>History</b> tab shows the full week-by-week trend."]},
+ {id:"assessment",cat:"Daily workflows",title:"Full wound assessment (what each section means)",sub:"TIME / MEASURE-aligned charting",
+  intro:"The wound note is organized into clinical sections so it captures everything standards expect. Area, PUSH score, and % healing are calculated automatically from your entries — you don't compute them.",
+  fig:["Wound Care",[{label:"Measurements → area & PUSH auto-calc",n:1},{label:"Wound bed: tissue %, edges, periwound, tunneling",n:2},{label:"Exudate, pain, infection severity, culture",n:3},{label:"ABI (safety), Braden subscores, classification",n:4},{label:"Photo, goal of care, billing, sign-off",n:5}]],
+  steps:["<b>Measurements</b> (1): length × width × depth. The banner shows live <b>area (cm²)</b>, <b>% change vs baseline</b> (target ≥40% by week 4), and the <b>PUSH score</b>.","<b>Wound bed & edges</b> (2): % granulation / slough / eschar / epithelial, edge type, periwound skin, and undermining / tunneling with depth + clock position.","<b>Exudate & symptoms</b> (3): amount, type, odor, pain 0–10; then infection severity (NERDS / STONEES), culture, organism, antibiotic, osteomyelitis.","<b>Vascular & risk</b> (4): ABI value (drives a compression-safety alert), the six Braden subscores (total auto-sums), and an etiology classification (Wagner / UT / SINBAD / WIfI / CEAP / ISTAP).","<b>Photo & sign-off</b> (5): attach a dated photo, set goal of care, ICD-10/CPT codes, attest, and co-sign. Everything is logged to the audit trail."],
+  tips:["You only fill what's relevant — blank fields are fine.","ABI &lt; 0.8 with compression triggers a safety prompt before saving.","Allergy vs dressing conflicts (e.g., sulfa, silver, latex) prompt a warning."]},
  {id:"actionitems",cat:"Daily workflows",title:"Clinical action items — plan or document",sub:"Nothing slips through",
   intro:"The app watches each wound and raises a recommended action when criteria are met (stagnant, worsening, infection, non-healing without a graft, PCR not done, low albumin, high Braden risk). Each item stays open until you act OR document why you didn’t.",
   fig:["Wound Care",[{label:"Open wound → 🚩 Clinical Action Items",n:1},{label:"Recommended action",n:2},{label:"✓ Log Action / Plan",n:3},{label:"✎ Document Reason",n:4,cap:"If not acting"}]],
@@ -2922,6 +3104,11 @@ var HELP=[
   fig:["Reports & Analytics",[{label:"Scope: Enterprise / Portfolio / Facility",n:1},{label:"Period: Monthly / Quarterly",n:2},{label:"Healing rate · pressure vs non-pressure · by provider",n:3},{label:"🖨 Generate Report",n:4,cap:"Print / PDF"}]],
   steps:["Go to <span class='help-pill'>Reports & Analytics → Wound Reports</span>.","Choose the <b>scope</b> (1): Enterprise, a portfolio, or drill to one facility.","Pick the <b>period</b> (2): Current, Monthly, or Quarterly.","Review healing rate, pressure vs non-pressure, provider breakdown, and <b>education recommendations</b> for facilities below target (3).","Click <span class='help-pill'>🖨 Generate Report</span> (4) for a printable / PDF version to share."],
   tips:["Education recommendations flag any facility or portfolio below the healing-rate target."]},
+ {id:"mdsquality",cat:"Reporting",title:"QAPI / MDS Section M quality measures",sub:"Regulatory reporting",
+  intro:"The Wound Care → Quality tab rolls your data into the CMS-aligned measures facilities report to QAPI, following MDS 3.0 Section M conventions (deepest stage, no back-staging).",
+  fig:["Wound Care",[{label:"Prevalence · Incidence (facility-acquired)",n:1},{label:"New or worsened pressure injuries",n:2},{label:"Avoidable vs unavoidable (F686)",n:3},{label:"Quality measures by facility",n:4}]],
+  steps:["Open <span class='help-pill'>Wound Care → Quality</span>.","<b>Prevalence</b> and <b>incidence</b> (1) are computed from active pressure injuries vs census (facility-acquired = incidence).","<b>New / worsened</b> (2) counts facility-acquired injuries plus any that increased in stage during the stay.","Record <b>avoidable vs unavoidable</b> and a <b>root cause</b> on each facility-acquired wound (3) in its assessment — F686 expects this determination.","The by-facility table (4) flags facilities over the prevalence target for follow-up."],
+  tips:["Origin (POA vs facility-acquired) is set on each wound and drives these measures.","Set it accurately at Add Wound time — it can't be back-staged later per MDS rules."]},
  {id:"admin",cat:"Administration",title:"Admin — create user accounts",sub:"Set up your team",
   intro:"Admins create sign-in accounts for staff and set each person’s role.",
   fig:["Admin",[{label:"Admin button (top-right)",n:1},{label:"Username · full name · role",n:2},{label:"Temporary password",n:3},{label:"＋ Create User",n:4}]],
