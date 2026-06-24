@@ -3,7 +3,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
 const SECRET = process.env.JWT_SECRET;
-const TTL_HOURS = parseInt(process.env.JWT_TTL_HOURS || "12", 10);
+const TTL_HOURS = parseInt(process.env.JWT_TTL_HOURS || "8", 10);
 
 if (!SECRET) {
   console.error("FATAL: JWT_SECRET is required");

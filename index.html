@@ -4,6 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="theme-color" content="#3f7d76"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"/>
 <link rel="manifest" href="manifest.json"/>
 <title>Clinilytics · Wound Care</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -856,6 +857,11 @@ const coB=co=>{const m=COM[co]||{c:"#8c877d",a:"#8c877d"};return'<span class="pi
 const hC=h=>({Progressing:"#4f8268",Stable:"#6b7077",Slow:"#b07d3c",Improving:"#4f8268",Worsening:"#b3433a",Healed:"#4f8268"}[h]||"#888d92");
 const sP=s=>{const p=(["Stage 4","Stage 3"].includes(s))?["#fee2e2","#991b1b"]:(s==="Stage 2")?["#fef3c7","#92400e"]:(["Unstageable","Deep Tissue Inj."].includes(s))?["#ede9fe","#5b21b6"]:["#eceae4","#6f6a61"];return'<span class="pill" style="background:'+p[0]+';color:'+p[1]+'">'+s+'</span>';};
 const e=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+/* XSS hardening: neutralize HTML-active characters in stored data before it can
+   reach any innerHTML sink. Runs at every render entry point (idempotent). */
+function scrubStr(s){return typeof s==="string"?s.replace(/</g,"‹").replace(/>/g,"›"):s;}
+function sanitizeObj(o){if(!o||typeof o!=="object")return;for(var k in o){if(!Object.prototype.hasOwnProperty.call(o,k))continue;if(k==="photo")continue;var v=o[k];if(typeof v==="string")o[k]=scrubStr(v);else if(v&&typeof v==="object")sanitizeObj(v);}}
+function sanitizeAll(){try{[typeof WOUNDS!=="undefined"?WOUNDS:null,typeof PATIENTS!=="undefined"?PATIENTS:null,typeof FACS!=="undefined"?FACS:null].forEach(function(a){if(a)a.forEach(sanitizeObj);});if(typeof SENTLOG!=="undefined"&&SENTLOG)SENTLOG.forEach(sanitizeObj);}catch(e){}}
 const gv=id=>(document.getElementById(id)||{}).value||"";
 const sv=(id,v)=>{var el=document.getElementById(id);if(el)el.value=v;};
 function oM(id){document.getElementById(id).classList.remove("h");}
@@ -977,7 +983,7 @@ document.addEventListener("input",function(ev){if(_ctx&&_ctx.tp==="wound"&&ev.ta
    When connected to the API, the server is the source of truth and the browser
    keeps a full localStorage mirror as an offline fallback — that's the client
    layer of redundancy. With no server configured, the app stays local-only. */
-function cloudGet(){return {api:(localStorage.getItem("cc_api")||"").replace(/\/+$/,""),token:sessionStorage.getItem("cc_token")||localStorage.getItem("cc_token")||""};}
+function cloudGet(){return {api:(localStorage.getItem("cc_api")||"").replace(/\/+$/,""),token:sessionStorage.getItem("cc_token")||""};}
 function cloudOn(){var c=cloudGet();return !!(c.api&&c.token);}
 function updateCloudStat(){var el=document.getElementById("cloud-stat");if(!el)return;el.textContent=cloudOn()?("Connected"+(loadUI().lastSync?" · "+loadUI().lastSync:"")):(localStorage.getItem("cc_api")?"Configured (signed out)":"Local only");}
 function cloudConnect(){closeMenus();
@@ -985,10 +991,10 @@ function cloudConnect(){closeMenus();
   var u=prompt("Username:");if(!u)return;var p=prompt("Password:");if(p==null)return;
   fetch(api+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u,password:p})})
    .then(function(r){if(!r.ok)throw new Error("login");return r.json();})
-   .then(function(d){localStorage.setItem("cc_api",api);sessionStorage.setItem("cc_token",d.token);localStorage.setItem("cc_token",d.token);toast("Connected to server","ok");cloudPull(true);})
+   .then(function(d){localStorage.setItem("cc_api",api);sessionStorage.setItem("cc_token",d.token);toast("Connected to server","ok");cloudPull(true);})
    .catch(function(){toast("Could not connect (check URL / credentials)","err");});
 }
-function cloudDisconnect(){closeMenus();sessionStorage.removeItem("cc_token");localStorage.removeItem("cc_token");toast("Disconnected — local data kept");}
+function cloudDisconnect(){closeMenus();sessionStorage.removeItem("cc_token");toast("Disconnected — local data kept");}
 function cloudPull(silent){var c=cloudGet();if(!c.api||!c.token)return;
   fetch(c.api+"/api/snapshot",{headers:{Authorization:"Bearer "+c.token}})
    .then(function(r){if(r.status===401){toast("Session expired — reconnect","err");throw new Error("401");}if(!r.ok)throw new Error("pull");return r.json();})
@@ -1042,7 +1048,7 @@ function go(id){
 const MOS=["Jan","Feb","Mar","Apr","May","Jun"];
 const CO={border:{color:"rgba(20,20,20,0.07)"},ticks:{color:"#8c877d",font:{size:10}}};
 const COPTS={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#26282d",titleColor:"#fff",bodyColor:"#d8d3c8",borderColor:"#41454b",borderWidth:1}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
-function initDash(){
+function initDash(){sanitizeAll();
   var actW=WOUNDS.filter(function(w){return!wIsHealed(w);});
   var prW=actW.filter(wIsPressure);
   var healRate=actW.length?Math.round(actW.filter(function(w){return["Progressing","Improving","Healed"].includes(w.heal);}).length/actW.length*100):0;
@@ -1186,7 +1192,7 @@ function renderDashActions(){
 
 /* ── CENSUS ── */
 var cenFac="All";
-function renderCensus(){
+function renderCensus(){sanitizeAll();
   var q=(gv("cen-q")||"").toLowerCase();
   document.getElementById("cen-sub").textContent=PATIENTS.filter(function(p){return p.st==="Active";}).length+" active · "+FACS.length+" facilities";
   document.getElementById("cen-port").innerHTML=Object.entries(COM).map(function(e2){var co=e2[0],m=e2[1];var cnt=PATIENTS.filter(function(p){return p.st==="Active"&&FACS.find(function(f){return f.name===p.fac&&f.co===co;});}).length;return'<div class="card" style="padding:9px 11px;border-left:3px solid '+m.c+'"><div style="font-size:16px;font-weight:800;font-family:var(--mono);color:'+m.c+'">'+cnt+'</div><div style="font-size:10px;color:var(--mu);margin-top:2px">'+co.split(" ")[0]+'</div></div>';}).join("")+'<div class="card" style="padding:9px 11px;border-left:3px solid var(--mu)"><div style="font-size:16px;font-weight:800">'+PATIENTS.filter(function(p){return p.st==="Active";}).length+'</div><div style="font-size:10px;color:var(--mu);margin-top:2px">Total Active</div></div>';
@@ -1342,7 +1348,7 @@ function facilityWeeklyReport(name){
 
 /* ── CHART EDITOR ── */
 var _ctx=null;
-function openChart(tp,id){
+function openChart(tp,id){sanitizeAll();
   var rec=null;
   if(tp==="census")  rec=PATIENTS.find(function(p){return p.id===id;});
   if(tp==="wound")   rec=WOUNDS.find(function(w){return w.id===id;});
@@ -1498,7 +1504,10 @@ function saveWoundEntry(){
   var rec=_ctx.rec;
   var pin=document.getElementById("wf-photo");
   if(pin&&pin.files&&pin.files[0]){
-    var fr=new FileReader();fr.onload=function(){_saveWoundEntry2(rec,fr.result);};fr.onerror=function(){_saveWoundEntry2(rec,"");};fr.readAsDataURL(pin.files[0]);
+    var pf=pin.files[0];
+    if(!/^image\//.test(pf.type)){toast("Photo must be an image file","err");return;}
+    if(pf.size>4*1024*1024){toast("Photo too large (max 4 MB) — saving without it","err");_saveWoundEntry2(rec,"");return;}
+    var fr=new FileReader();fr.onload=function(){_saveWoundEntry2(rec,fr.result);};fr.onerror=function(){_saveWoundEntry2(rec,"");};fr.readAsDataURL(pf);
   } else { _saveWoundEntry2(rec,""); }
 }
 function _saveWoundEntry2(rec,photoData){
@@ -1910,7 +1919,7 @@ function saveNewWound(){
 /* ── WOUND SUB-TABS & ANALYTICS ── */
 var wCurrentTab=0;
 function wTab(i){
-  wCurrentTab=i;saveUI({wTab:i,wFac:wFac,wProv:wProv});
+  sanitizeAll();wCurrentTab=i;saveUI({wTab:i,wFac:wFac,wProv:wProv});
   for(var j=0;j<6;j++){var p=document.getElementById("w-p"+j),b=document.getElementById("w-t"+j);if(p)p.style.display=j===i?"block":"none";if(b)b.className=j===i?"btn bd2 bsm":"btn bg3 bsm";}
   if(i===0)renderWound();
   else if(i===1)renderWAnalytics();
@@ -2879,7 +2888,7 @@ function rptTab(i){
 }
 function renderCurrentRpt(){if(rptCatIdx===0)renderRptWound();else if(rptCatIdx===1)renderRptPrimary();else if(rptCatIdx===2)renderRptPsych();else if(rptCatIdx===3)renderRptQA();}
 function generateCurrentRpt(){if(rptCatIdx===0)runWoundReport();else if(rptCatIdx===1)runPrimaryReport();else if(rptCatIdx===2)runPsychReport();else if(rptCatIdx===3)runQAReport();}
-function renderReports(){
+function renderReports(){sanitizeAll();
   var bar=document.getElementById("rpt-scope-bar");
   if(bar){
     var scopes=[{k:"all",l:"Enterprise"}].concat(Object.keys(COM).map(function(c){return{k:c,l:c.split(" ")[0]};}));
