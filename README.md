@@ -3,6 +3,40 @@
 Single-file clinical monitoring web app (`index.html`) for AMA SNF Provider Services.
 Open `index.html` in a browser — no build step or server required.
 
+This app is **focused exclusively on wound & skin integrity**. The Dashboard,
+Census & Facilities, Wound Care, and Reports tabs are all wound-centric; the
+former Psych / Primary Services / Quality Assurance modules were removed (those
+service lines are owned by other projects).
+
+## Access
+
+A client-side sign-in gate protects the data (username + SHA-256 password hash,
+session-scoped). This is a lightweight gate suitable for a demo, not server-side
+auth — anyone reading the page source can find the hash.
+
+## What's new (call-feedback build)
+
+- **Facility contacts & report distribution** — each facility carries a DON /
+  contact name, email, and phone (Census & Facilities → *Edit Contact*). Weekly
+  wound reports can be emailed to the facility via the user's mail client
+  (*Email Report*), with a session distribution log. *(True automatic/scheduled
+  SMTP needs a backend, which a static GitHub Pages site cannot host.)*
+- **Graft / collagen / PCR tracking** — wounds record graft-in-place (+ type/date),
+  collagen-in-use, and wound-care PCR (required / completed / date). Surfaced in
+  the wound table, chart editor, dashboard, and reports.
+- **Clinical trigger / action-plan engine** — criteria (stagnant ≥7d, slow/worsening,
+  active infection, non-healing ≥30d without a graft, PCR ordered-not-done, low
+  albumin, long-term pressure wound, high Braden risk) fire a recommended action.
+  Each trigger stays **open until the provider logs an action plan _or_ documents a
+  reason for not acting** — both are written to the wound's chart history.
+- **Provider watch lists** — wounds carry an owning provider; the Active Wounds
+  view and reports can be filtered/broken down by provider.
+- **Enterprise → portfolio → facility reporting** — wound reports roll up by scope
+  with healing rate, pressure vs non-pressure, healing status, provider breakdown,
+  and **automatic education recommendations** when a facility/portfolio falls below
+  the healing-rate target. A period selector (Current / Monthly / Quarterly)
+  labels leadership reports.
+
 ## Wound & Skin Integrity module
 
 The Wound tab is organized into six sub-views, built to mirror the AMA Advanced

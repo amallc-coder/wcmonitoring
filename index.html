@@ -122,14 +122,11 @@ select option{background:#131920}
   <div class="logo"><div class="lic">⚕</div><span class="ltx">AMA <span>Care Connect</span></span></div>
   <nav id="mnav">
     <button class="A" onclick="go('dashboard')">Dashboard</button>
-    <button onclick="go('census')">Census</button>
+    <button onclick="go('census')">Census &amp; Facilities</button>
     <button onclick="go('wound')">Wound Care</button>
-    <button onclick="go('psych')">Psych Services</button>
-    <button onclick="go('qa')">Quality Assurance</button>
-    <button onclick="go('primary')">Primary Services</button>
     <button onclick="go('reports')">Reports &amp; Analytics</button>
   </nav>
-  <div class="hdr-r"><div class="live"></div><span style="font-size:10px;color:var(--mu)">Live</span><span style="background:var(--bd);border-radius:16px;padding:3px 10px;font-size:11px">SNF Admin</span><button class="btn bg3 bsm" style="font-size:10px" onclick="ccLogout()">Sign Out</button></div>
+  <div class="hdr-r"><div class="live"></div><span style="font-size:10px;color:var(--mu)">Live</span><span style="background:var(--bd);border-radius:16px;padding:3px 10px;font-size:11px">Wound &amp; Skin Integrity</span><button class="btn bg3 bsm" style="font-size:10px" onclick="ccLogout()">Sign Out</button></div>
 </header>
 <div id="main">
 
@@ -142,12 +139,8 @@ select option{background:#131920}
     <div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Facility Risk Overview</span></div><table class="tbl" id="d-fac"></table></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px">
-    <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0;color:#7dd3fc">&#x1FA79; Wound Care</span><button class="btn bg3 bsm" style="font-size:10px" onclick="go('wound')">View All</button></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px" id="d-wounds-kpis"></div><div id="d-wounds-alerts"></div></div>
-    <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0;color:#f87171">&#x26A0; Quality Assurance</span><button class="btn bg3 bsm" style="font-size:10px" onclick="go('qa')">View All</button></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px" id="d-qa-kpis"></div><div id="d-qa-items"></div></div>
-  </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px">
-    <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0;color:#fcd34d">&#x1F3E5; Primary Services</span><button class="btn bg3 bsm" style="font-size:10px" onclick="go('primary')">View All</button></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px" id="d-primary-kpis"></div><div id="d-primary-items"></div></div>
-    <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0;color:#d8b4fe">&#x1F9E0; Psych Services</span><button class="btn bg3 bsm" style="font-size:10px" onclick="go('psych')">View All</button></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px" id="d-psych-kpis"></div><div id="d-psych-items"></div></div>
+    <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0;color:#7dd3fc">&#x1FA79; Wound Overview</span><button class="btn bg3 bsm" style="font-size:10px" onclick="go('wound')">View All</button></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px" id="d-wounds-kpis"></div><div id="d-wounds-alerts"></div></div>
+    <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0;color:#fca5a5">&#x1F6A9; Open Clinical Action Items</span><button class="btn bg3 bsm" style="font-size:10px" onclick="go('wound')">Review</button></div><div id="d-actions"></div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:11px">
     <div class="card cp"><div class="st">Hosp. Rate</div><div class="cw"><canvas id="c-hosp"></canvas></div></div>
@@ -163,7 +156,7 @@ select option{background:#131920}
     <div><div class="pt3">Master Census</div><div class="ps2" id="cen-sub">Loading…</div></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <input id="cen-q" placeholder="Search patient, dx, facility…" style="width:210px" oninput="renderCensus()">
-      <button class="btn bd2" onclick="oM('m-addfac')">🏢 Add Facility</button>
+      <button class="btn bd2" onclick="openFacAdd()">🏢 Add Facility</button>
       <button class="btn bd2" onclick="oM('m-upload')">📤 Upload Facesheets</button>
       <button class="btn bt" onclick="oM('m-addpt')">＋ Add Patient</button>
     </div>
@@ -174,15 +167,20 @@ select option{background:#131920}
     <thead><tr><th></th><th>Patient</th><th>DOB</th><th>Facility</th><th>Co.</th><th>Room</th><th>Admit</th><th>Primary Dx</th><th>Insurance</th><th>Provider</th><th>Code</th><th>Status</th></tr></thead>
     <tbody id="cen-tb"></tbody>
   </table></div>
-  <div class="st">FACILITY MANAGEMENT</div>
+  <div class="st">FACILITY MANAGEMENT &amp; REPORT CONTACTS</div>
   <div id="fac-list"></div>
+  <div id="send-log" style="margin-top:8px"></div>
 </div>
 
 <!-- WOUND -->
 <div id="tab-wound" class="tb">
   <div class="ph2">
     <div><div class="pt3">Wound &amp; Skin Integrity</div><div class="ps2" id="w-sub">Loading…</div></div>
-    <button class="btn bb2" onclick="woundRpt()">🖨 Print Report</button>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <select id="w-prov" style="width:170px;font-size:11px" onchange="wProv=this.value;wRefresh()"></select>
+      <button class="btn bb2 bsm" onclick="emailWFacReport()">📧 Email Facility Report</button>
+      <button class="btn bb2 bsm" onclick="woundRpt()">🖨 Print Report</button>
+    </div>
   </div>
   <div class="fs2" id="w-fs"></div>
   <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:11px">
@@ -205,85 +203,11 @@ select option{background:#131920}
   <div id="w-p5" style="display:none"></div>
 </div>
 
-<!-- PSYCH -->
-<div id="tab-psych" class="tb">
-  <div class="ph2">
-    <div><div class="pt3">Psych Services</div><div class="ps2">Psych Clinical Lead — Monthly Facility Review</div></div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <select id="psy-month" onchange="renderPsych()" style="width:160px;font-size:12px"></select>
-      <select id="psy-portfolio" onchange="renderPsych()" style="width:180px;font-size:12px"><option value="">All Portfolios</option></select>
-      <button class="btn bp2 bsm" onclick="openPsyFacModal()">＋ Facility Review</button>
-      <button class="btn bd2 bsm" onclick="openPsyPolyrxRpt()">💊 Polypharmacy Report</button>
-      <button class="btn bg3 bsm" onclick="psychRpt()">🖨 Print</button>
-    </div>
-  </div>
-  <div style="display:flex;gap:3px;margin-bottom:13px;flex-wrap:wrap">
-    <button class="btn bd2 bsm" id="psy-t0" onclick="psyTab(0)">📋 Monthly Overview</button>
-    <button class="btn bg3 bsm" id="psy-t1" onclick="psyTab(1)">🧠 Caseload</button>
-    <button class="btn bg3 bsm" id="psy-t2" onclick="psyTab(2)">📊 Visit Activity</button>
-    <button class="btn bg3 bsm" id="psy-t3" onclick="psyTab(3)">💊 Medications &amp; GDRs</button>
-    <button class="btn bg3 bsm" id="psy-t4" onclick="psyTab(4)">📋 Provider Compliance</button>
-  </div>
-  <div id="psy-p0"></div>
-  <div id="psy-p1" style="display:none"></div>
-  <div id="psy-p2" style="display:none"></div>
-  <div id="psy-p3" style="display:none"></div>
-  <div id="psy-p4" style="display:none"></div>
-</div>
-
-<!-- QA -->
-<div id="tab-qa" class="tb">
-  <div class="ph2">
-    <div><div class="pt3">Quality Assurance</div><div class="ps2">Hospitalization reviews &amp; high-risk resident monitoring</div></div>
-    <div style="display:flex;gap:6px">
-      <button class="btn bt" onclick="oM('m-addhosp')">＋ Add Send-Out Review</button>
-      <button class="btn bd2 bsm" onclick="entRpt('all','Full Portfolio')">📊 Report</button>
-    </div>
-  </div>
-  <div style="display:flex;gap:4px;margin-bottom:11px">
-    <button class="btn bd2 bsm" id="qa-t0" onclick="qaTab(0)">📋 Send-Out Reviews</button>
-    <button class="btn bg3 bsm" id="qa-t1" onclick="qaTab(1)">⚠ High-Risk Residents</button>
-  </div>
-  <div id="qa-p0"></div>
-  <div id="qa-p1" style="display:none"></div>
-</div>
-
-<!-- PRIMARY -->
-<div id="tab-primary" class="tb">
-  <div class="ph2">
-    <div><div class="pt3">Primary Services</div><div class="ps2">Regional Director / RN Supervisor Monthly Review</div></div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap">
-      <select id="pr-month" onchange="renderPrimary()" style="width:160px;font-size:12px"></select>
-      <select id="pr-portfolio" onchange="prPortfolioChange()" style="width:180px;font-size:12px"><option value="">All Portfolios</option></select>
-      <button class="btn bt bsm" onclick="openPrFacModal()">＋ Facility Review</button>
-      <button class="btn bd2 bsm" onclick="primaryRpt()">🖨 Print Report</button>
-    </div>
-  </div>
-  <!-- Sub-tabs -->
-  <div style="display:flex;gap:3px;margin-bottom:13px;flex-wrap:wrap">
-    <button class="btn bd2 bsm" id="pr-t0" onclick="prTab(0)">📋 Monthly Overview</button>
-    <button class="btn bg3 bsm" id="pr-t1" onclick="prTab(1)">🏥 New Admissions</button>
-    <button class="btn bg3 bsm" id="pr-t2" onclick="prTab(2)">📅 Compliance Schedule</button>
-    <button class="btn bg3 bsm" id="pr-t3" onclick="prTab(3)">💊 Chronic Disease &amp; Meds</button>
-    <button class="btn bg3 bsm" id="pr-t4" onclick="prTab(4)">🩹 Braden &amp; Wounds</button>
-    <button class="btn bg3 bsm" id="pr-t5" onclick="prTab(5)">👩‍⚕️ LPN Oversight</button>
-  </div>
-  <div id="pr-p0"></div>
-  <div id="pr-p1" style="display:none"></div>
-  <div id="pr-p2" style="display:none"></div>
-  <div id="pr-p3" style="display:none"></div>
-  <div id="pr-p4" style="display:none"></div>
-  <div id="pr-p5" style="display:none"></div>
-</div>
-
 <!-- REPORTS -->
 <div id="tab-reports" class="tb">
   <div class="ph2"><div><div class="pt3">Reports &amp; Analytics</div><div class="ps2">Enterprise · Portfolio · Facility</div></div></div>
   <div class="itr">
-    <button class="it A" id="rpt-t0" onclick="rptTab(0)">&#x1FA79; Wounds</button>
-    <button class="it" id="rpt-t1" onclick="rptTab(1)">&#x1F3E5; Primary</button>
-    <button class="it" id="rpt-t2" onclick="rptTab(2)">&#x1F9E0; Psych</button>
-    <button class="it" id="rpt-t3" onclick="rptTab(3)">&#x26A0; QA</button>
+    <button class="it A" id="rpt-t0" onclick="rptTab(0)">&#x1FA79; Wound Reports</button>
     <button class="it" id="rpt-t4" onclick="rptTab(4)">&#x1F50D; Keyword Search</button>
   </div>
   <div class="card cp" style="margin-bottom:11px">
@@ -291,6 +215,8 @@ select option{background:#131920}
       <span class="st" style="margin:0">Scope:</span>
       <div style="display:flex;gap:4px;flex-wrap:wrap" id="rpt-scope-bar"></div>
       <select id="rpt-fac-sel" style="width:200px;font-size:11px;display:none" onchange="renderCurrentRpt()"><option value="">All Facilities</option></select>
+      <span class="st" style="margin:0">Period:</span>
+      <select id="rpt-period" style="width:150px;font-size:11px" onchange="renderCurrentRpt()"><option value="">Current (live)</option><option>Monthly</option><option>Quarterly</option></select>
       <div style="margin-left:auto"><button class="btn bp2 bsm" onclick="generateCurrentRpt()">&#x1F5A8; Generate Report</button></div>
     </div>
   </div>
@@ -493,10 +419,10 @@ select option{background:#131920}
 <!-- ADD FACILITY -->
 <div id="m-addfac" class="mo h">
 <div class="mb">
-  <div class="mh"><div class="mtt">🏢 Add Facility</div><button class="xb" onclick="cM('m-addfac')">✕</button></div>
+  <div class="mh"><div class="mtt" id="af-title">🏢 Add Facility</div><button class="xb" onclick="cM('m-addfac')">✕</button></div>
   <div class="mbd"><div class="g2">
     <div><label class="fl">Facility Name *</label><input id="af-n" placeholder="e.g. Embassy – Westlake"></div>
-    <div><label class="fl">Company *</label>
+    <div><label class="fl">Company / Portfolio *</label>
       <select id="af-co" onchange="document.getElementById('af-ncw').style.display=this.value==='__new__'?'block':'none'">
         <option>Embassy Healthcare</option><option>Reliant Senior Care</option><option>Sunrise Health Group</option><option>Valley SNF Partners</option><option value="__new__">+ New Company…</option>
       </select>
@@ -507,6 +433,10 @@ select option{background:#131920}
     <div><label class="fl">Type</label><select id="af-tp"><option>SNF</option><option>ALF</option><option>Rehab</option><option>Memory Care</option></select></div>
     <div><label class="fl">Provider</label><input id="af-pv"></div>
     <div><label class="fl">Census</label><input id="af-cs" placeholder="0"></div>
+    <div style="grid-column:1/-1;border-top:1px solid var(--bd);margin-top:4px;padding-top:8px"><span class="st" style="margin:0;color:var(--tl)">📧 Report Distribution Contact</span><div style="font-size:10px;color:var(--mu);margin-top:2px">Used to email the weekly wound report to the facility.</div></div>
+    <div><label class="fl">DON / Contact Name</label><input id="af-don" placeholder="e.g. Jane Smith, DON"></div>
+    <div><label class="fl">Contact Email</label><input id="af-email" placeholder="don@facility.com"></div>
+    <div><label class="fl">Contact Phone</label><input id="af-phone" placeholder="(555) 000-0000"></div>
   </div></div>
   <div class="mft"><button class="btn bg3" onclick="cM('m-addfac')">Cancel</button><button class="btn bt" onclick="saveFac()">Save</button></div>
 </div>
@@ -628,13 +558,13 @@ let WHOSP=[
 /* extra clinical attributes merged onto wounds at init (Braden, etiology detail, products, labs, vascular, nutrition, POA vs facility-acquired) */
 const WMETA={
   w1:{poa:"Facility-Acquired",braden:14,debride:"Selective",vac:false,vacBrand:"",albumin:2.8,vascular:"N/A",dietary:true},
-  w2:{poa:"Present on Admission",braden:11,debride:"Excisional",vac:true,vacBrand:"3M V.A.C.",albumin:2.5,vascular:"Screened — adequate perfusion",dietary:true,healedDate:""},
-  w3:{poa:"Present on Admission",braden:16,debride:"Sharp",vac:false,vacBrand:"",albumin:3.0,vascular:"PVD — vascular referral placed",dietary:true},
+  w2:{poa:"Present on Admission",braden:11,debride:"Excisional",vac:true,vacBrand:"3M V.A.C.",albumin:2.5,vascular:"Screened — adequate perfusion",dietary:true,healedDate:"",collagen:true,graft:false,pcrReq:true,pcrDone:false},
+  w3:{poa:"Present on Admission",braden:16,debride:"Sharp",vac:false,vacBrand:"",albumin:3.0,vascular:"PVD — vascular referral placed",dietary:true,collagen:true},
   w5:{poa:"Facility-Acquired",braden:12,debride:"Excisional",vac:false,vacBrand:"",albumin:2.6,vascular:"N/A",dietary:true},
   w6:{poa:"Present on Admission",braden:17,debride:"None",vac:false,vacBrand:"",albumin:3.4,vascular:"Venous insufficiency — compression",dietary:false},
-  w7:{poa:"Present on Admission",braden:10,debride:"Excisional",vac:true,vacBrand:"3M V.A.C.",albumin:2.4,vascular:"Screened — adequate perfusion",dietary:true},
+  w7:{poa:"Present on Admission",braden:10,debride:"Excisional",vac:true,vacBrand:"3M V.A.C.",albumin:2.4,vascular:"Screened — adequate perfusion",dietary:true,collagen:false,graft:false,pcrReq:true,pcrDone:false},
   w8:{poa:"Present on Admission",braden:18,debride:"None",vac:false,vacBrand:"",albumin:3.2,vascular:"Venous insufficiency — compression",dietary:true},
-  w9:{poa:"Present on Admission",braden:15,debride:"Sharp",vac:false,vacBrand:"",albumin:2.9,vascular:"PVD — vascular surgery consult",dietary:true},
+  w9:{poa:"Present on Admission",braden:15,debride:"Sharp",vac:false,vacBrand:"",albumin:2.9,vascular:"PVD — vascular surgery consult",dietary:true,collagen:true,graft:false,pcrReq:true,pcrDone:false},
   w10:{poa:"Facility-Acquired",braden:16,debride:"None",vac:false,vacBrand:"",albumin:3.1,vascular:"N/A",dietary:true},
   w11:{poa:"Facility-Acquired",braden:18,debride:"None",vac:false,vacBrand:"",albumin:3.5,vascular:"N/A",dietary:false,healedDate:"05/25/2026"},
   w12:{poa:"Present on Admission",braden:15,debride:"None",vac:true,vacBrand:"Prevena (incision)",albumin:3.3,vascular:"N/A",dietary:false,healedDate:"06/14/2026"}
@@ -642,7 +572,18 @@ const WMETA={
 /* Braden scores for the full active census (drives skin-integrity hot list & pressure prevention) */
 const BRADEN={p1:14,p2:12,p3:17,p4:17,p5:15,p6:16,p7:18,p8:13,p9:18,p10:11,p11:20,p12:16,p13:10,p14:18,p15:15,p16:16};
 function bradenRisk(s){if(s==null)return{l:"—",c:"#8a9ab0"};if(s<=9)return{l:"Severe",c:"#dc2626"};if(s<=12)return{l:"High",c:"#ef4444"};if(s<=14)return{l:"Moderate",c:"#f59e0b"};if(s<=18)return{l:"Mild",c:"#eab308"};return{l:"Minimal",c:"#10b981"};}
+/* Facility contacts (DON + delivery) — drives weekly report distribution */
+const FACMETA={
+  f1:{don:"Tabitha Reeves, DON",email:"don.riverside@embassyhc.example",phone:"(555) 201-3344",addr:"100 Riverside Dr, Columbus, OH"},
+  f2:{don:"Karen Mills, DON",email:"don.northgate@embassyhc.example",phone:"(555) 201-7788",addr:"880 Northgate Blvd, Columbus, OH"},
+  f3:{don:"Denise Park, DON",email:"don.lakewood@embassyhc.example",phone:"(555) 201-9911",addr:"45 Lakewood Ave, Cleveland, OH"},
+  f4:{don:"Maria Gomez, DON",email:"don.maplewood@reliantsc.example",phone:"(555) 332-4400",addr:"12 Maplewood Ct, Akron, OH"},
+  f5:{don:"Joan Pittman, DON",email:"don.pinebrook@reliantsc.example",phone:"(555) 332-5521",addr:"67 Pinebrook Rd, Akron, OH"},
+  f6:{don:"Angela Brooks, DON",email:"don.central@sunrisehg.example",phone:"(555) 478-1200",addr:"500 Central Pkwy, Dayton, OH"},
+  f7:{don:"Priya Nair, DON",email:"don.valleyview@valleysnf.example",phone:"(555) 590-8080",addr:"9 Valley View Ln, Toledo, OH"}
+};
 function initWoundData(){
+  FACS.forEach(function(f){var m=FACMETA[f.id]||{};if(f.don==null)f.don=m.don||"";if(f.email==null)f.email=m.email||"";if(f.phone==null)f.phone=m.phone||"";if(f.addr==null)f.addr=m.addr||"";});
   WOUNDS.forEach(function(w){
     var m=WMETA[w.id]||{};
     if(w.poa==null)w.poa=m.poa||"Unknown";
@@ -653,6 +594,15 @@ function initWoundData(){
     if(w.albumin==null)w.albumin=m.albumin!=null?m.albumin:null;
     if(w.vascular==null)w.vascular=m.vascular||"Not assessed";
     if(w.dietary==null)w.dietary=!!m.dietary;
+    if(w.graft==null)w.graft=!!m.graft;
+    if(w.graftType==null)w.graftType=m.graftType||"";
+    if(w.graftDate==null)w.graftDate=m.graftDate||"";
+    if(w.collagen==null)w.collagen=!!m.collagen;
+    if(w.pcrReq==null)w.pcrReq=!!m.pcrReq;
+    if(w.pcrDone==null)w.pcrDone=!!m.pcrDone;
+    if(w.pcrDate==null)w.pcrDate=m.pcrDate||"";
+    if(w.pv==null)w.pv=m.pv||(w.chart&&w.chart.length?w.chart[w.chart.length-1].by:"")||"Wound Team";
+    if(w.triggerResp==null)w.triggerResp={};
     if(w.onset==null)w.onset=(w.chart&&w.chart.length?w.chart[0].dt:w.ls);
     if(w.healedDate==null)w.healedDate=m.healedDate||(w.heal==="Healed"&&w.chart&&w.chart.length?w.chart[w.chart.length-1].dt:"");
   });
@@ -725,13 +675,10 @@ function go(id){
   document.querySelectorAll(".tb").forEach(function(t){t.classList.remove("A");});
   document.querySelectorAll("#mnav button").forEach(function(b){b.classList.remove("A");});
   document.getElementById("tab-"+id).classList.add("A");
-  var idx={dashboard:0,census:1,wound:2,psych:3,qa:4,primary:5,reports:6}[id];
+  var idx={dashboard:0,census:1,wound:2,reports:3}[id];
   document.querySelectorAll("#mnav button")[idx].classList.add("A");
   if(id==="census")  renderCensus();
   if(id==="wound")   wTab(wCurrentTab);
-  if(id==="psych")   renderPsych();
-  if(id==="qa")      renderQA();
-  if(id==="primary") renderPrimary();
   if(id==="reports") renderReports();
 }
 
@@ -740,23 +687,25 @@ const MOS=["Jan","Feb","Mar","Apr","May","Jun"];
 const CO={border:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#8a9ab0",font:{size:10}}};
 const COPTS={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{backgroundColor:"#1e2a35",titleColor:"#e6eaf0",bodyColor:"#8a9ab0",borderColor:"#2a3a4a",borderWidth:1}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
 function initDash(){
+  var actW=WOUNDS.filter(function(w){return!wIsHealed(w);});
+  var prW=actW.filter(wIsPressure);
+  var healRate=actW.length?Math.round(actW.filter(function(w){return["Progressing","Improving","Healed"].includes(w.heal);}).length/actW.length*100):0;
+  var openAct=WOUNDS.reduce(function(a,w){return a+getOpenTriggers(w).length;},0);
   var kpis=[
     {i:"&#x1F3E5;",l:"Census",v:FACS.reduce(function(a,f){return a+f.cs;},0),c:"#e2e8f0"},
-    {i:"&#x1FA79;",l:"Wounds",v:WOUNDS.length,c:"#7dd3fc"},
-    {i:"&#x26A0;&#xFE0F;",l:"High-Risk",v:QA.filter(function(q){return q.st==="HIGH";}).length,c:"#f87171"},
-    {i:"&#x1F9E0;",l:"Psych",v:PSYCH.length,c:"#d8b4fe"},
-    {i:"&#x1F4E1;",l:"Telehealth",v:FACS.reduce(function(a,f){return a+f.th;},0),c:"#7dd3fc"},
-    {i:"&#x1F9A0;",l:"Infections",v:FACS.reduce(function(a,f){return a+f.inf;},0),c:"#f87171"},
-    {i:"&#x1F4CA;",l:"Send-Outs",v:HOSP.length,c:"#fca5a5"},
+    {i:"&#x1FA79;",l:"Active Wounds",v:actW.length,c:"#7dd3fc"},
+    {i:"&#x1F534;",l:"Pressure",v:prW.length,c:"#fca5a5"},
+    {i:"&#x1F535;",l:"Non-Pressure",v:actW.length-prW.length,c:"#7dd3fc"},
+    {i:"&#x1F9A0;",l:"Infected",v:actW.filter(function(w){return w.inf;}).length,c:"#f87171"},
+    {i:"&#x1F6A9;",l:"Action Items",v:openAct,c:openAct?"#fca5a5":"#6ee7b7"},
+    {i:"&#x1F4C8;",l:"Healing Rate",v:healRate+"%",c:healRate>=70?"var(--tl)":healRate>=40?"#f59e0b":"#f87171"},
     {i:"&#x1F3E2;",l:"Facilities",v:FACS.length,c:"var(--tl)"}
   ];
   document.getElementById("d-kpis").innerHTML=kpis.map(function(k){return'<div class="kt"><div style="font-size:14px;margin-bottom:2px">'+k.i+'</div><div class="kv" style="color:'+k.c+'">'+k.v+'</div><div class="kl">'+k.l+'</div></div>';}).join("");
   document.getElementById("d-fac").innerHTML='<thead><tr><th>Facility</th><th>Co.</th><th>Risk</th><th>RTH%</th><th>Census</th><th>HR</th><th>Inf.</th><th>TH</th></tr></thead><tbody>'+FACS.map(function(f){return'<tr><td class="b">'+f.name+'</td><td>'+coB(f.co)+'</td><td>'+rP(rT(f.rth))+'</td><td style="font-weight:700;color:'+rC(f.rth)+'">'+f.rth+'%</td><td>'+f.cs+'</td><td>'+f.hr+'</td><td style="color:'+(f.inf>3?"#f87171":"var(--mu)")+'">'+f.inf+'</td><td>'+f.th+'</td></tr>';}).join("")+'</tbody>';
   renderDashAlerts();
   renderDashWounds();
-  renderDashQA();
-  renderDashPrimary();
-  renderDashPsych();
+  renderDashActions();
   var MO=["Jan","Feb","Mar","Apr","May","Jun"];
   var CO={border:{color:"rgba(255,255,255,0.04)"},ticks:{color:"#8a9ab0",font:{size:9}}};
   var OP={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
@@ -836,30 +785,22 @@ function renderDashPsych(){
 
 function renderDashAlerts(){
   var el=document.getElementById("d-alerts");if(!el)return;
-  var woundAlerts=getWoundAlerts();
-  var bypasses=HOSP.filter(function(h){return h.bypass;});
-  var pending=HOSP.filter(function(h){return h.reviewed&&h.reviewed.startsWith("No");});
-  var alerts=woundAlerts.concat(
-    bypasses.map(function(h){return{type:"bypass",h:h,msg:"No provider notified & no TH — bypass flagged"};}),
-    pending.map(function(h){return{type:"pending",h:h,msg:"Send-out not yet reviewed by provider"};})
-  );
+  var alerts=getWoundAlerts();
   var html='<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0">Clinical Alerts</span><span class="pill '+(alerts.length?"pr2":"pt")+'">'+(alerts.length||"All clear")+'</span></div>';
   if(!alerts.length){
     html+='<div style="color:var(--tl);font-size:12px;padding:8px 0">✓ No active wound alerts.</div>';
   } else {
     html+=alerts.map(function(a){
       var isStale=a.type==="stale";
-      var isWound=a.type==="stale"||a.type==="longterm";
-      var palette={stale:["#f87171","#ef444412","#ef444444","⚠️","STALE WOUND"],longterm:["#c4b5fd","#7c3aed12","#7c3aed44","⏱","LONG-TERM PRESSURE WOUND"],bypass:["#fca5a5","#ef444412","#ef444444","🚫","PROVIDER BYPASS"],pending:["#fcd34d","#f59e0b12","#f59e0b44","📋","UNREVIEWED SEND-OUT"]};
+      var palette={stale:["#f87171","#ef444412","#ef444444","⚠️","STALE WOUND"],longterm:["#c4b5fd","#7c3aed12","#7c3aed44","⏱","LONG-TERM PRESSURE WOUND"]};
       var p=palette[a.type]||["#c4b5fd","#7c3aed12","#7c3aed44","•","ALERT"];
       var color=p[0],bg=p[1],border=p[2],icon=p[3],label=p[4];
-      var rec=a.w||a.h||{};
-      var nm=rec.name||rec.pt||"—";
+      var rec=a.w||{};
+      var nm=rec.name||"—";
       var fac=rec.fac||"";
-      var sub=isWound?(fac+(rec.loc?" · "+rec.loc:"")):(fac+(rec.date?" · "+rec.date:""));
-      var right=isStale?(a.days+"d overdue"):a.type==="longterm"?("Day "+a.onset):(rec.date||"");
-      var dest=isWound?"wound":"qa";
-      return'<div style="background:'+bg+';border:1px solid '+border+';border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer" onclick="go(\''+dest+'\')">'
+      var sub=fac+(rec.loc?" · "+rec.loc:"");
+      var right=isStale?(a.days+"d overdue"):a.type==="longterm"?("Day "+a.onset):"";
+      return'<div style="background:'+bg+';border:1px solid '+border+';border-radius:6px;padding:8px 10px;margin-bottom:6px;cursor:pointer" onclick="openChart(\'wound\',\''+rec.id+'\')">'
         +'<div style="display:flex;justify-content:space-between;margin-bottom:2px">'
         +'<span style="font-size:10px;font-weight:700;color:'+color+'">'+icon+' '+label+'</span>'
         +'<span style="font-size:10px;color:var(--mu)">'+right+'</span>'
@@ -871,6 +812,16 @@ function renderDashAlerts(){
     }).join("");
   }
   el.innerHTML=html;
+}
+function renderDashActions(){
+  var el=document.getElementById("d-actions");if(!el)return;
+  var items=[];
+  WOUNDS.forEach(function(w){getOpenTriggers(w).forEach(function(t){items.push({w:w,t:t});});});
+  items.sort(function(a,b){return (b.t.sev||0)-(a.t.sev||0);});
+  if(!items.length){el.innerHTML='<div style="color:var(--tl);font-size:12px;padding:8px 0">✓ No open action items. All triggered wounds have a documented plan or rationale.</div>';return;}
+  el.innerHTML='<div style="max-height:300px;overflow-y:auto">'+items.slice(0,12).map(function(it){var sc=it.t.sev>=3?"#f87171":it.t.sev===2?"#fcd34d":"#7dd3fc";
+    return'<div style="background:'+sc+'10;border:1px solid '+sc+'33;border-radius:6px;padding:7px 10px;margin-bottom:6px;cursor:pointer" onclick="openChart(\'wound\',\''+it.w.id+'\')"><div style="display:flex;justify-content:space-between"><span style="font-size:12px;font-weight:600;color:var(--tx)">'+it.w.name+'</span><span style="font-size:10px;color:var(--mu)">'+it.w.fac.split("–").pop().trim()+'</span></div><div style="font-size:10px;font-weight:700;color:'+sc+';margin-top:2px">🚩 '+it.t.label+'</div><div style="font-size:11px;color:var(--mu)">→ '+it.t.rec+'</div></div>';
+  }).join("")+(items.length>12?'<div style="font-size:11px;color:var(--mu);text-align:center;padding:4px">+ '+(items.length-12)+' more…</div>':"")+'</div>';
 }
 
 
@@ -892,15 +843,39 @@ function renderFacList(){
   var el=document.getElementById("fac-list");if(!el)return;
   var byC={};FACS.forEach(function(f){if(!byC[f.co])byC[f.co]=[];byC[f.co].push(f);});
   el.innerHTML=Object.entries(byC).map(function(e2){var co=e2[0],facs=e2[1];var m=COM[co]||{c:"#8a9ab0",a:"#e2e8f0"};
-    return'<div style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><div style="width:7px;height:7px;border-radius:2px;background:'+m.c+'"></div><span style="font-size:12px;font-weight:700">'+co+'</span><span style="font-size:11px;color:var(--mu)">'+facs.length+' fac · '+facs.reduce(function(a,f){return a+f.cs;},0)+' res</span></div><div class="card"><table class="tbl"><thead><tr><th>Facility</th><th>Type</th><th>Census</th><th>RTH%</th><th>Risk</th><th>Provider</th></tr></thead><tbody>'+facs.map(function(f){return'<tr><td class="b">'+f.name+'</td><td>'+f.tp+'</td><td>'+f.cs+'</td><td style="font-weight:700;color:'+rC(f.rth)+'">'+f.rth+'%</td><td>'+rP(rT(f.rth))+'</td><td>'+f.pv+'</td></tr>';}).join("")+'</tbody></table></div></div>';
+    return'<div style="margin-bottom:14px"><div style="display:flex;align-items:center;gap:7px;margin-bottom:6px"><div style="width:7px;height:7px;border-radius:2px;background:'+m.c+'"></div><span style="font-size:12px;font-weight:700">'+co+'</span><span style="font-size:11px;color:var(--mu)">'+facs.length+' fac · '+facs.reduce(function(a,f){return a+f.cs;},0)+' res</span></div><div class="card"><table class="tbl"><thead><tr><th>Facility</th><th>Type</th><th>Census</th><th>Active Wounds</th><th>DON / Contact</th><th>Email</th><th>Last Report Sent</th><th></th></tr></thead><tbody>'+facs.map(function(f){
+      var wn=WOUNDS.filter(function(w){return w.fac===f.name&&!wIsHealed(w);}).length;
+      var last=lastSentFor(f.name);
+      return'<tr><td class="b">'+f.name+'</td><td>'+f.tp+'</td><td>'+f.cs+'</td><td style="font-weight:700;color:'+(wn?"#7dd3fc":"var(--mu)")+'">'+wn+'</td><td style="font-size:11px">'+(f.don||'<span style="color:#f87171">— add contact —</span>')+'</td><td style="font-size:11px;color:var(--mu)">'+(f.email||"—")+'</td><td style="font-size:11px;color:var(--mu)">'+(last?last.date+" → "+last.to:"<span style=\"color:var(--mu)\">never</span>")+'</td><td style="white-space:nowrap"><button class="btn bg3 bsm" onclick="openFacEdit(\''+f.id+'\')">✏ Contact</button> <button class="btn bb2 bsm" onclick="emailFacReport(\''+f.name+'\')">📧 Email Report</button></td></tr>';
+    }).join("")+'</tbody></table></div></div>';
   }).join("");
+  renderSendLog();
+}
+var _facEdit=null;
+function openFacAdd(){_facEdit=null;document.getElementById("af-title").textContent="🏢 Add Facility";["af-n","af-reg","af-pv","af-cs","af-addr","af-don","af-email","af-phone","af-nc"].forEach(function(id){sv(id,"");});oM("m-addfac");}
+function openFacEdit(id){
+  var f=FACS.find(function(x){return x.id===id;});if(!f)return;_facEdit=id;
+  document.getElementById("af-title").textContent="✏ Edit Facility — "+f.name;
+  sv("af-n",f.name);sv("af-reg",f.reg);sv("af-pv",f.pv);sv("af-cs",f.cs);sv("af-addr",f.addr||"");
+  sv("af-don",f.don||"");sv("af-email",f.email||"");sv("af-phone",f.phone||"");
+  var co=document.getElementById("af-co");if(co){var has=false;[].forEach.call(co.options,function(o){if(o.value===f.co||o.text===f.co)has=true;});co.value=f.co;}
+  var tp=document.getElementById("af-tp");if(tp)tp.value=f.tp;
+  oM("m-addfac");
 }
 function saveFac(){
   var n=gv("af-n").trim();var co=gv("af-co");
   if(co==="__new__")co=gv("af-nc").trim();
   if(!n||!co){alert("Name and company required.");return;}
   if(!COM[co])COM[co]={c:["#8b5cf6","#06b6d4","#84cc16","#f97316"][Object.keys(COM).length%4],a:"#e2e8f0"};
-  FACS.push({id:"f"+(FACS.length+1),name:n,co:co,reg:gv("af-reg")||"TBD",tp:gv("af-tp"),cs:parseInt(gv("af-cs"))||0,pv:gv("af-pv")||"TBD",rth:14,inf:0,hr:0,mo:0,th:0,apy:0,wn:0,vwk:0,chart:[]});
+  if(_facEdit){
+    var f=FACS.find(function(x){return x.id===_facEdit;});
+    if(f){f.name=n;f.co=co;f.reg=gv("af-reg")||f.reg;f.tp=gv("af-tp");f.cs=parseInt(gv("af-cs"))||f.cs;f.pv=gv("af-pv")||f.pv;f.addr=gv("af-addr");f.don=gv("af-don");f.email=gv("af-email");f.phone=gv("af-phone");}
+  } else {
+    FACS.push({id:"f"+(FACS.length+1),name:n,co:co,reg:gv("af-reg")||"TBD",tp:gv("af-tp"),cs:parseInt(gv("af-cs"))||0,pv:gv("af-pv")||"TBD",rth:14,inf:0,hr:0,mo:0,th:0,apy:0,wn:0,vwk:0,addr:gv("af-addr"),don:gv("af-don"),email:gv("af-email"),phone:gv("af-phone"),chart:[]});
+  }
+  _facEdit=null;
+  document.getElementById("af-title").textContent="🏢 Add Facility";
+  ["af-n","af-reg","af-pv","af-cs","af-addr","af-don","af-email","af-phone","af-nc"].forEach(function(id){sv(id,"");});
   cM("m-addfac");renderCensus();
 }
 function savePt(){
@@ -910,6 +885,54 @@ function savePt(){
   var fmt=function(d){return d?new Date(d).toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"}):"-";};
   PATIENTS.push({id:id,name:n,dob:fmt(gv("np-dob")),fac:fac,rm:gv("np-rm")||"—",adm:fmt(gv("np-adm")),dx:dx,ins:gv("np-ins"),pv:gv("np-pv"),code:gv("np-cd"),st:"Active",src:"Manual",al:gv("np-al")||"NKDA",gen:gv("np-gn"),mrn:gv("np-mrn"),chart:[{dt:TDS(),tp:"census",by:"Admin",dx:dx,rm:gv("np-rm"),code:gv("np-cd"),pv:gv("np-pv"),ins:gv("np-ins"),notes:"Manual patient entry."}]});
   cM("m-addpt");renderCensus();
+}
+
+/* ── WEEKLY FACILITY REPORT DISTRIBUTION (mailto + send log) ── */
+var SENTLOG=[];
+function lastSentFor(name){var m=SENTLOG.filter(function(s){return s.fac===name;});return m.length?m[m.length-1]:null;}
+function facActiveWounds(name){return WOUNDS.filter(function(w){return w.fac===name&&!wIsHealed(w);});}
+function woundReportText(name){
+  var ws=facActiveWounds(name);
+  var lines=ws.map(function(w,i){var last=(w.chart&&w.chart.length?w.chart[w.chart.length-1]:{});var sz=[last.L,last.W,last.D].filter(function(x){return x!=null;}).join(" x ");
+    return (i+1)+". "+w.name+" — "+w.tp+(w.stage&&w.stage!=="N/A"?" ("+w.stage+")":"")+", "+w.loc
+      +"\n   Tx: "+w.tx+"\n   Size: "+(sz?sz+" cm":"n/a")+" | Healing: "+w.heal+" | Infection: "+(w.inf?"ACTIVE":"none")+" | Last seen: "+w.ls;});
+  return "WEEKLY WOUND REPORT — "+name+"\nDate: "+TD()+"\nActive wounds: "+ws.length
+    +"\n\n"+(lines.join("\n\n")||"No active wounds on the wound-care watch list this week.")
+    +"\n\n— This summary is for facility records and must match facility (PointClickCare) documentation. A full printable report is available on request.\n\nAMA SNF Provider Services · Care Connect";
+}
+function emailFacReport(name){
+  var f=FACS.find(function(x){return x.name===name;});if(!f)return;
+  if(!f.email){alert("No contact email on file for "+name+".\n\nAdd a DON / contact email first (Edit Contact).");openFacEdit(f.id);return;}
+  var ws=facActiveWounds(name);
+  var subj="Weekly Wound Report — "+name+" — "+TD();
+  var body=woundReportText(name);
+  var mailto="mailto:"+encodeURIComponent(f.email)+"?subject="+encodeURIComponent(subj)+"&body="+encodeURIComponent(body);
+  window.location.href=mailto;
+  SENTLOG.push({fac:name,to:f.email,don:f.don||"",date:TDS(),count:ws.length,by:"You"});
+  renderSendLog();renderFacList();
+  setTimeout(function(){if(confirm("Email draft opened for "+name+" → "+f.email+".\n\nOpen the full printable report now (to print/attach as PDF)?"))facilityWeeklyReport(name);},300);
+}
+function renderSendLog(){
+  var el=document.getElementById("send-log");if(!el)return;
+  if(!SENTLOG.length){el.innerHTML='<div style="font-size:11px;color:var(--mu);padding:4px 2px">📨 No weekly reports sent yet this session. Use “Email Report” on a facility above.</div>';return;}
+  el.innerHTML='<div class="st">REPORT DISTRIBUTION LOG (this session)</div><div class="card"><table class="tbl"><thead><tr><th>Sent</th><th>Facility</th><th>To</th><th>Wounds</th><th>By</th></tr></thead><tbody>'+[].concat(SENTLOG).reverse().map(function(s){return'<tr><td>'+s.date+'</td><td class="b">'+s.fac+'</td><td style="font-size:11px;color:var(--mu)">'+s.to+'</td><td>'+s.count+'</td><td>'+s.by+'</td></tr>';}).join("")+'</tbody></table></div>';
+}
+function facilityWeeklyReport(name){
+  var f=FACS.find(function(x){return x.name===name;})||{};
+  var ws=facActiveWounds(name);
+  var heal=ws.filter(function(w){return["Progressing","Improving","Healed"].includes(w.heal);});
+  var hp=ws.length?Math.round(heal.length/ws.length*100):0;
+  var css=mkPrintCss();
+  var html="<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Weekly Wound Report — "+name+"</title><style>"+css+"</style></head><body>"
+    +mkPrintHdr("Weekly Wound Report",name+(f.co?" · "+f.co:""),[{l:"Active Wounds",v:ws.length},{l:"Pressure",v:ws.filter(wIsPressure).length},{l:"Infected",v:ws.filter(function(w){return w.inf;}).length},{l:"Healing Rate",v:hp+"%"},{l:"Action Items",v:ws.reduce(function(a,w){return a+getOpenTriggers(w).length;},0)}],"#0e7490")
+    +"<div style='padding:0 24px 24px'>"
+    +"<div style='font-size:11px;color:#475569;margin-bottom:8px'>Prepared for: <b>"+(f.don||"Director of Nursing")+"</b>"+(f.email?" &middot; "+f.email:"")+(f.phone?" &middot; "+f.phone:"")+"</div>"
+    +"<h2>Wound Detail — Watch List</h2><table><thead><tr><th>Patient</th><th>Type</th><th>Stage</th><th>Location</th><th>Treatment</th><th>L×W×D</th><th>Healing</th><th>Infection</th><th>Graft</th><th>Collagen</th><th>Last Seen</th></tr></thead><tbody>"
+    +(ws.length?ws.map(function(w){var last=(w.chart&&w.chart.length?w.chart[w.chart.length-1]:{});return"<tr><td><b>"+w.name+"</b></td><td>"+w.tp+"</td><td>"+w.stage+"</td><td>"+w.loc+"</td><td>"+w.tx+"</td><td>"+[last.L,last.W,last.D].filter(function(x){return x!=null;}).join("×")+"</td><td>"+w.heal+"</td><td>"+(w.inf?"ACTIVE":"No")+"</td><td>"+(w.graft?"Yes":"No")+"</td><td>"+(w.collagen?"Yes":"No")+"</td><td>"+w.ls+"</td></tr>";}).join(""):"<tr><td colspan='11' style='color:#94a3b8'>No active wounds on the watch list.</td></tr>")
+    +"</tbody></table>"
+    +"<div style='margin-top:10px;font-size:10px;color:#64748b'>Compliance note: AMA wound documentation must match facility (PointClickCare) documentation for this reporting period.</div>"
+    +mkPrintFtr()+"</div></body></html>";
+  showRpt("pm-wound",html);
 }
 
 /* ── CHART EDITOR ── */
@@ -954,10 +977,9 @@ function buildFields(){
       var od=woundOnsetDays(rec);
       ltAlert='<div style="background:#7c3aed12;border:1px solid #7c3aed44;border-radius:7px;padding:10px 13px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#c4b5fd;margin-bottom:4px">⏱ Day '+od+' — Pressure wound approaching 100-day threshold</div><div style="font-size:11px;color:#a78bfa">Long-term pressure wounds require enhanced documentation, care team review, and possible specialist referral.</div></div>';
     }
-    flds=[{id:"wf-stage",l:"Stage",v:rec.stage,sel:["N/A","Stage 1","Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."]},{id:"wf-heal",l:"Healing",v:rec.heal,sel:["Stable","Progressing","Improving","Slow","Worsening","Healed"]},{id:"wf-inf",l:"Infection",v:rec.inf?"Yes":"No",sel:["No","Yes"]},{id:"wf-L",l:"Length (cm)",v:last.L||""},{id:"wf-W",l:"Width (cm)",v:last.W||""},{id:"wf-D",l:"Depth (cm)",v:last.D||""},{id:"wf-poa",l:"Origin",v:rec.poa||"Unknown",sel:["Unknown","Present on Admission","Facility-Acquired"]},{id:"wf-braden",l:"Braden Score",v:rec.braden!=null?rec.braden:""},{id:"wf-debride",l:"Debridement",v:rec.debride||"None",sel:["None","Selective","Sharp","Excisional","Enzymatic","Autolytic"]},{id:"wf-vac",l:"Wound VAC",v:rec.vac?"Yes":"No",sel:["No","Yes"]},{id:"wf-albumin",l:"Albumin (g/dL)",v:rec.albumin!=null?rec.albumin:""},{id:"wf-vascular",l:"Vascular Screening",v:rec.vascular||""},{id:"wf-dietary",l:"Nutrition Consult",v:rec.dietary?"Yes":"No",sel:["No","Yes"]},{id:"wf-tx",l:"Treatment / New Intervention",v:rec.tx,full:true},{id:"wf-notes",l:"Progress Note (required if no measurement change)",v:"",ta:true,full:true,ph:"Document wound appearance, drainage, odor, patient response, or reason measurements unchanged…"},{id:"wf-date",l:"Visit Date",v:TDS()},{id:"wf-by",l:"Updated By",v:"",ph:"Clinician name"}];
-    var savedBuild=flds;
+    flds=[{id:"wf-stage",l:"Stage",v:rec.stage,sel:["N/A","Stage 1","Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."]},{id:"wf-heal",l:"Healing",v:rec.heal,sel:["Stable","Progressing","Improving","Slow","Worsening","Healed"]},{id:"wf-inf",l:"Infection",v:rec.inf?"Yes":"No",sel:["No","Yes"]},{id:"wf-L",l:"Length (cm)",v:last.L||""},{id:"wf-W",l:"Width (cm)",v:last.W||""},{id:"wf-D",l:"Depth (cm)",v:last.D||""},{id:"wf-poa",l:"Origin",v:rec.poa||"Unknown",sel:["Unknown","Present on Admission","Facility-Acquired"]},{id:"wf-braden",l:"Braden Score",v:rec.braden!=null?rec.braden:""},{id:"wf-debride",l:"Debridement",v:rec.debride||"None",sel:["None","Selective","Sharp","Excisional","Enzymatic","Autolytic"]},{id:"wf-vac",l:"Wound VAC",v:rec.vac?"Yes":"No",sel:["No","Yes"]},{id:"wf-collagen",l:"Collagen In Use",v:rec.collagen?"Yes":"No",sel:["No","Yes"]},{id:"wf-graft",l:"Graft In Place",v:rec.graft?"Yes":"No",sel:["No","Yes"]},{id:"wf-graftType",l:"Graft Type / Product",v:rec.graftType||"",ph:"e.g. skin substitute, CTP"},{id:"wf-pcrReq",l:"PCR Required",v:rec.pcrReq?"Yes":"No",sel:["No","Yes"]},{id:"wf-pcrDone",l:"PCR Completed",v:rec.pcrDone?"Yes":"No",sel:["No","Yes"]},{id:"wf-albumin",l:"Albumin (g/dL)",v:rec.albumin!=null?rec.albumin:""},{id:"wf-vascular",l:"Vascular Screening",v:rec.vascular||""},{id:"wf-dietary",l:"Nutrition Consult",v:rec.dietary?"Yes":"No",sel:["No","Yes"]},{id:"wf-pv",l:"Wound Provider",v:rec.pv||"",ph:"Provider on watch list"},{id:"wf-tx",l:"Treatment / New Intervention",v:rec.tx,full:true},{id:"wf-notes",l:"Progress Note (required if no measurement change)",v:"",ta:true,full:true,ph:"Document wound appearance, drainage, odor, patient response, or reason measurements unchanged…"},{id:"wf-date",l:"Visit Date",v:TDS()},{id:"wf-by",l:"Updated By",v:"",ph:"Clinician name"}];
     var wflds=flds.map(function(f){return'<div style="grid-column:'+(f.full?"1/-1":"span 1")+'"><label class="fl">'+f.l+'</label>'+(f.sel?'<select id="'+f.id+'">'+f.sel.map(function(o){return'<option'+(o===f.v?' selected':'')+'>'+o+'</option>';}).join("")+'</select>':f.ta?'<textarea id="'+f.id+'" rows="3" placeholder="'+(f.ph||"")+'">'+e(f.v)+'</textarea>':'<input id="'+f.id+'" value="'+e(f.v||"")+'" placeholder="'+(f.ph||"")+'">') +'</div>';}).join("");
-    el.innerHTML=staleAlert+ltAlert+'<div class="st" style="margin-bottom:10px">Update Wound Chart</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+wflds+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:flex-end"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div>';
+    el.innerHTML=staleAlert+ltAlert+triggerPanelHtml(rec)+'<div class="st" style="margin-bottom:10px">Update Wound Chart</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+wflds+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:flex-end"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div>';
     return;
   } else if(tp==="psych"){
     flds=[{id:"pf-ev",l:"Visit Type",v:"Follow-up Visit",sel:["Follow-up Visit","Initial Assessment","Medication Review","GDR Review","GDR Attempt","Telehealth Visit","Acute Hospitalization","Post-Discharge Follow-up","Behavioral Assessment"]},{id:"pf-date",l:"Visit Date",v:TDS()},{id:"pf-th",l:"Telehealth",v:rec.th?"Yes":"No",sel:["No","Yes"]},{id:"pf-apy",l:"Antipsychotic",v:rec.apy?"Yes":"No",sel:["No","Yes"]},{id:"pf-gdr",l:"GDR Status",v:rec.gdr},{id:"pf-lastH",l:"Last Acute Hosp.",v:rec.lastH},{id:"pf-dx",l:"Diagnoses",v:rec.dx.join(", "),full:true},{id:"pf-meds",l:"Medications (one per line)",v:rec.meds.join("\n"),ta:true,full:true},{id:"pf-notes",l:"Clinical Notes",v:"",ta:true,full:true,ph:"Mood, SI screening, plan…"},{id:"pf-by",l:"Updated By",v:"",ph:"Clinician name"}];
@@ -986,16 +1008,18 @@ function saveWoundEntry(){
   if(!rec.chart)rec.chart=[];
   var braden=gv("wf-braden")!==""?parseInt(gv("wf-braden")):rec.braden;
   var albumin=gv("wf-albumin")!==""?parseFloat(gv("wf-albumin")):rec.albumin;
-  var en={dt:gv("wf-date")||today,stage:gv("wf-stage"),tx:gv("wf-tx"),heal:gv("wf-heal"),inf:gv("wf-inf")==="Yes",L:newL,W:parseFloat(gv("wf-W"))||null,D:parseFloat(gv("wf-D"))||null,poa:gv("wf-poa"),braden:braden,debride:gv("wf-debride"),vac:gv("wf-vac")==="Yes",albumin:albumin,vascular:gv("wf-vascular"),dietary:gv("wf-dietary")==="Yes",notes:notes,by:gv("wf-by")||"Wound Team"};
+  var en={dt:gv("wf-date")||today,stage:gv("wf-stage"),tx:gv("wf-tx"),heal:gv("wf-heal"),inf:gv("wf-inf")==="Yes",L:newL,W:parseFloat(gv("wf-W"))||null,D:parseFloat(gv("wf-D"))||null,poa:gv("wf-poa"),braden:braden,debride:gv("wf-debride"),vac:gv("wf-vac")==="Yes",albumin:albumin,vascular:gv("wf-vascular"),dietary:gv("wf-dietary")==="Yes",graft:gv("wf-graft")==="Yes",collagen:gv("wf-collagen")==="Yes",pcrReq:gv("wf-pcrReq")==="Yes",pcrDone:gv("wf-pcrDone")==="Yes",notes:notes,by:gv("wf-by")||"Wound Team"};
   rec.chart.push(en);
   rec.stage=en.stage;if(en.tx)rec.tx=en.tx;rec.heal=en.heal;rec.inf=en.inf;rec.ls=en.dt;if(en.notes)rec.notes=en.notes;
   rec.poa=en.poa;rec.braden=braden;rec.debride=en.debride;rec.vac=en.vac;rec.albumin=albumin;rec.vascular=en.vascular;rec.dietary=en.dietary;
+  rec.graft=en.graft;rec.collagen=en.collagen;rec.pcrReq=en.pcrReq;rec.pcrDone=en.pcrDone;if(en.graft&&!rec.graftDate)rec.graftDate=en.dt;if(en.pcrDone&&!rec.pcrDate)rec.pcrDate=en.dt;
+  var pvv=gv("wf-pv");if(pvv)rec.pv=pvv;
   if(en.heal==="Healed"&&!rec.healedDate)rec.healedDate=en.dt;
   if(en.heal!=="Healed")rec.healedDate="";
   cht(0);
   wRefresh();
   // Also refresh dashboard alerts
-  renderDashAlerts();
+  renderDashAlerts();renderDashActions();
   alert("✓ Wound chart updated."+(woundIsStale(rec)?"":"\n\n✅ Stale alert cleared."));
 }
 
@@ -1105,7 +1129,8 @@ function discharge(){
 }
 
 /* ── WOUND ── */
-var wFac="All";
+var wFac="All";var wProv="All";
+function woundProviders(){var s={};WOUNDS.forEach(function(w){if(w.pv)s[w.pv]=1;});return Object.keys(s).sort();}
 /* ── WOUND ALERT LOGIC ── */
 function parseDate(s){
   if(!s)return null;
@@ -1160,12 +1185,72 @@ function woundAlertBadge(w){
   var parts=[];
   if(stale)parts.push('<span class="pill pr2" title="No measurement update in '+woundDaysSinceUpdate(w)+' days">⚠ Stale '+woundDaysSinceUpdate(w)+'d</span>');
   if(lt)parts.push('<span class="pill" style="background:#7c3aed22;color:#c4b5fd" title="Day '+woundOnsetDays(w)+' pressure wound">⏱ Day '+woundOnsetDays(w)+'</span>');
+  var ot=getOpenTriggers(w).length;
+  if(ot)parts.push('<span class="pill" style="background:#f59e0b22;color:#fcd34d" title="'+ot+' open clinical action item(s)">🚩 '+ot+' action'+(ot>1?"s":"")+'</span>');
   return parts.join(" ");
+}
+
+/* ── CLINICAL TRIGGER / ACTION-PLAN ENGINE ──
+   Each criterion fires a recommended action. A trigger stays OPEN until the
+   provider either logs an action plan or documents a reason for not acting
+   (stored in w.triggerResp[key]). */
+function getWoundTriggers(w){
+  if(wIsHealed(w))return [];
+  var t=[];
+  var onset=woundOnsetDays(w);
+  if(woundIsStale(w))t.push({key:"stale",sev:2,label:"Stagnant ≥7 days — no measurement change",rec:"Re-measure & re-evaluate plan; document a progress note"});
+  if(w.heal==="Worsening"||w.heal==="Slow")t.push({key:"worsening",sev:3,label:"Healing "+w.heal.toLowerCase(),rec:"Escalate therapy — consider debridement, advanced dressing, or specialist referral"});
+  if(w.inf)t.push({key:"infection",sev:3,label:"Active infection present",rec:"Obtain wound culture; assess for systemic antibiotics / wound-care PCR"});
+  if(!w.graft&&onset>=30&&(w.heal==="Slow"||w.heal==="Worsening"||["Stage 3","Stage 4","Unstageable"].indexOf(w.stage)>=0))t.push({key:"graft",sev:2,label:"Non-healing ≥30 days, no graft in place",rec:"Evaluate for skin substitute / cellular tissue graft"});
+  if(w.pcrReq&&!w.pcrDone)t.push({key:"pcr",sev:2,label:"Wound-care PCR ordered but not completed",rec:"Complete & document the PCR"});
+  if(w.albumin!=null&&w.albumin<3.0)t.push({key:"nutrition",sev:1,label:"Low albumin ("+w.albumin+" g/dL)",rec:"Dietary / nutrition consult; protein optimization"});
+  if(woundNearingLongTerm(w))t.push({key:"longterm",sev:2,label:"Pressure wound near/past 100 days (Day "+onset+")",rec:"Enhanced documentation, care-team review, possible specialist referral"});
+  if(w.braden!=null&&w.braden<=12)t.push({key:"braden",sev:1,label:"High pressure-injury risk (Braden "+w.braden+")",rec:"Reinforce repositioning & prevention; weekly skin checks"});
+  return t;
+}
+function getOpenTriggers(w){var r=w.triggerResp||{};return getWoundTriggers(w).filter(function(t){return!r[t.key];});}
+function respondTrigger(woundId,key,status){
+  var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;
+  var t=getWoundTriggers(w).find(function(x){return x.key===key;});if(!t)return;
+  var msg=status==="planned"?"Document the action plan / intervention for:\n\n"+t.label:"Document the clinical reason for NOT acting on:\n\n"+t.label;
+  var note=prompt(msg+"\n\n("+t.rec+")");
+  if(note==null||!note.trim()){return;}
+  var by=prompt("Your name / initials:")||"Wound Team";
+  if(!w.triggerResp)w.triggerResp={};
+  w.triggerResp[key]={status:status,note:note.trim(),by:by,dt:TDS()};
+  if(!w.chart)w.chart=[];
+  w.chart.push({dt:TDS(),stage:w.stage,tx:w.tx,heal:w.heal,inf:w.inf,by:by,notes:"["+(status==="planned"?"ACTION PLAN":"NO ACTION — RATIONALE")+" · "+t.label+"] "+note.trim()});
+  if(_ctx&&_ctx.tp==="wound"&&_ctx.id===woundId){buildFields();}
+  wRefresh&&wRefresh();
+  renderDashAlerts();renderDashActions&&renderDashActions();
+}
+function reopenTrigger(woundId,key){
+  var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w||!w.triggerResp)return;
+  delete w.triggerResp[key];
+  if(_ctx&&_ctx.tp==="wound"&&_ctx.id===woundId){buildFields();}
+  wRefresh&&wRefresh();renderDashActions&&renderDashActions();
+}
+function triggerPanelHtml(w){
+  var open=getOpenTriggers(w);
+  var resp=getWoundTriggers(w).filter(function(t){return (w.triggerResp||{})[t.key];});
+  if(!open.length&&!resp.length)return "";
+  var sevC={1:"#7dd3fc",2:"#fcd34d",3:"#f87171"};
+  var h='<div style="background:#0d1117;border:1px solid #f59e0b44;border-radius:8px;padding:11px 13px;margin-bottom:13px">';
+  h+='<div class="st" style="color:#fcd34d;margin-bottom:8px">🚩 Clinical Action Items'+(open.length?' <span class="pill pr2">'+open.length+' open</span>':' <span class="pill pt">all addressed</span>')+'</div>';
+  open.forEach(function(t){var c=sevC[t.sev]||"#fcd34d";
+    h+='<div style="border-left:3px solid '+c+';background:'+c+'10;border-radius:5px;padding:7px 9px;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:'+c+'">'+t.label+'</div><div style="font-size:11px;color:var(--mu);margin-bottom:5px">Recommended: '+t.rec+'</div><div style="display:flex;gap:6px"><button class="btn ba2 bsm" onclick="respondTrigger(\''+w.id+'\',\''+t.key+'\',\'planned\')">✓ Log Action / Plan</button><button class="btn bg3 bsm" onclick="respondTrigger(\''+w.id+'\',\''+t.key+'\',\'declined\')">✎ Document Reason</button></div></div>';
+  });
+  resp.forEach(function(t){var r=w.triggerResp[t.key];
+    h+='<div style="border-left:3px solid var(--tl);background:#10b98110;border-radius:5px;padding:7px 9px;margin-bottom:6px"><div style="display:flex;justify-content:space-between"><span style="font-size:11px;font-weight:700;color:var(--tl)">'+(r.status==="planned"?"✓ Action planned":"✎ Documented — no action")+' · '+t.label+'</span><button class="btn bg3 bsm" style="font-size:10px" onclick="reopenTrigger(\''+w.id+'\',\''+t.key+'\')">Reopen</button></div><div style="font-size:11px;color:var(--tx);margin-top:2px">'+e(r.note)+'</div><div style="font-size:10px;color:var(--mu)">'+r.by+' · '+r.dt+'</div></div>';
+  });
+  h+='</div>';return h;
 }
 
 function renderWound(){
   buildFS("w-fs",wFac,function(v){wFac=v;renderWound();},"#0ea5e9");
-  var cases=wFac==="All"?WOUNDS:WOUNDS.filter(function(w){return w.fac===wFac;});
+  var psel=document.getElementById("w-prov");
+  if(psel)psel.innerHTML='<option value="All">All Providers (watch lists)</option>'+woundProviders().map(function(p){return'<option value="'+e(p)+'"'+(p===wProv?" selected":"")+'>'+e(p)+'</option>';}).join("");
+  var cases=WOUNDS.filter(function(w){return (wFac==="All"||w.fac===wFac)&&(wProv==="All"||w.pv===wProv);});
   var staleList=cases.filter(function(w){return woundIsStale(w);});
   var ltList=cases.filter(function(w){return woundNearingLongTerm(w);});
   document.getElementById("w-sub").textContent=cases.length+" active · "+cases.filter(function(w){return w.inf;}).length+" infected"+(staleList.length?" · ⚠ "+staleList.length+" stale":"");
@@ -1193,14 +1278,19 @@ function renderWound(){
     {l:"Progressing",v:cases.filter(function(w){return w.heal==="Progressing";}).length,c:"#6ee7b7"}
   ].map(function(k){return'<div class="kt" style="'+(k.l.includes("Stale")&&k.v>0?"border-color:#ef444444;":"")+(k.l.includes("80-100")&&k.v>0?"border-color:#7c3aed44;":"")+'"><div class="kv" style="color:'+k.c+'">'+k.v+'</div><div class="kl">'+k.l+'</div></div>';}).join("");
 
-  document.getElementById("w-tb").innerHTML='<thead><tr><th></th><th>Patient</th><th>Facility</th><th>Type</th><th>Stage</th><th>Location</th><th>Treatment</th><th>Last Update</th><th>Days</th><th>Healing</th><th>Infection</th><th>Alerts</th><th>History</th></tr></thead><tbody>'+cases.map(function(w){
+  document.getElementById("w-tb").innerHTML='<thead><tr><th></th><th>Patient</th><th>Facility</th><th>Provider</th><th>Type</th><th>Stage</th><th>Location</th><th>Treatment</th><th>Graft/Coll/PCR</th><th>Last Update</th><th>Days</th><th>Healing</th><th>Infection</th><th>Alerts</th><th>History</th></tr></thead><tbody>'+cases.map(function(w){
     var daysSince=woundDaysSinceUpdate(w);
     var stale=woundIsStale(w);
     var lt=woundNearingLongTerm(w);
     var rowStyle=stale?"background:#ef44440a;":"";
     var wid=w.id;
-    return'<tr style="'+rowStyle+'"><td><button class="btn bg3 bsm" onclick="openChart(\'wound\',\''+wid+'\')">✏</button></td><td class="b">'+w.name+'</td><td style="font-size:11px">'+w.fac+'</td><td style="color:var(--tx)">'+w.tp+'</td><td>'+sP(w.stage)+'</td><td>'+w.loc+'</td><td style="color:var(--tx);max-width:160px;font-size:11px">'+w.tx+'</td><td class="b" style="color:'+(stale?"#f87171":"var(--tx)")+'">'+w.ls+'</td><td style="font-weight:700;color:'+(stale?"#f87171":daysSince<4?"var(--tl)":"var(--am)")+'">'+daysSince+'d</td><td style="font-weight:700;color:'+hC(w.heal)+'">● '+w.heal+'</td><td>'+(w.inf?'<span class="pill pr2">ACTIVE</span>':'<span style="color:var(--tl)">✓</span>')+'</td><td style="white-space:nowrap">'+woundAlertBadge(w)+'</td><td><span class="pill pt" style="cursor:pointer" onclick="openChart(\'wound\',\''+wid+'\');cht(1);">'+(w.chart||[]).length+'</span></td></tr>';
+    var gcp=[w.graft?'<span class="pill" style="background:#10b98122;color:#6ee7b7" title="Graft in place">G</span>':"",w.collagen?'<span class="pill" style="background:#2a7fff22;color:#7dd3fc" title="Collagen in use">C</span>':"",w.pcrReq?'<span class="pill" style="background:'+(w.pcrDone?"#10b98122;color:#6ee7b7":"#ef444422;color:#fca5a5")+'" title="PCR '+(w.pcrDone?"completed":"required, not done")+'">PCR'+(w.pcrDone?"✓":"!")+'</span>':""].filter(Boolean).join(" ")||'<span style="color:var(--mu)">—</span>';
+    return'<tr style="'+rowStyle+'"><td><button class="btn bg3 bsm" onclick="openChart(\'wound\',\''+wid+'\')">✏</button></td><td class="b">'+w.name+'</td><td style="font-size:11px">'+w.fac+'</td><td style="font-size:11px;color:var(--mu)">'+(w.pv||"—")+'</td><td style="color:var(--tx)">'+w.tp+'</td><td>'+sP(w.stage)+'</td><td>'+w.loc+'</td><td style="color:var(--tx);max-width:150px;font-size:11px">'+w.tx+'</td><td style="white-space:nowrap">'+gcp+'</td><td class="b" style="color:'+(stale?"#f87171":"var(--tx)")+'">'+w.ls+'</td><td style="font-weight:700;color:'+(stale?"#f87171":daysSince<4?"var(--tl)":"var(--am)")+'">'+daysSince+'d</td><td style="font-weight:700;color:'+hC(w.heal)+'">● '+w.heal+'</td><td>'+(w.inf?'<span class="pill pr2">ACTIVE</span>':'<span style="color:var(--tl)">✓</span>')+'</td><td style="white-space:nowrap">'+woundAlertBadge(w)+'</td><td><span class="pill pt" style="cursor:pointer" onclick="openChart(\'wound\',\''+wid+'\');cht(1);">'+(w.chart||[]).length+'</span></td></tr>';
   }).join("")+'</tbody>';
+}
+function emailWFacReport(){
+  if(wFac==="All"){alert("Select a single facility (in the filter strip above) to email its weekly report, or use the per-facility “Email Report” buttons under Census & Facilities.");return;}
+  emailFacReport(wFac);
 }
 
 /* ── WOUND SUB-TABS & ANALYTICS ── */
@@ -2160,6 +2250,7 @@ function rptTab(i){
   }
   var fs=document.getElementById("rpt-fac-sel");
   if(fs)fs.style.display=i<4?"inline-block":"none";
+  var per=document.getElementById("rpt-period");if(per)per.style.display=i<4?"inline-block":"none";
   if(i===4){initKwCats();return;}
   renderCurrentRpt();
 }
@@ -2183,7 +2274,7 @@ function renderReports(){
 }
 function rptSetScope(s){rptScope=s;var fs=document.getElementById("rpt-fac-sel");if(fs)fs.value="";renderReports();}
 function rptGetFacs(){var fs=document.getElementById("rpt-fac-sel");var fv=fs?fs.value:"";if(fv)return FACS.filter(function(f){return f.name===fv;});if(rptScope!=="all")return FACS.filter(function(f){return f.co===rptScope;});return FACS;}
-function rptLabel(){var fs=document.getElementById("rpt-fac-sel");var fv=fs?fs.value:"";if(fv)return fv;if(rptScope!=="all")return rptScope;return "Enterprise — All Portfolios";}
+function rptLabel(){var fs=document.getElementById("rpt-fac-sel");var fv=fs?fs.value:"";var per=(document.getElementById("rpt-period")||{}).value||"";var base=fv?fv:(rptScope!=="all"?rptScope:"Enterprise — All Portfolios");return base+(per?" · "+per+" Report":"");}
 
 /* chart helper */
 var _rc={};
@@ -2211,13 +2302,27 @@ function renderRptWound(){
   var facNames=facs.map(function(f){return f.name;});
   var wh=WHOSP.filter(function(h){return facNames.indexOf(h.fac)>=0;});
   var byFac=facs.map(function(f){var fw=w.filter(function(x){return x.fac===f.name;});var fh=fw.filter(function(x){return["Progressing","Improving","Healed"].includes(x.heal);});return{fac:f.name,co:f.co,total:fw.length,pressure:fw.filter(function(x){return x.etio==="Pressure"||x.tp==="Pressure Injury";}).length,nonPressure:fw.filter(function(x){return x.etio!=="Pressure"&&x.tp!=="Pressure Injury";}).length,infected:fw.filter(function(x){return x.inf;}).length,stale:fw.filter(function(x){return woundIsStale(x);}).length,lt:fw.filter(function(x){return woundNearingLongTerm(x);}).length,hp:fw.length?Math.round(fh.length/fw.length*100):0};});
-  var byPort=Object.keys(COM).map(function(co){var pf=FACS.filter(function(f){return f.co===co;});var pw=w.filter(function(x){return pf.find(function(f){return f.name===x.fac;});});return{co:co,total:pw.length,pressure:pw.filter(function(x){return x.etio==="Pressure"||x.tp==="Pressure Injury";}).length,nonPressure:pw.filter(function(x){return x.etio!=="Pressure"&&x.tp!=="Pressure Injury";}).length};});
+  var byPort=Object.keys(COM).map(function(co){var pf=FACS.filter(function(f){return f.co===co;});var pw=w.filter(function(x){return pf.find(function(f){return f.name===x.fac;});});var ph=pw.filter(function(x){return["Progressing","Improving","Healed"].includes(x.heal);});return{co:co,total:pw.length,pressure:pw.filter(function(x){return x.etio==="Pressure"||x.tp==="Pressure Injury";}).length,nonPressure:pw.filter(function(x){return x.etio!=="Pressure"&&x.tp!=="Pressure Injury";}).length,hp:pw.length?Math.round(ph.length/pw.length*100):0};});
+  var HEALTHRESH=70;
+  var byProv={};w.forEach(function(x){var p=x.pv||"Unassigned";if(!byProv[p])byProv[p]={pv:p,total:0,heal:0,open:0};byProv[p].total++;if(["Progressing","Improving","Healed"].includes(x.heal))byProv[p].heal++;byProv[p].open+=getOpenTriggers(x).length;});
+  var provArr=Object.keys(byProv).map(function(k){var o=byProv[k];o.hp=o.total?Math.round(o.heal/o.total*100):0;return o;}).sort(function(a,b){return b.total-a.total;});
+  var lowFacs=byFac.filter(function(f){return f.total>0&&f.hp<HEALTHRESH;});
+  var lowPorts=byPort.filter(function(p){return p.total>0&&p.hp<HEALTHRESH;});
+  var openTotal=w.reduce(function(a,x){return a+getOpenTriggers(x).length;},0);
+  var period=(document.getElementById("rpt-period")||{}).value||"";
   el.innerHTML='<div style="display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:13px"><div class="kt"><div class="kv">'+w.length+'</div><div class="kl">Total Wounds</div></div><div class="kt"><div class="kv" style="color:#fca5a5">'+pr.length+'</div><div class="kl">Pressure</div></div><div class="kt"><div class="kv" style="color:#7dd3fc">'+np.length+'</div><div class="kl">Non-Pressure</div></div><div class="kt"><div class="kv" style="color:#7dd3fc">'+neu.length+'</div><div class="kl">New (30d)</div></div><div class="kt"><div class="kv" style="color:#6ee7b7">'+healed.length+'</div><div class="kl">Healed</div></div><div class="kt"><div class="kv" style="color:#a78bfa">'+(avgHt!=null?avgHt+"d":"—")+'</div><div class="kl">Avg Heal Time</div></div><div class="kt"><div class="kv" style="color:#fca5a5">'+s2.length+'</div><div class="kl">Stage 2+</div></div><div class="kt"><div class="kv" style="color:var(--tl)">'+hp+'%</div><div class="kl">Healing Rate</div></div></div>'
   +'<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:13px"><div class="kt" style="'+(inf.length?"border-color:#f8717144":"")+'"><div class="kv" style="color:'+(inf.length?"#f87171":"#6ee7b7")+'">'+inf.length+'</div><div class="kl">Infected</div></div><div class="kt" style="'+(stale.length?"border-color:#f8717144":"")+'"><div class="kv" style="color:'+(stale.length?"#f87171":"#6ee7b7")+'">'+stale.length+'</div><div class="kl">Stale 7d+</div></div><div class="kt" style="'+(wh.length?"border-color:#f8717144":"")+'"><div class="kv" style="color:'+(wh.length?"#f87171":"#6ee7b7")+'">'+wh.length+'</div><div class="kl">Wound-Rel. Hosp.</div></div></div>'
   +'<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:13px"><div class="card cp"><div class="st">Pressure vs Non-Pressure</div><div style="height:150px"><canvas id="rc-w1"></canvas></div></div><div class="card cp"><div class="st">Healing Status</div><div style="height:150px"><canvas id="rc-w2"></canvas></div></div><div class="card cp"><div class="st">Wounds by Portfolio</div><div style="height:150px"><canvas id="rc-w3"></canvas></div></div></div>'
   +(lt.length?'<div style="background:#7c3aed12;border:1px solid #7c3aed44;border-radius:8px;padding:10px 14px;margin-bottom:11px"><div style="font-size:12px;font-weight:700;color:#c4b5fd;margin-bottom:5px">&#x23F1; '+lt.length+' pressure wound'+(lt.length>1?"s":"")+" near/past 100 days</div>"+lt.map(function(x){return'<div style="font-size:11px;color:#a78bfa">&#x25B8; '+x.name+' &middot; '+x.fac+' &middot; Day '+woundOnsetDays(x)+'</div>';}).join("")+'</div>':"")
   +(wh.length?'<div class="card" style="margin-bottom:11px"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">&#x1F3E5; Wound-Related Rehospitalizations</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Patient</th><th>Facility</th><th>Date</th><th>Type</th><th>Diagnosis</th><th>LOS</th><th>Preventable</th></tr></thead><tbody>'+wh.map(function(h){return'<tr><td class="b">'+h.name+'</td><td style="font-size:11px">'+h.fac+'</td><td>'+h.date+'</td><td><span class="pill pr2">'+h.type+'</span></td><td style="font-size:11px">'+h.dx+'</td><td>'+h.los+'d</td><td style="font-size:11px;color:var(--mu)">'+h.preventable+'</td></tr>';}).join("")+'</tbody></table></div></div>':"")
-  +'<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Detail by Facility</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Total</th><th>Pressure</th><th>Non-Pressure</th><th>Infected</th><th>Healing Rate</th><th>Stale 7d+</th><th>80-100d+</th></tr></thead><tbody>'+byFac.filter(function(f){return f.total>0;}).map(function(f){return'<tr style="'+(f.stale?"background:#ef44440a;":"")+'"><td class="b">'+f.fac+'</td><td>'+coB(f.co)+'</td><td style="font-weight:700">'+f.total+'</td><td style="color:#fca5a5">'+f.pressure+'</td><td style="color:#7dd3fc">'+f.nonPressure+'</td><td style="color:'+(f.infected?"#f87171":"var(--mu)")+'">'+f.infected+'</td><td style="color:'+(f.hp>=70?"var(--tl)":f.hp>=40?"var(--am)":"#f87171")+';font-weight:700">'+f.hp+'%</td><td style="color:'+(f.stale?"#f87171":"var(--mu)")+'">'+f.stale+'</td><td style="color:'+(f.lt?"#c4b5fd":"var(--mu)")+'">'+f.lt+'</td></tr>';}).join("")+'</tbody></table></div></div>';
+  +'<div class="card" style="margin-bottom:11px"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Detail by Facility</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Total</th><th>Pressure</th><th>Non-Pressure</th><th>Infected</th><th>Healing Rate</th><th>Stale 7d+</th><th>80-100d+</th></tr></thead><tbody>'+byFac.filter(function(f){return f.total>0;}).map(function(f){return'<tr style="'+(f.stale?"background:#ef44440a;":"")+'"><td class="b">'+f.fac+'</td><td>'+coB(f.co)+'</td><td style="font-weight:700">'+f.total+'</td><td style="color:#fca5a5">'+f.pressure+'</td><td style="color:#7dd3fc">'+f.nonPressure+'</td><td style="color:'+(f.infected?"#f87171":"var(--mu)")+'">'+f.infected+'</td><td style="color:'+(f.hp>=70?"var(--tl)":f.hp>=40?"var(--am)":"#f87171")+';font-weight:700">'+f.hp+'%</td><td style="color:'+(f.stale?"#f87171":"var(--mu)")+'">'+f.stale+'</td><td style="color:'+(f.lt?"#c4b5fd":"var(--mu)")+'">'+f.lt+'</td></tr>';}).join("")+'</tbody></table></div></div>'
+  +'<div class="card" style="margin-bottom:11px"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">By Wound Provider (watch-list ownership)</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Provider</th><th>Wounds</th><th>Healing Rate</th><th>Open Action Items</th></tr></thead><tbody>'+provArr.map(function(p){return'<tr><td class="b">'+e(p.pv)+'</td><td style="font-weight:700">'+p.total+'</td><td style="font-weight:700;color:'+(p.hp>=70?"var(--tl)":p.hp>=40?"var(--am)":"#f87171")+'">'+p.hp+'%</td><td style="color:'+(p.open?"#fca5a5":"var(--mu)")+'">'+p.open+'</td></tr>';}).join("")+'</tbody></table></div></div>'
+  +'<div style="background:'+((lowFacs.length||openTotal)?"#f59e0b10":"#10b98110")+';border:1px solid '+((lowFacs.length||openTotal)?"#f59e0b44":"#10b98144")+';border-radius:8px;padding:11px 14px"><div class="st" style="margin:0 0 6px;color:'+((lowFacs.length||openTotal)?"#fcd34d":"var(--tl)")+'">🎓 Education &amp; Action Recommendations</div>'
+    +(lowPorts.length?lowPorts.map(function(p){return'<div style="font-size:11px;color:#fcd34d;margin-bottom:3px">▸ <b>'+p.co.split(" ")[0]+'</b> portfolio healing rate '+p.hp+'% (below '+HEALTHRESH+'% target) — recommend wound-care in-service / education for facility nursing staff.</div>';}).join(""):"")
+    +(lowFacs.length?lowFacs.map(function(f){return'<div style="font-size:11px;color:#fca5a5;margin-bottom:3px">▸ <b>'+f.fac+'</b>: healing rate '+f.hp+'% — offer staff education, reinforce prevention &amp; weekly skin checks.</div>';}).join(""):"")
+    +(openTotal?'<div style="font-size:11px;color:#fca5a5;margin-bottom:3px">▸ <b>'+openTotal+'</b> open clinical action item'+(openTotal>1?"s":"")+' across this scope require a documented plan or rationale.</div>':"")
+    +((!lowFacs.length&&!lowPorts.length&&!openTotal)?'<div style="font-size:11px;color:var(--tl)">✓ All facilities at or above the '+HEALTHRESH+'% healing target and no open action items. No education flags this period.</div>':"")
+    +'</div>';
   setTimeout(function(){
     mkChart("rc-w1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#fca5a5","#7dd3fc"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
     mkChart("rc-w2","doughnut",["Progressing","Stable","Slow","Worsening"],[{data:["Progressing","Stable","Improving","Slow","Worsening"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#3ecfb2","#2a7fff","#10b981","#f59e0b","#ef4444"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
