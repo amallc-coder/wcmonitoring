@@ -3517,7 +3517,61 @@ var HELP=[
   intro:"Admins create sign-in accounts for staff and set each person’s role.",
   fig:["Admin",[{label:"Admin button (top-right)",n:1},{label:"Username · full name · role",n:2},{label:"Temporary password",n:3},{label:"＋ Create User",n:4}]],
   steps:["Click <span class='help-pill'>Admin</span> at the top-right (visible to Admins) (1).","Enter the <b>username, full name, and role</b> (2): Admin, Wound Provider, or Viewer.","Set a <b>temporary password</b> (3).","Click <span class='help-pill'>＋ Create User</span> (4) and share the username + temp password."],
-  tips:["Accounts are stored in this browser; cross-device accounts would require a backend.","You can’t remove the account you’re signed in as, or the last Admin."]}
+  tips:["Accounts are stored in this browser; cross-device accounts would require a backend.","You can’t remove the account you’re signed in as, or the last Admin."]},
+
+ {id:"whatsnew",cat:"What’s new",title:"What’s new — today’s updates",sub:"Everything added in this release",
+  intro:"A quick tour of what’s new. Each item has its own guide in the sections below.",
+  fig:["Wound",[{label:"AI photo analysis + compare",n:1},{label:"Suggested Care & smart notes",n:2},{label:"Search (⌘/Ctrl-K), notifications, settings",n:3},{label:"Autosave, offline, cloud sync",n:4}]],
+  steps:["<b>AI wound-photo analysis</b> — Claude reviews a photo and suggests imaging, meds, grafts, labs/PCR, dressings & referrals; <b>Compare to last</b> shows interval change. (See ‘Analyze a wound photo’.)","<b>Suggested Care & smart notes</b> — guideline-based recommendations with one-click notes. (See ‘Suggested care’.)","<b>Deeper charting</b> — area/%-healing/PUSH auto-calc, tissue/exudate/edges, ABI, Braden subscores, classifications, goal of care, photos, billing, e-sign + audit. (See ‘Full wound assessment’.)","<b>QAPI / MDS Section M</b> quality measures. (See ‘QAPI / MDS’.)","<b>Power features</b> — ⌘/Ctrl-K search, notifications worklist, sortable tables, macros, voice dictation, CSV. (See the Power features guides.)","<b>Autosave + offline + dark mode</b>, data export/import, and optional <b>cloud sync</b> to a shared server. (See ‘Saving, offline & data’ and ‘Cloud sync’.)"],
+  tips:["Press <span class='help-pill'>Ctrl / ⌘ K</span> any time to jump to a resident, wound, facility, or action.","AI features turn on once the server is connected to Claude (Admin/IT)."]},
+
+ {id:"suggestions",cat:"AI & knowledge base",title:"Suggested care & smart notes",sub:"Guideline-based decision support",
+  intro:"Open any wound — the editor shows a Suggested Care panel: cited, guideline-based recommendations built from the patient’s history and the wound’s current state. Always review before use; it’s decision support, not orders.",
+  fig:["Wound",[{label:"Open a wound → 💡 Suggested Care panel",n:1},{label:"Cited recommendation (NPIAP / IWGDF / WOCN…)",n:2},{label:"＋ Note inserts a smart note",n:3}]],
+  steps:["Open a wound to its assessment. The <b>💡 Suggested Care & Smart Notes</b> panel sits near the top (1).","Each item is a recommendation with the <b>guideline it’s based on</b> (2) — offloading, perfusion/ABI, compression safety, infection, debridement, nutrition, etc.","Click <span class='help-pill'>＋ Note</span> (3) to drop a ready-written smart note into the progress note — edit then save."],
+  tips:["Suggestions update as you change the wound (stage, infection, ABI, etc.).","It reads comorbidities from the diagnosis and labs like albumin — keep those current for better prompts."]},
+
+ {id:"aiphoto",cat:"AI & knowledge base",title:"Analyze a wound photo (Claude)",sub:"Vision analysis + interval comparison",
+  intro:"With the server connected to Claude, the app can analyze a wound photo and compare it to the last one — returning suggestions for imaging, medications, grafts, labs/PCR, dressings and referrals, with urgent red-flags highlighted.",
+  fig:["Wound",[{label:"Attach / select a wound photo",n:1},{label:"🔬 Analyze photo  /  📊 Compare to last",n:2},{label:"Structured analysis + red flags",n:3},{label:"＋ Insert into note",n:4}]],
+  steps:["Add a photo in the wound note (or use one already on the chart) (1).","Click <span class='help-pill'>🔬 Analyze photo</span> for a single image, or <span class='help-pill'>📊 Compare to last</span> to compare this visit with the previous photo (2).","Review the analysis — assessment, imaging, meds, grafts/CTP, labs & wound-care PCR, dressings, referrals, and any 🚩 red flags (3). Compare also shows a healing trajectory.","Click <span class='help-pill'>＋ Insert into note</span> (4) to add a summary, then edit and save."],
+  tips:["Always verify — it’s clinician decision support, never a diagnosis or order.","Photos are PHI; analysis runs through your organization’s BAA-covered Claude connection."]},
+
+ {id:"search",cat:"Power features",title:"Instant search & command palette",sub:"Jump anywhere with one shortcut",
+  intro:"Press Ctrl/⌘-K (or the 🔍 in the top bar) to search every resident, wound, and facility — and run quick actions like Add Wound.",
+  fig:["Dashboard",[{label:"🔍 or Ctrl / ⌘ K",n:1},{label:"Type a name, wound, facility, or action",n:2},{label:"↑ ↓ to choose · Enter to go",n:3}]],
+  steps:["Press <span class='help-pill'>Ctrl / ⌘ K</span> or click the 🔍 (1).","Start typing a <b>resident, wound, or facility</b> — or an action like ‘Add Wound’ (2).","Use <b>↑/↓</b> and <b>Enter</b> (or click) to jump straight there (3). <b>Esc</b> closes it."],
+  tips:["Esc also closes any open dialog or menu.","Your last facility, provider, and tab are remembered between visits."]},
+
+ {id:"worklist",cat:"Power features",title:"Notifications & worklist",sub:"What needs attention, in one place",
+  intro:"The 🔔 bell in the top bar shows a live worklist of wounds needing attention — stale (overdue) wounds and open clinical action items — plus a recent-activity feed.",
+  fig:["Dashboard",[{label:"🔔 bell with a count badge",n:1},{label:"Overdue wounds + open action items",n:2},{label:"Click an item to open the wound",n:3}]],
+  steps:["Click the <span class='help-pill'>🔔</span> bell (1) — the badge shows how many wounds need attention.","Review the <b>worklist</b>: stale wounds and wounds with open action items (2), plus recent activity.","Click any item to <b>jump to that wound</b> (3)."],
+  tips:["The badge updates automatically as you chart.","The Dashboard alerts and the Wound → Rounds tab show the same overdue logic."]},
+
+ {id:"productivity",cat:"Power features",title:"Faster charting: tables, macros, dictation, export",sub:"Small things that save time",
+  intro:"Several conveniences speed up everyday work.",
+  fig:["Wound",[{label:"Click a column header to sort",n:1},{label:"Quick-insert macros + 🎤 Dictate on notes",n:2},{label:"⬇ CSV exports the wound list",n:3}]],
+  steps:["<b>Sort any table</b> — click a column header to sort; click again to reverse (1).","<b>Smart-note macros</b> — in the progress note, tap a quick-insert phrase, or <span class='help-pill'>🎤 Dictate</span> to speak the note (2).","<b>Export</b> — the Wound tab’s <span class='help-pill'>⬇ CSV</span> downloads the current list; reports export PDF (3).","<b>Carry-forward</b> — each new wound entry pre-fills from the last visit, so you only change what’s different."],
+  tips:["Dictation uses your browser’s speech recognition (Chrome/Safari).","Filters (facility/provider/tab) stick between sessions."]},
+
+ {id:"data-offline",cat:"Power features",title:"Saving, offline & your data",sub:"Autosave, drafts, undo, backup",
+  intro:"Your work is saved automatically to this browser and the app keeps working without a connection.",
+  fig:["Settings",[{label:"Autosaves on every change",n:1},{label:"Half-finished notes kept as a draft",n:2},{label:"Settings → Export / Import / Reset",n:3},{label:"Installable + works offline (PWA)",n:4}]],
+  steps:["Everything you enter <b>autosaves</b> to this browser and reloads next time (1).","A long wound note is kept as a <b>draft</b> — reopen it and your unsaved edits return (2).","<b>Undo</b> appears after deleting a wound (in the toast). ","<b>Settings (⚙) → Data</b>: <span class='help-pill'>Export</span> a JSON backup, <span class='help-pill'>Import</span> it on another device, or <span class='help-pill'>Reset to demo</span> (3).","<b>Install it</b> — add to your home screen; it runs full-screen and works offline (4)."],
+  tips:["Browser-stored data lives on that one device — use Export/Import to move it, or Cloud sync to share it.","Photos are large; if local storage fills, the app keeps your data and warns you."]},
+
+ {id:"display",cat:"Power features",title:"Appearance: dark mode & density",sub:"Make it comfortable",
+  intro:"Tune the look from the ⚙ Settings menu in the top bar.",
+  fig:["Settings",[{label:"⚙ Settings (top-right)",n:1},{label:"Compact density · Dark theme · Reduce motion",n:2}]],
+  steps:["Click the <span class='help-pill'>⚙</span> gear (1).","Toggle <b>Compact density</b> (tighter rows), <b>Dark theme</b>, or <b>Reduce motion</b> (2) — choices are remembered."],
+  tips:["Compact density fits more rows on screen for power users.","These are per-device preferences."]},
+
+ {id:"cloud",cat:"Power features",title:"Cloud sync (shared, durable data)",sub:"Connect to your server",
+  intro:"By default data is local to your browser. If your organization runs the Clinilytics server, connect to it so your team shares one synced, durable, encrypted copy — and the app still works offline, syncing when it reconnects.",
+  fig:["Settings",[{label:"⚙ Settings → Cloud sync",n:1},{label:"Connect to server (URL + login)",n:2},{label:"Status: Connected · Sync now",n:3}]],
+  steps:["Open <span class='help-pill'>⚙ Settings → Cloud sync</span> (1).","Click <span class='help-pill'>Connect to server</span>, enter the server URL and your username/password (2).","Once connected, changes sync automatically; use <span class='help-pill'>Sync now</span> any time, and <span class='help-pill'>Disconnect</span> to go local-only (3)."],
+  tips:["Ask your administrator/IT for the server URL and your login.","AI photo analysis and draft-note require the cloud connection."]}
 ];
 var helpCur="overview";
 function helpGo(id){helpCur=id;renderHelp();var b=document.getElementById("help-body");if(b)b.scrollTop=0;}
