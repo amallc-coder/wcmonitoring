@@ -225,15 +225,19 @@ function buildApp() {
     if (!anthropic.configured()) return res.status(501).json({ error: "Claude not configured (set ANTHROPIC_API_KEY)" });
     const body = req.body || {};
     const image = typeof body.image === "string" ? body.image : "";
-    if (image && image.length > 9 * 1024 * 1024) return res.status(413).json({ error: "image too large" });
+    const prevImage = typeof body.prevImage === "string" ? body.prevImage : "";
+    if ((image && image.length > 9 * 1024 * 1024) || (prevImage && prevImage.length > 9 * 1024 * 1024))
+      return res.status(413).json({ error: "image too large" });
     try {
       const analysis = await anthropic.analyzeWound({
         context: body.context || {},
         suggestions: Array.isArray(body.suggestions) ? body.suggestions.slice(0, 30) : [],
         image: image || null,
-        mime: body.mime || "image/jpeg"
+        mime: body.mime || "image/jpeg",
+        prevImage: prevImage || null,
+        prevMime: body.prevMime || "image/jpeg"
       });
-      await audit(req, "ai.analyze", "img=" + (image ? "y" : "n"));
+      await audit(req, "ai.analyze", "img=" + (image ? "y" : "n") + (prevImage ? " compare" : ""));
       res.json({ analysis: analysis });
     } catch (e) { res.status(502).json({ error: "AI analysis failed" }); }
   }));
