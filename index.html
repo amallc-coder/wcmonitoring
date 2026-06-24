@@ -240,6 +240,11 @@ img,canvas,svg{max-width:100%}
       <div class="mi" onclick="prefToggle('dense')">Compact density <small id="pf-dense">Off</small></div>
       <div class="mi" onclick="prefToggle('theme')">Dark theme <small id="pf-theme">Off</small></div>
       <div class="mi" onclick="prefToggle('reduce')">Reduce motion <small id="pf-reduce">Off</small></div>
+      <h4>Cloud sync (self-hosted server)</h4>
+      <div class="mi" style="cursor:default"><span>Status</span><small id="cloud-stat">Local only</small></div>
+      <div class="mi" onclick="cloudConnect()">Connect to server… <small>🔗</small></div>
+      <div class="mi" onclick="cloudSyncNow()">Sync now <small>⟳</small></div>
+      <div class="mi" onclick="cloudDisconnect()">Disconnect <small>⏏</small></div>
       <h4>Data (this browser)</h4>
       <div class="mi" onclick="exportData()">Export all data <small>⬇ .json</small></div>
       <div class="mi" onclick="document.getElementById('import-file').click()">Import data <small>⬆ .json</small></div>
@@ -880,6 +885,7 @@ function persistNow(){
       localStorage.setItem("cc_state",JSON.stringify(lite));toast("Saved — photos too large to store locally","err");}
     catch(e2){toast("Could not save locally (storage full)","err");}
   }
+  cloudPushSoon();
 }
 function loadState(){try{var s=localStorage.getItem("cc_state");if(!s)return false;var d=JSON.parse(s);if(d.WOUNDS)WOUNDS=d.WOUNDS;if(d.PATIENTS)PATIENTS=d.PATIENTS;if(d.FACS)FACS=d.FACS;if(d.SENTLOG)SENTLOG=d.SENTLOG;_loadedFromStore=true;return true;}catch(e){return false;}}
 function exportData(){closeMenus();try{var blob=new Blob([JSON.stringify({WOUNDS:WOUNDS,PATIENTS:PATIENTS,FACS:FACS,SENTLOG:SENTLOG,exported:nowStamp()},null,1)],{type:"application/json"});var u=URL.createObjectURL(blob);var a=document.createElement("a");a.href=u;a.download="clinilytics_backup_"+TDS().replace(/\//g,"-")+".json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);toast("Backup downloaded","ok");}catch(e){toast("Export failed","err");}}
@@ -897,7 +903,7 @@ function saveUI(o){try{var u=JSON.parse(localStorage.getItem("cc_ui")||"{}");for
 function loadUI(){try{return JSON.parse(localStorage.getItem("cc_ui")||"{}");}catch(e){return {};}}
 
 /* Menus */
-function toggleMenu(id){var m=document.getElementById(id);if(!m)return;var open=m.classList.contains("show");closeMenus();if(!open){if(id==="notif-menu")renderNotif();m.classList.add("show");}}
+function toggleMenu(id){var m=document.getElementById(id);if(!m)return;var open=m.classList.contains("show");closeMenus();if(!open){if(id==="notif-menu")renderNotif();if(id==="settings-menu")updateCloudStat();m.classList.add("show");}}
 function closeMenus(){var ms=document.querySelectorAll(".menu.show");for(var i=0;i<ms.length;i++)ms[i].classList.remove("show");}
 
 /* Notifications / worklist bell */
@@ -966,6 +972,37 @@ function saveDraft(id){try{var o={};woundFieldIds().forEach(function(f){var el=d
 function restoreDraft(id){try{var s=localStorage.getItem("cc_draft_"+id);if(!s)return;var o=JSON.parse(s);var any=false;woundFieldIds().forEach(function(f){var el=document.getElementById(f);if(el&&o[f]!=null&&o[f]!==""){el.value=o[f];any=true;}});if(any)toast("Draft restored — unsaved edits from before","ok");}catch(e){}}
 function clearDraft(id){try{localStorage.removeItem("cc_draft_"+id);}catch(e){}}
 document.addEventListener("input",function(ev){if(_ctx&&_ctx.tp==="wound"&&ev.target.id&&ev.target.id.indexOf("wf-")===0)saveDraftSoon(_ctx.id);});
+
+/* ════ CLOUD SYNC (optional self-hosted backend) ════
+   When connected to the API, the server is the source of truth and the browser
+   keeps a full localStorage mirror as an offline fallback — that's the client
+   layer of redundancy. With no server configured, the app stays local-only. */
+function cloudGet(){return {api:(localStorage.getItem("cc_api")||"").replace(/\/+$/,""),token:sessionStorage.getItem("cc_token")||localStorage.getItem("cc_token")||""};}
+function cloudOn(){var c=cloudGet();return !!(c.api&&c.token);}
+function updateCloudStat(){var el=document.getElementById("cloud-stat");if(!el)return;el.textContent=cloudOn()?("Connected"+(loadUI().lastSync?" · "+loadUI().lastSync:"")):(localStorage.getItem("cc_api")?"Configured (signed out)":"Local only");}
+function cloudConnect(){closeMenus();
+  var api=prompt("Server API base URL (e.g. https://your-host.com):",localStorage.getItem("cc_api")||"");if(!api)return;api=api.replace(/\/+$/,"");
+  var u=prompt("Username:");if(!u)return;var p=prompt("Password:");if(p==null)return;
+  fetch(api+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u,password:p})})
+   .then(function(r){if(!r.ok)throw new Error("login");return r.json();})
+   .then(function(d){localStorage.setItem("cc_api",api);sessionStorage.setItem("cc_token",d.token);localStorage.setItem("cc_token",d.token);toast("Connected to server","ok");cloudPull(true);})
+   .catch(function(){toast("Could not connect (check URL / credentials)","err");});
+}
+function cloudDisconnect(){closeMenus();sessionStorage.removeItem("cc_token");localStorage.removeItem("cc_token");toast("Disconnected — local data kept");}
+function cloudPull(silent){var c=cloudGet();if(!c.api||!c.token)return;
+  fetch(c.api+"/api/snapshot",{headers:{Authorization:"Bearer "+c.token}})
+   .then(function(r){if(r.status===401){toast("Session expired — reconnect","err");throw new Error("401");}if(!r.ok)throw new Error("pull");return r.json();})
+   .then(function(d){if(d.facilities)FACS=d.facilities;if(d.patients)PATIENTS=d.patients;if(d.wounds)WOUNDS=d.wounds;if(d.sentlog)SENTLOG=d.sentlog;persistNow();initWoundData();initDash();renderCensus();updateBell();saveUI({lastSync:nowStamp()});if(!silent)toast("Synced from server","ok");})
+   .catch(function(){if(!silent)toast("Pull failed — using local copy","err");});
+}
+var _cloudPushT=null;
+function cloudPushSoon(){if(!cloudOn())return;if(_cloudPushT)clearTimeout(_cloudPushT);_cloudPushT=setTimeout(cloudPush,1200);}
+function cloudPush(){var c=cloudGet();if(!c.api||!c.token)return;
+  fetch(c.api+"/api/snapshot",{method:"PUT",headers:{"Content-Type":"application/json",Authorization:"Bearer "+c.token},body:JSON.stringify({facilities:FACS,patients:PATIENTS,wounds:WOUNDS,sentlog:SENTLOG})})
+   .then(function(r){if(r.status===401){toast("Session expired — reconnect to sync","err");return;}if(r.ok)saveUI({lastSync:nowStamp()});})
+   .catch(function(){/* offline — local mirror keeps the data; retries on next change/Sync now */});
+}
+function cloudSyncNow(){closeMenus();if(!cloudOn()){toast("Not connected — use Connect to server","err");return;}cloudPush();cloudPull(false);}
 
 /* ── FAC STRIP ── */
 var _fcb={};
@@ -3400,6 +3437,7 @@ document.addEventListener("DOMContentLoaded",function(){
   renderCensus();
   if(ui.tab&&ui.tab!=="dashboard"){try{go(ui.tab);}catch(e){}}
   updateBell();
+  if(cloudOn())setTimeout(function(){cloudPull(true);},300);
   document.getElementById("ftr").textContent="Last sync: "+TD()+" · "+FACS.length+" facilities · "+PATIENTS.filter(function(p){return p.st==="Active";}).length+" active residents";
   if(!hadSaved&&!loadUI().seen){saveUI({seen:1});setTimeout(function(){toast("Welcome! Your work autosaves to this browser. Press Ctrl/⌘-K to search anything.","ok");},900);}
   // PWA service worker (offline / installable)
