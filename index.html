@@ -20,9 +20,9 @@ body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;backgroun
 .lic{display:flex;align-items:center;justify-content:center;line-height:0}
 .lic svg{display:block}
 .ltx{font-weight:700;font-size:17px;color:var(--tx);letter-spacing:-.02em}.ltx span{color:var(--tl)}
-.modpill{background:var(--ink);color:#fff;border-radius:14px;padding:4px 12px;font-size:11px;font-weight:600;white-space:nowrap}
+.modpill{background:var(--am);color:#fff;border-radius:5px;padding:4px 12px;font-size:11px;font-weight:700;white-space:nowrap;letter-spacing:.01em}
 nav{display:flex;overflow-x:auto;gap:4px;padding-bottom:9px;margin:0}
-nav button{background:transparent;border:none;color:#6f6a61;padding:5px 11px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;border-radius:14px;display:inline-flex;align-items:center;gap:6px}
+nav button{background:transparent;border:none;color:#6f6a61;padding:6px 12px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;border-radius:5px;display:inline-flex;align-items:center;gap:6px}
 nav button::before{content:"";width:6px;height:6px;border-radius:50%;background:var(--tl);opacity:.55;flex-shrink:0}
 nav button:hover{color:var(--tx)}
 nav button.A{background:var(--ink);color:#fff;font-weight:600}
@@ -73,11 +73,11 @@ select option{background:#fff}
 .xb{background:none;border:none;color:var(--mu);font-size:17px;cursor:pointer;padding:2px 5px;border-radius:4px}
 .xb:hover{color:var(--tx);background:var(--bd)}
 .itr{display:flex;gap:4px;margin-bottom:13px;flex-wrap:wrap}
-.it{background:transparent;border:none;color:var(--mu);padding:5px 12px;font-size:11.5px;cursor:pointer;font-family:inherit;border-radius:14px;font-weight:500}
+.it{background:transparent;border:none;color:var(--mu);padding:5px 12px;font-size:11.5px;cursor:pointer;font-family:inherit;border-radius:5px;font-weight:500}
 .it:hover{color:var(--tx)}
 .it.A{background:var(--ink);color:#fff;font-weight:600}
 .fs2{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:11px}
-.fb{background:#fff;border:1px solid var(--bd);color:var(--mu);padding:3px 9px;border-radius:14px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .12s}
+.fb{background:#fff;border:1px solid var(--bd);color:var(--mu);padding:3px 9px;border-radius:5px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .12s}
 .fb:hover{border-color:var(--b2);color:var(--tx)}.fb.A{font-weight:700}
 .ph2{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px}
 .pt3{font-size:21px;font-weight:700;color:var(--tx);margin-bottom:3px;letter-spacing:-.02em}
@@ -127,7 +127,7 @@ img,canvas,svg{max-width:100%}
   #navtoggle{display:inline-flex}
   #hdr nav{display:none;flex-direction:column;gap:3px;padding:4px 0 12px;max-height:64vh;overflow-y:auto}
   #hdr nav.open{display:flex}
-  #hdr nav button{width:100%;justify-content:flex-start;border-radius:9px;padding:10px 12px;font-size:13px}
+  #hdr nav button{width:100%;justify-content:flex-start;border-radius:6px;padding:10px 12px;font-size:13px}
   .tb{padding:11px 12px}
   .ph2{flex-direction:column;align-items:stretch;gap:9px}
   .ph2 > div:last-child{display:flex;flex-wrap:wrap;gap:6px}
@@ -721,11 +721,11 @@ const KWP=[
 /* ── HELPERS ── */
 const TD=()=>new Date().toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"});
 const TDS=()=>new Date().toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"});
-const rC=r=>r>18?"#ef4444":r>15?"#f59e0b":"#10b981";
+const rC=r=>r>18?"#c0392b":r>15?"#c2693f":"#6f9b7a";
 const rT=r=>r>18?"HIGH":r>15?"MED":"LOW";
 const rP=r=>'<span class="pill '+(r==="HIGH"?"ph":r==="MED"?"pm2":"pl")+'">'+r+'</span>';
 const coB=co=>{const m=COM[co]||{c:"#8c877d",a:"#8c877d"};return'<span class="pill" style="background:'+m.c+'1f;color:'+m.c+'">'+co.split(" ")[0]+'</span>';};
-const hC=h=>({Progressing:"#16a34a",Stable:"#2563eb",Slow:"#d97706",Improving:"#059669",Worsening:"#dc2626",Healed:"#059669"}[h]||"#8a9ab0");
+const hC=h=>({Progressing:"#4f7d5e",Stable:"#6b675e",Slow:"#c2693f",Improving:"#4f7d5e",Worsening:"#c0392b",Healed:"#4f7d5e"}[h]||"#8f8a81");
 const sP=s=>{const p=(["Stage 4","Stage 3"].includes(s))?["#fee2e2","#991b1b"]:(s==="Stage 2")?["#fef3c7","#92400e"]:(["Unstageable","Deep Tissue Inj."].includes(s))?["#ede9fe","#5b21b6"]:["#eceae4","#6f6a61"];return'<span class="pill" style="background:'+p[0]+';color:'+p[1]+'">'+s+'</span>';};
 const e=s=>String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
 const gv=id=>(document.getElementById(id)||{}).value||"";
@@ -795,10 +795,10 @@ function initDash(){
   var MO=["Jan","Feb","Mar","Apr","May","Jun"];
   var CO={border:{color:"rgba(20,20,20,0.07)"},ticks:{color:"#8c877d",font:{size:9}}};
   var OP={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
-  new Chart(document.getElementById("c-hosp"),{type:"line",data:{labels:MO,datasets:[{data:[22,20,19,17,16,15],borderColor:"#3b82f6",borderWidth:2,tension:.4,pointRadius:0,fill:false},{data:[18,18,18,18,18,18],borderColor:"#3ecfb2",borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false}]},options:OP});
-  new Chart(document.getElementById("c-wound"),{type:"bar",data:{labels:MO,datasets:[{data:[62,65,70,74,78,82],backgroundColor:"#3ecfb2",borderRadius:3},{data:[38,35,30,26,22,18],backgroundColor:"#2a3a4a",borderRadius:3}]},options:Object.assign({},OP,{scales:{x:Object.assign({},OP.scales.x,{stacked:true}),y:Object.assign({},OP.scales.y,{stacked:true})}})});
-  new Chart(document.getElementById("c-th"),{type:"line",data:{labels:MO,datasets:[{data:[142,158,171,189,204,214],borderColor:"#2a7fff",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(42,127,255,0.12)"}]},options:OP});
-  new Chart(document.getElementById("c-inf"),{type:"line",data:{labels:MO,datasets:[{data:[8.2,7.8,7.1,6.5,5.9,5.4],borderColor:"#ef4444",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(239,68,68,0.1)"}]},options:OP});
+  new Chart(document.getElementById("c-hosp"),{type:"line",data:{labels:MO,datasets:[{data:[22,20,19,17,16,15],borderColor:"#c2693f",borderWidth:2,tension:.4,pointRadius:0,fill:false},{data:[18,18,18,18,18,18],borderColor:"#b8b3a8",borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false}]},options:OP});
+  new Chart(document.getElementById("c-wound"),{type:"bar",data:{labels:MO,datasets:[{data:[62,65,70,74,78,82],backgroundColor:"#6f9b7a",borderRadius:3},{data:[38,35,30,26,22,18],backgroundColor:"#d3cdc1",borderRadius:3}]},options:Object.assign({},OP,{scales:{x:Object.assign({},OP.scales.x,{stacked:true}),y:Object.assign({},OP.scales.y,{stacked:true})}})});
+  new Chart(document.getElementById("c-th"),{type:"line",data:{labels:MO,datasets:[{data:[142,158,171,189,204,214],borderColor:"#3f7d76",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(63,125,118,0.12)"}]},options:OP});
+  new Chart(document.getElementById("c-inf"),{type:"line",data:{labels:MO,datasets:[{data:[8.2,7.8,7.1,6.5,5.9,5.4],borderColor:"#c0392b",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(192,57,43,0.1)"}]},options:OP});
 }
 
 function kv2(v,l,c){return'<div style="background:#faf8f4;border:1px solid var(--bd);border-radius:6px;padding:5px 7px"><div style="font-size:14px;font-weight:800;font-family:var(--mono);color:'+c+'">'+v+'</div><div style="font-size:9px;color:var(--mu)">'+l+'</div></div>';}
@@ -1478,9 +1478,9 @@ function renderWAnalytics(){
     '<div style="display:grid;grid-template-columns:2fr 1fr;gap:11px;margin-bottom:13px"><div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Facility Benchmarks</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Census</th><th>Wounds</th><th>Prevalence</th><th>Pressure</th><th>Stage 2+</th><th>Infected</th><th>Healing</th><th>Avg Heal</th><th>Hosp</th></tr></thead><tbody>'+byFac.filter(function(f){return f.total>0;}).map(function(f){return'<tr><td class="b">'+f.fac+'</td><td>'+f.cs+'</td><td style="font-weight:700">'+f.total+'</td><td style="color:'+(f.prev>5?"#f87171":f.prev>3?"#fcd34d":"#6ee7b7")+';font-weight:700">'+f.prev+'%</td><td style="color:#fca5a5">'+f.pressure+'</td><td>'+f.s2+'</td><td style="color:'+(f.inf?"#f87171":"var(--mu)")+'">'+f.inf+'</td><td style="color:'+(f.hp>=70?"var(--tl)":f.hp>=40?"var(--am)":"#f87171")+';font-weight:700">'+f.hp+'%</td><td>'+f.avgHt+(f.avgHt!=="—"?"d":"")+'</td><td style="color:'+(f.wh?"#f87171":"var(--mu)")+'">'+f.wh+'</td></tr>';}).join("")+'</tbody></table></div></div>'+
     '<div class="card cp"><div class="st">Quarterly Metrics</div><table class="tbl" style="font-size:11px"><thead><tr><th>Quarter</th><th>New Wounds</th><th>Healed</th></tr></thead><tbody>'+(qArr.length?qArr.map(function(q){return'<tr><td class="b">'+q.q+'</td><td style="color:#7dd3fc;font-weight:700">'+q.nw+'</td><td style="color:#6ee7b7;font-weight:700">'+q.hl+'</td></tr>';}).join(""):'<tr><td colspan="3" style="color:var(--mu)">No dated wounds</td></tr>')+'</tbody></table><div style="font-size:10px;color:var(--mu);margin-top:8px;line-height:1.5">Marketable metrics for hospital partners & QAPI: healing rates, average healing time, and wound-related rehospitalizations.</div></div></div>';
   setTimeout(function(){
-    mkChart("wa-c1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#fca5a5","#7dd3fc"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom"}},scales:{x:{display:false},y:{display:false}}});
-    mkChart("wa-c2","doughnut",["Progressing","Improving","Stable","Slow","Worsening","Healed"],[{data:["Progressing","Improving","Stable","Slow","Worsening","Healed"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#3ecfb2","#10b981","#2a7fff","#f59e0b","#ef4444","#6ee7b7"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
-    mkChart("wa-c3","bar",["Mar","Apr","May","Jun"],[{label:"New",data:[2,4,3,2],backgroundColor:"#7dd3fc",borderRadius:3},{label:"Healed",data:[1,1,2,2],backgroundColor:"#6ee7b7",borderRadius:3}]);
+    mkChart("wa-c1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#c2693f","#6f9b7a"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom"}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wa-c2","doughnut",["Progressing","Improving","Stable","Slow","Worsening","Healed"],[{data:["Progressing","Improving","Stable","Slow","Worsening","Healed"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#6f9b7a","#8fb89a","#b8b3a8","#c2693f","#c0392b","#4f7d5e"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wa-c3","bar",["Mar","Apr","May","Jun"],[{label:"New",data:[2,4,3,2],backgroundColor:"#cbb892",borderRadius:3},{label:"Healed",data:[1,1,2,2],backgroundColor:"#6f9b7a",borderRadius:3}]);
   },60);
 }
 
@@ -1504,8 +1504,8 @@ function renderWQuality(){
     '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Quality Measures by Facility</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Census</th><th>Pressure Injuries</th><th>Prevalence</th><th>Facility-Acquired</th><th>Infection Rate</th><th>RTH%</th></tr></thead><tbody>'+byFac.map(function(f){return'<tr style="'+(f.acq||f.prev>5?"background:#ef44440a;":"")+'"><td class="b">'+f.fac+'</td><td>'+coB(f.co)+'</td><td>'+f.cs+'</td><td style="font-weight:700;color:#fca5a5">'+f.pi+'</td><td style="font-weight:700;color:'+(f.prev>5?"#f87171":f.prev>3?"#fcd34d":"#6ee7b7")+'">'+f.prev+'%</td><td style="color:'+(f.acq?"#f87171":"var(--mu)")+';font-weight:700">'+f.acq+'</td><td style="color:'+(f.infRate>20?"#f87171":"var(--mu)")+'">'+f.infRate+'%</td><td style="font-weight:700;color:'+rC(f.rth)+'">'+f.rth+'%</td></tr>';}).join("")+'</tbody></table></div></div>'+
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px"><div class="card cp"><div class="st">Pressure Injury Origin</div><div style="height:160px"><canvas id="wq-c1"></canvas></div></div><div class="card cp"><div class="st">Prevalence by Facility</div><div style="height:160px"><canvas id="wq-c2"></canvas></div></div></div>';
   setTimeout(function(){
-    mkChart("wq-c1","doughnut",["Facility-Acquired","Present on Admission"],[{data:[acq.length,poa.length],backgroundColor:["#ef4444","#7dd3fc"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
-    mkChart("wq-c2","bar",byFac.map(function(f){return f.fac.split("–").pop().trim();}),[{label:"Prevalence %",data:byFac.map(function(f){return f.prev;}),backgroundColor:"#fca5a5",borderRadius:3}]);
+    mkChart("wq-c1","doughnut",["Facility-Acquired","Present on Admission"],[{data:[acq.length,poa.length],backgroundColor:["#c0392b","#b8b3a8"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wq-c2","bar",byFac.map(function(f){return f.fac.split("–").pop().trim();}),[{label:"Prevalence %",data:byFac.map(function(f){return f.prev;}),backgroundColor:"#c2693f",borderRadius:3}]);
   },60);
 }
 
@@ -1553,7 +1553,7 @@ function renderWRehosp(){
     '<div style="display:grid;grid-template-columns:2fr 1fr;gap:11px"><div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Transfer Detail</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Patient</th><th>Facility</th><th>Date</th><th>Type</th><th>Diagnosis</th><th>LOS</th><th>Readmit</th><th>Telehealth</th><th>Preventable</th></tr></thead><tbody>'+(hs.length?hs.map(function(h){return'<tr><td class="b"><span style="cursor:pointer;color:#7dd3fc" onclick="openChart(\'wound\',\''+h.woundId+'\')">'+h.name+'</span></td><td style="font-size:11px">'+h.fac+'</td><td>'+h.date+'</td><td><span class="pill pr2">'+h.type+'</span></td><td style="font-size:11px;max-width:220px">'+h.dx+'</td><td>'+h.los+'d</td><td>'+(h.readmit?'<span class="pill pr2">Yes</span>':'<span style="color:var(--tl)">No</span>')+'</td><td>'+h.thAttempted+'</td><td style="font-size:11px;color:'+((h.preventable||"").toLowerCase().indexOf("possibly")>=0?"#fcd34d":"var(--mu)")+'">'+h.preventable+'</td></tr>';}).join(""):'<tr><td colspan="9" style="color:var(--mu)">No wound-related transfers recorded.</td></tr>')+'</tbody></table></div></div>'+
     '<div class="card cp"><div class="st">Transfers by Type</div><div style="height:180px"><canvas id="wr-c1"></canvas></div></div></div>';
   setTimeout(function(){
-    mkChart("wr-c1","doughnut",["Sepsis","Osteomyelitis","Cellulitis"],[{data:[byType("Sepsis"),byType("Osteomyelitis"),byType("Cellulitis")],backgroundColor:["#ef4444","#f97316","#f59e0b"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wr-c1","doughnut",["Sepsis","Osteomyelitis","Cellulitis"],[{data:[byType("Sepsis"),byType("Osteomyelitis"),byType("Cellulitis")],backgroundColor:["#c0392b","#c2693f","#cbb892"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
   },60);
 }
 
@@ -2456,9 +2456,9 @@ function renderRptWound(){
     +((!lowFacs.length&&!lowPorts.length&&!openTotal)?'<div style="font-size:11px;color:var(--tl)">✓ All facilities at or above the '+HEALTHRESH+'% healing target and no open action items. No education flags this period.</div>':"")
     +'</div>';
   setTimeout(function(){
-    mkChart("rc-w1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#fca5a5","#7dd3fc"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
-    mkChart("rc-w2","doughnut",["Progressing","Stable","Slow","Worsening"],[{data:["Progressing","Stable","Improving","Slow","Worsening"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#3ecfb2","#2a7fff","#10b981","#f59e0b","#ef4444"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
-    mkChart("rc-w3","bar",byPort.map(function(p){return p.co.split(" ")[0];}), [{label:"Pressure",data:byPort.map(function(p){return p.pressure;}),backgroundColor:"#fca5a5",borderRadius:3},{label:"Non-Pressure",data:byPort.map(function(p){return p.nonPressure;}),backgroundColor:"#7dd3fc",borderRadius:3}],{scales:{x:{stacked:true},y:{stacked:true}}});
+    mkChart("rc-w1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#c2693f","#6f9b7a"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
+    mkChart("rc-w2","doughnut",["Progressing","Stable","Slow","Worsening"],[{data:["Progressing","Stable","Improving","Slow","Worsening"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#6f9b7a","#b8b3a8","#8fb89a","#c2693f","#c0392b"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
+    mkChart("rc-w3","bar",byPort.map(function(p){return p.co.split(" ")[0];}), [{label:"Pressure",data:byPort.map(function(p){return p.pressure;}),backgroundColor:"#c2693f",borderRadius:3},{label:"Non-Pressure",data:byPort.map(function(p){return p.nonPressure;}),backgroundColor:"#6f9b7a",borderRadius:3}],{scales:{x:{stacked:true},y:{stacked:true}}});
   },50);
 }
 
