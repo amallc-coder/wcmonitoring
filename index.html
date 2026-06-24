@@ -103,7 +103,8 @@ select option{background:#fff}
 #lgate.h{display:none}
 #lgate .lcard{width:340px;max-width:92vw;background:var(--sf);border:1px solid var(--bd);border-radius:14px;padding:26px 24px;box-shadow:0 24px 60px rgba(20,20,20,.12)}
 #lgate .lhd{display:flex;align-items:center;gap:9px;margin-bottom:4px}
-#lgate .lic2{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#5f9a78,#3f7d76);display:flex;align-items:center;justify-content:center;font-size:18px;color:#fff}
+#lgate .lic2{width:38px;height:38px;border-radius:9px;background:#f3f5f5;border:1px solid var(--bd);display:flex;align-items:center;justify-content:center}
+#lgate .lic2 svg{display:block}
 #lgate h2{font-size:17px;font-weight:800;color:var(--tx);margin:0;letter-spacing:-.01em}
 #lgate .lsub{font-size:11px;color:var(--mu);margin:2px 0 18px}
 #lgate label{display:block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--mu);margin:0 0 4px}
@@ -170,7 +171,7 @@ img,canvas,svg{max-width:100%}
 
 <div id="lgate">
   <div class="lcard">
-    <div class="lhd"><div class="lic2">☰</div><h2>clinilytics</h2></div>
+    <div class="lhd"><div class="lic2"><svg width="30" height="30" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="3.4" width="18" height="3.5" rx="1.75" fill="#c2603f"/><rect x="2" y="9.25" width="12" height="3.5" rx="1.75" fill="#26282d"/><rect x="2" y="15.1" width="15.5" height="3.5" rx="1.75" fill="#26282d"/></svg></div><h2>clinilytics</h2></div>
     <div class="lsub">Wound Care · Secure Sign-In</div>
     <form id="lform" onsubmit="return doLogin(event)">
       <div class="frow"><label for="lg-user">Username</label><input id="lg-user" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="username"></div>
