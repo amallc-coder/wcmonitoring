@@ -11,6 +11,15 @@ wound report and either attaches it via the native share sheet (where supported)
 or downloads it for manual attachment, then opens the pre-filled email draft.
 Chart.js, jsPDF, and jsPDF-AutoTable load from CDN at runtime.
 
+**Responsive** across desktop, iPad, and iPhone: a two-line header (logo + Admin/Sign-out
+on top, navigation below) collapses to a **hamburger menu** on small screens, grids
+reflow to fewer columns, and wide tables scroll within their cards.
+
+**User management:** Admins get an **Admin** panel (header) to create sign-in
+accounts (username, name, role: Admin / Wound Provider / Viewer) with per-user
+SHA-256 password hashes stored in the browser (`localStorage`). The seed admin is
+`ama`. Cross-device/org-wide accounts would require a backend.
+
 This app is **focused exclusively on wound & skin integrity**. The Dashboard,
 Census & Facilities, Wound Care, and Reports tabs are all wound-centric; the
 former Psych / Primary Services / Quality Assurance modules were removed (those
