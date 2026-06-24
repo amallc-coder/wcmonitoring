@@ -15,6 +15,20 @@ Chart.js, jsPDF, and jsPDF-AutoTable load from CDN at runtime.
 on top, navigation below) collapses to a **hamburger menu** on small screens, grids
 reflow to fewer columns, and wide tables scroll within their cards.
 
+**Quality-of-life:** all data **autosaves to the browser** (`localStorage`) and
+restores on reload; the long wound note keeps a **draft** so nothing is lost;
+non-blocking **toasts** (with **Undo** on delete) replace native popups;
+**Ctrl/⌘-K** opens a **command palette / global search** across residents,
+wounds, and facilities; **Esc/click-outside** closes modals and there are visible
+focus rings; **inline validation** on numeric fields; **sortable tables**
+(click any header); **sticky filters** (last facility/provider/tab); a
+**notifications bell + worklist** of overdue wounds and open action items, plus a
+recent-activity feed; **note macros + voice dictation**; **camera capture** for
+photos; **CSV export** of the wound list and area/PUSH in the weekly PDF;
+**Export/Import/Reset** of all data; a **Settings** menu with compact density,
+**dark theme**, and reduced motion; and it is an installable **offline PWA**
+(`manifest.json` + `sw.js`).
+
 **Clinical depth (EHR-grade):** the wound assessment note is organized into
 TIME/MEASURE-aligned sections and auto-calculates **area (cm²)**, **% healing vs
 baseline** (4-week ≥40% target), and the **PUSH score**. It captures tissue-type

@@ -3,6 +3,8 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<meta name="theme-color" content="#3f7d76"/>
+<link rel="manifest" href="manifest.json"/>
 <title>Clinilytics · Wound Care</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -12,7 +14,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f6f7f7;--sf:#ffffff;--bd:#e7e8e7;--b2:#d7d9d8;--tx:#23262b;--mu:#888d92;--tl:#3f7d76;--ac:#3f7d76;--bl:#4a6f86;--rd:#b3433a;--am:#b07d3c;--pu:#7d6a9c;--gn:#5b8c6e;--ink:#23262b;--mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
+:root{--bg:#f6f7f7;--sf:#ffffff;--bd:#e7e8e7;--b2:#d7d9d8;--tx:#23262b;--mu:#888d92;--tl:#3f7d76;--ac:#3f7d76;--bl:#4a6f86;--rd:#b3433a;--am:#b07d3c;--pu:#7d6a9c;--gn:#5b8c6e;--ink:#23262b;--in:var(--in);--mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
 body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;font-size:13px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 16px;display:flex;flex-direction:column;position:sticky;top:0;z-index:100;flex-shrink:0}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;height:48px}
@@ -40,7 +42,7 @@ footer{background:var(--sf);border-top:1px solid var(--bd);padding:5px 16px;disp
 .tbl{width:100%;border-collapse:collapse}
 .tbl th{padding:7px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;border-bottom:1px solid var(--bd);white-space:nowrap;font-family:var(--mono)}
 .tbl td{padding:7px 10px;font-size:12px;color:#41454b;border-bottom:1px solid #eceeed;font-family:var(--mono)}
-.tbl tr:hover td{background:#f4f6f6}
+.tbl tr:hover td{background:var(--in)}
 .tbl td.b{color:var(--tx);font-weight:600}
 .pill{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700}
 .ph{background:#f7e3df;color:#b23a2e}.pm2{background:#f6ecd7;color:#9a6a25}.pl{background:#e3efe1;color:#3f7d4e}
@@ -86,7 +88,7 @@ select option{background:#fff}
 .te::before{content:'';position:absolute;left:-15px;top:5px;width:7px;height:7px;border-radius:50%;background:var(--tl);border:2px solid var(--sf)}
 .te.old::before{background:var(--mu)}
 .td2{font-size:10px;color:var(--mu);margin-bottom:2px}
-.tc{background:#f4f6f6;border:1px solid var(--bd);border-radius:6px;padding:8px 11px}
+.tc{background:var(--in);border:1px solid var(--bd);border-radius:6px;padding:8px 11px}
 .cw{position:relative;height:130px}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:9px}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px}
@@ -125,7 +127,7 @@ select option{background:#fff}
 .help-body .hsub{color:var(--mu);font-size:13px;margin-bottom:18px}
 .help-body h3{font-size:13px;font-weight:700;margin:22px 0 8px;color:var(--tx)}
 .help-body p{font-size:13.5px;line-height:1.65;color:#42474d;margin-bottom:10px}
-.help-fig{border:1px solid var(--bd);border-radius:10px;background:#fbfcfc;padding:14px;margin:6px 0 18px}
+.help-fig{border:1px solid var(--bd);border-radius:10px;background:var(--in);padding:14px;margin:6px 0 18px}
 .help-step{display:flex;gap:12px;margin-bottom:13px}
 .help-step .hn{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:"Inter",sans-serif}
 .help-step .ht{font-size:13.5px;line-height:1.55;color:#42474d}
@@ -133,9 +135,42 @@ select option{background:#fff}
 .help-tip{background:rgba(63,125,118,.07);border-left:3px solid var(--ac);border-radius:0 7px 7px 0;padding:9px 13px;font-size:12.5px;color:#3a4f4b;margin:6px 0 4px;line-height:1.55}
 .help-pill{display:inline-block;background:#eef0f0;border:1px solid var(--bd);border-radius:5px;padding:1px 7px;font-size:11.5px;font-family:var(--mono);color:#3a4f4b}
 @media (max-width:760px){.help-wrap{grid-template-columns:1fr}.help-nav{position:static;max-height:none;flex-direction:column}.help-body{padding:16px 15px}}
+/* ── QUALITY-OF-LIFE: toasts, palette, menus, density, dark, focus ── */
+:focus-visible{outline:2px solid var(--ac);outline-offset:2px;border-radius:4px}
+.tbl thead th{cursor:pointer}.tbl thead th[data-dir]::after{content:" ▾";opacity:.6}.tbl thead th[data-dir="asc"]::after{content:" ▴";opacity:.6}
+#toasts{position:fixed;left:50%;bottom:22px;transform:translateX(-50%);z-index:600;display:flex;flex-direction:column;gap:8px;align-items:center;pointer-events:none}
+.toast{pointer-events:auto;background:#23262b;color:#fff;border-radius:9px;padding:10px 14px;font-size:12.5px;box-shadow:0 8px 28px rgba(0,0,0,.22);display:flex;gap:12px;align-items:center;max-width:92vw;animation:tin .18s ease}
+.toast .tact{background:rgba(255,255,255,.18);border:none;color:#fff;font-weight:700;border-radius:6px;padding:3px 10px;cursor:pointer;font-size:11.5px}
+.toast.err{background:#8a2f27}.toast.ok{background:#2f5f4a}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+#cmdk{position:fixed;inset:0;background:rgba(20,20,20,.35);z-index:500;display:none;align-items:flex-start;justify-content:center;padding-top:12vh}
+#cmdk.show{display:flex}
+#cmdk .cbox{width:580px;max-width:94vw;background:var(--sf);border:1px solid var(--b2);border-radius:12px;box-shadow:0 24px 60px rgba(20,20,20,.28);overflow:hidden}
+#cmdk input{border:none;border-bottom:1px solid var(--bd);border-radius:0;padding:14px 16px;font-size:14px;box-shadow:none}
+#cmdk input:focus{box-shadow:none}
+#cmdk .cres{max-height:52vh;overflow-y:auto}
+#cmdk .cr{padding:9px 16px;display:flex;justify-content:space-between;gap:10px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--bd)}
+#cmdk .cr.sel,#cmdk .cr:hover{background:rgba(63,125,118,.12)}
+#cmdk .cr .ct{color:var(--mu);font-size:11px;font-family:var(--mono);white-space:nowrap}
+.menu{position:absolute;top:46px;right:14px;background:var(--sf);border:1px solid var(--b2);border-radius:10px;box-shadow:0 16px 40px rgba(20,20,20,.18);z-index:400;width:270px;max-width:92vw;padding:8px;display:none}
+.menu.show{display:block}
+.menu h4{font-size:10px;text-transform:uppercase;letter-spacing:.07em;color:var(--mu);font-family:var(--mono);margin:8px 8px 3px}
+.menu .mi{padding:8px 10px;border-radius:7px;font-size:12.5px;cursor:pointer;display:flex;justify-content:space-between;gap:10px;align-items:center;color:var(--tx)}
+.menu .mi:hover{background:#eef0f0}
+.menu .mi small{color:var(--mu)}
+.iconbtn{background:transparent;border:1px solid var(--bd);border-radius:8px;width:30px;height:30px;cursor:pointer;color:var(--tx);font-size:14px;position:relative;flex-shrink:0}
+.iconbtn:hover{background:#eef0f0}
+.badge{position:absolute;top:-6px;right:-6px;background:var(--rd);color:#fff;border-radius:10px;font-size:9px;font-weight:700;padding:1px 4px;min-width:15px;line-height:1.3}
+body.dense{font-size:12px}
+body.dense .cp{padding:10px 12px}body.dense .kt{padding:9px 11px}body.dense .tbl td{padding:5px 8px}body.dense .tbl th{padding:5px 8px}body.dense .kv{font-size:20px}
+body[data-theme="dark"]{--bg:#15171a;--sf:#1e2125;--bd:#2d3137;--b2:#3b3f46;--tx:#e7e9eb;--mu:#9aa0a6;--in:#262a2f}
+body[data-theme="dark"] .menu .mi:hover,body[data-theme="dark"] nav button:hover,body[data-theme="dark"] .iconbtn:hover,body[data-theme="dark"] .bd2,body[data-theme="dark"] .bg3{background:#2a2e33}
+body[data-theme="dark"] .tbl tr:hover td{background:#23272c}
+body[data-theme="dark"] .card,body[data-theme="dark"] .kt{box-shadow:none}
+body.reduce-motion *{animation:none!important;transition:none!important}
 /* ── HAMBURGER + RESPONSIVE ── */
 #navtoggle{display:none;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid var(--bd);border-radius:8px;background:#fff;cursor:pointer;color:var(--tx);font-size:16px;line-height:1;margin-right:4px;flex-shrink:0}
-#navtoggle:hover{border-color:var(--b2);background:#f4f6f6}
+#navtoggle:hover{border-color:var(--b2);background:var(--in)}
 img,canvas,svg{max-width:100%}
 @media (max-width:1024px){
   [style*="grid-template-columns"]{grid-template-columns:1fr 1fr!important}
@@ -193,8 +228,23 @@ img,canvas,svg{max-width:100%}
     </div>
     <div class="hdr-r">
       <div class="live"></div><span class="live-tx" style="font-size:10px;color:var(--mu)">Live</span>
+      <button class="iconbtn" title="Search (Ctrl/⌘ K)" aria-label="Search" onclick="openCmdk()">🔍</button>
+      <button class="iconbtn" id="bell-btn" title="Notifications &amp; worklist" aria-label="Notifications" onclick="toggleMenu('notif-menu')">🔔<span id="bell-badge" class="badge" style="display:none">0</span></button>
+      <button class="iconbtn" id="gear-btn" title="Settings" aria-label="Settings" onclick="toggleMenu('settings-menu')">⚙</button>
       <button id="admin-btn" class="btn bg3 bsm" style="display:none" onclick="openAdmin()">Admin</button>
       <button class="btn bg3 bsm" onclick="ccLogout()">Sign out</button>
+    </div>
+    <div id="notif-menu" class="menu"></div>
+    <div id="settings-menu" class="menu">
+      <h4>Display</h4>
+      <div class="mi" onclick="prefToggle('dense')">Compact density <small id="pf-dense">Off</small></div>
+      <div class="mi" onclick="prefToggle('theme')">Dark theme <small id="pf-theme">Off</small></div>
+      <div class="mi" onclick="prefToggle('reduce')">Reduce motion <small id="pf-reduce">Off</small></div>
+      <h4>Data (this browser)</h4>
+      <div class="mi" onclick="exportData()">Export all data <small>⬇ .json</small></div>
+      <div class="mi" onclick="document.getElementById('import-file').click()">Import data <small>⬆ .json</small></div>
+      <div class="mi" style="color:var(--rd)" onclick="resetDemo()">Reset to demo data <small>↺</small></div>
+      <input type="file" id="import-file" accept="application/json" style="display:none" onchange="importData(this.files[0])">
     </div>
   </div>
   <nav id="mnav">
@@ -257,6 +307,7 @@ img,canvas,svg{max-width:100%}
       <select id="w-prov" style="width:170px;font-size:11px" onchange="wProv=this.value;wRefresh()"></select>
       <button class="btn bt bsm" onclick="openAddWound()">＋ Add Wound</button>
       <button class="btn bg3 bsm" onclick="emailWFacReport()">📧 Email Report</button>
+      <button class="btn bg3 bsm" onclick="exportWounds()">⬇ CSV</button>
       <button class="btn bg3 bsm" onclick="woundRpt()">🖨 Print</button>
     </div>
   </div>
@@ -333,6 +384,8 @@ img,canvas,svg{max-width:100%}
   </div>
 </div>
 </div>
+<div id="toasts"></div>
+<div id="cmdk"><div class="cbox"><input id="cmdk-inp" placeholder="Search residents, wounds, facilities — or type a command…" oninput="cmdkRender()" autocomplete="off"><div class="cres" id="cmdk-res"></div></div></div>
 <footer><span>clinilytics · Wound Care · © 2026 Clinilytics · HIPAA Compliant</span><span id="ftr">Loading…</span></footer>
 
 <!-- CHART EDITOR MODAL -->
@@ -559,7 +612,7 @@ img,canvas,svg{max-width:100%}
 <div class="mb">
   <div class="mh"><div class="mtt">📤 Facesheet Upload</div><button class="xb" onclick="cM('m-upload')">✕</button></div>
   <div class="mbd">
-    <div style="padding:9px 11px;background:#f4f6f6;border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:11px">
+    <div style="padding:9px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:11px">
       <div style="font-size:12px;font-weight:600;margin-bottom:2px">AI-Powered OCR Extraction</div>
       <div style="font-size:11px;color:var(--mu)">Upload PDF facesheets — AI extracts Name, DOB, Dx, Insurance, Room, Provider, Code Status, Allergies, MRN.</div>
     </div>
@@ -631,7 +684,7 @@ img,canvas,svg{max-width:100%}
 <div class="mb">
   <div class="mh"><div class="mtt">👤 User Management</div><button class="xb" onclick="cM('m-admin')">✕</button></div>
   <div class="mbd">
-    <div style="padding:9px 11px;background:#f4f6f6;border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:13px">
+    <div style="padding:9px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:13px">
       <div style="font-size:12px;font-weight:600;margin-bottom:2px">Create sign-in accounts</div>
       <div style="font-size:11px;color:var(--mu)">Each provider/admin signs in with their own username &amp; password. Passwords are stored as SHA-256 hashes in this browser. (For org-wide accounts across devices, a backend would be required.)</div>
     </div>
@@ -803,6 +856,117 @@ const sv=(id,v)=>{var el=document.getElementById(id);if(el)el.value=v;};
 function oM(id){document.getElementById(id).classList.remove("h");}
 function cM(id){document.getElementById(id).classList.add("h");}
 
+/* ════ QUALITY-OF-LIFE INFRASTRUCTURE ════ */
+/* Toasts (also used to replace blocking alert()) */
+function toast(msg,type,actLabel,actFn){
+  var c=document.getElementById("toasts");if(!c){try{window.__origAlert(msg);}catch(e){}return;}
+  var t=document.createElement("div");t.className="toast"+(type==="err"?" err":type==="ok"?" ok":"");
+  t.innerHTML='<span></span>';t.firstChild.textContent=msg;
+  if(actLabel&&actFn){var b=document.createElement("button");b.className="tact";b.textContent=actLabel;b.onclick=function(){t.remove();actFn();};t.appendChild(b);}
+  c.appendChild(t);
+  setTimeout(function(){if(t.parentNode){t.style.transition="opacity .3s";t.style.opacity="0";setTimeout(function(){t.remove();},300);}},actLabel?7000:3600);
+}
+window.__origAlert=window.alert;
+window.alert=function(m){toast(String(m));};
+
+/* Persistence — autosave all clinical data to localStorage */
+var _persistT=null,_loadedFromStore=false;
+function persist(){if(_persistT)clearTimeout(_persistT);_persistT=setTimeout(persistNow,400);}
+function persistNow(){
+  try{localStorage.setItem("cc_state",JSON.stringify({WOUNDS:WOUNDS,PATIENTS:PATIENTS,FACS:FACS,SENTLOG:SENTLOG,v:1}));}
+  catch(err){
+    try{var lite={WOUNDS:JSON.parse(JSON.stringify(WOUNDS)),PATIENTS:PATIENTS,FACS:FACS,SENTLOG:SENTLOG};
+      lite.WOUNDS.forEach(function(w){(w.chart||[]).forEach(function(h){if(h.photo)h.photo="";});});
+      localStorage.setItem("cc_state",JSON.stringify(lite));toast("Saved — photos too large to store locally","err");}
+    catch(e2){toast("Could not save locally (storage full)","err");}
+  }
+}
+function loadState(){try{var s=localStorage.getItem("cc_state");if(!s)return false;var d=JSON.parse(s);if(d.WOUNDS)WOUNDS=d.WOUNDS;if(d.PATIENTS)PATIENTS=d.PATIENTS;if(d.FACS)FACS=d.FACS;if(d.SENTLOG)SENTLOG=d.SENTLOG;_loadedFromStore=true;return true;}catch(e){return false;}}
+function exportData(){closeMenus();try{var blob=new Blob([JSON.stringify({WOUNDS:WOUNDS,PATIENTS:PATIENTS,FACS:FACS,SENTLOG:SENTLOG,exported:nowStamp()},null,1)],{type:"application/json"});var u=URL.createObjectURL(blob);var a=document.createElement("a");a.href=u;a.download="clinilytics_backup_"+TDS().replace(/\//g,"-")+".json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);toast("Backup downloaded","ok");}catch(e){toast("Export failed","err");}}
+function importData(file){closeMenus();if(!file)return;var fr=new FileReader();fr.onload=function(){try{var d=JSON.parse(fr.result);if(d.WOUNDS)WOUNDS=d.WOUNDS;if(d.PATIENTS)PATIENTS=d.PATIENTS;if(d.FACS)FACS=d.FACS;if(d.SENTLOG)SENTLOG=d.SENTLOG;persistNow();initDash();renderCensus();updateBell();toast("Data imported","ok");}catch(e){toast("Invalid backup file","err");}};fr.readAsText(file);}
+function resetDemo(){closeMenus();if(!confirm("Reset to the original demo data? This erases everything you've entered in this browser."))return;try{localStorage.removeItem("cc_state");}catch(e){}location.reload();}
+
+/* Preferences — density, theme, reduced motion */
+function loadPrefs(){try{return JSON.parse(localStorage.getItem("cc_prefs")||"{}");}catch(e){return {};}}
+function applyPrefs(){var p=loadPrefs();document.body.classList.toggle("dense",!!p.dense);document.body.setAttribute("data-theme",p.theme==="dark"?"dark":"light");document.body.classList.toggle("reduce-motion",!!p.reduce);
+  var s=function(id,on){var el=document.getElementById(id);if(el)el.textContent=on?"On":"Off";};s("pf-dense",p.dense);s("pf-theme",p.theme==="dark");s("pf-reduce",p.reduce);}
+function prefToggle(k){var p=loadPrefs();if(k==="theme"){p.theme=p.theme==="dark"?"light":"dark";}else{p[k]=!p[k];}localStorage.setItem("cc_prefs",JSON.stringify(p));applyPrefs();}
+
+/* UI state — sticky filters & last tab */
+function saveUI(o){try{var u=JSON.parse(localStorage.getItem("cc_ui")||"{}");for(var k in o)u[k]=o[k];localStorage.setItem("cc_ui",JSON.stringify(u));}catch(e){}}
+function loadUI(){try{return JSON.parse(localStorage.getItem("cc_ui")||"{}");}catch(e){return {};}}
+
+/* Menus */
+function toggleMenu(id){var m=document.getElementById(id);if(!m)return;var open=m.classList.contains("show");closeMenus();if(!open){if(id==="notif-menu")renderNotif();m.classList.add("show");}}
+function closeMenus(){var ms=document.querySelectorAll(".menu.show");for(var i=0;i<ms.length;i++)ms[i].classList.remove("show");}
+
+/* Notifications / worklist bell */
+function worklistItems(){var out=[];WOUNDS.forEach(function(w){if(wIsHealed(w))return;var ot=getOpenTriggers(w);var stale=woundIsStale(w);if(stale||ot.length){out.push({w:w,stale:stale,days:woundDaysSinceUpdate(w),actions:ot.length,sev:Math.max(stale?2:0,ot.reduce(function(a,t){return Math.max(a,t.sev);},0))});}});out.sort(function(a,b){return b.sev-a.sev||b.actions-a.actions;});return out;}
+function updateBell(){var n=worklistItems().length;var b=document.getElementById("bell-badge");if(b){b.textContent=n>99?"99+":n;b.style.display=n?"block":"none";}}
+function renderNotif(){var m=document.getElementById("notif-menu");if(!m)return;var items=worklistItems();
+  m.innerHTML='<h4>Worklist — '+items.length+' need attention</h4>'+(items.length?items.slice(0,12).map(function(it){return '<div class="mi" onclick="closeMenus();openChart(\'wound\',\''+it.w.id+'\')"><span>'+e(it.w.name.split(",")[0])+' · '+e(it.w.tp)+'<br><small>'+(it.stale?"Stale "+it.days+"d":"")+(it.stale&&it.actions?" · ":"")+(it.actions?it.actions+" action"+(it.actions>1?"s":""):"")+'</small></span><span class="ct">'+e(it.w.fac.split("–").pop().trim())+'</span></div>';}).join("")+(items.length>12?'<div class="mi" style="justify-content:center;color:var(--mu)">+'+(items.length-12)+' more</div>':''):'<div class="mi" style="color:var(--gn)">✓ All wounds current — nothing overdue.</div>')
+    +'<h4>Recent activity</h4>'+activityFeed().slice(0,6).map(function(a){return '<div class="mi" style="cursor:default"><span style="font-size:11px">'+e(a.t)+'<br><small>'+e(a.by)+'</small></span><span class="ct">'+e(a.dt)+'</span></div>';}).join("");
+}
+function activityFeed(){var f=[];WOUNDS.forEach(function(w){(w.audit||[]).forEach(function(a){f.push({dt:a.dt,by:a.by||"—",t:w.name.split(",")[0]+": "+a.action});});});SENTLOG.forEach(function(s){f.push({dt:s.date,by:s.by||"You",t:"Report emailed — "+s.fac});});f.reverse();return f;}
+
+/* Command palette / global search */
+var _cmdkSel=0,_cmdkList=[];
+function openCmdk(){closeMenus();var o=document.getElementById("cmdk");if(!o)return;o.classList.add("show");var i=document.getElementById("cmdk-inp");i.value="";cmdkRender();setTimeout(function(){i.focus();},30);}
+function closeCmdk(){var o=document.getElementById("cmdk");if(o)o.classList.remove("show");}
+function cmdkIndex(){var L=[];
+  L.push({t:"Go to Dashboard",ct:"nav",fn:function(){go("dashboard");}});
+  L.push({t:"Go to Census & Facilities",ct:"nav",fn:function(){go("census");}});
+  L.push({t:"Go to Wound Care",ct:"nav",fn:function(){go("wound");}});
+  L.push({t:"Go to Reports & Analytics",ct:"nav",fn:function(){go("reports");}});
+  L.push({t:"Go to Help & Training",ct:"nav",fn:function(){go("help");}});
+  L.push({t:"＋ Add Wound",ct:"action",fn:function(){go("wound");openAddWound();}});
+  L.push({t:"＋ Add Patient",ct:"action",fn:function(){go("census");if(window.openAddPt)openAddPt();else oM("m-addpt");}});
+  WOUNDS.forEach(function(w){L.push({t:w.name.split(",")[0]+" — "+w.tp+(w.stage&&w.stage!=="N/A"?" ("+w.stage+")":""),ct:"wound · "+w.fac.split("–").pop().trim(),fn:function(){go("wound");openChart("wound",w.id);}});});
+  PATIENTS.forEach(function(p){if(p.st==="Active")L.push({t:p.name+" — "+(p.rm||""),ct:"resident · "+p.fac.split("–").pop().trim(),fn:function(){go("census");openChart("census",p.id);}});});
+  FACS.forEach(function(f){L.push({t:f.name,ct:"facility · "+f.co.split(" ")[0],fn:function(){wFac=f.name;saveUI({wFac:wFac});go("wound");}});});
+  return L;}
+function cmdkRender(){var q=(gv("cmdk-inp")||"").toLowerCase().trim();var all=cmdkIndex();
+  _cmdkList=(q?all.filter(function(x){return (x.t+" "+x.ct).toLowerCase().indexOf(q)>=0;}):all).slice(0,40);_cmdkSel=0;
+  var r=document.getElementById("cmdk-res");if(!r)return;
+  r.innerHTML=_cmdkList.length?_cmdkList.map(function(x,i){return '<div class="cr'+(i===0?" sel":"")+'" data-i="'+i+'" onclick="cmdkRun('+i+')"><span>'+e(x.t)+'</span><span class="ct">'+e(x.ct)+'</span></div>';}).join(""):'<div class="cr" style="color:var(--mu)">No matches</div>';}
+function cmdkMove(d){if(!_cmdkList.length)return;_cmdkSel=(_cmdkSel+d+_cmdkList.length)%_cmdkList.length;var rs=document.querySelectorAll("#cmdk-res .cr");for(var i=0;i<rs.length;i++)rs[i].classList.toggle("sel",i===_cmdkSel);if(rs[_cmdkSel])rs[_cmdkSel].scrollIntoView({block:"nearest"});}
+function cmdkRun(i){var it=_cmdkList[i==null?_cmdkSel:i];if(!it)return;closeCmdk();try{it.fn();}catch(e){}}
+
+/* Delete wound with Undo */
+var _woundTrash=null;
+function deleteWound(id){var idx=WOUNDS.findIndex(function(w){return w.id===id;});if(idx<0)return;_woundTrash={w:WOUNDS[idx],idx:idx};WOUNDS.splice(idx,1);cM("m-chart");persist();wRefresh();renderDashAlerts();renderDashActions();updateBell();
+  toast("Wound deleted","ok","Undo",function(){if(_woundTrash){WOUNDS.splice(_woundTrash.idx,0,_woundTrash.w);_woundTrash=null;persist();wRefresh();renderDashAlerts();renderDashActions();updateBell();toast("Restored");}});}
+
+/* Generic sortable tables (event delegation) */
+function sortTableByTh(th){var table=th.closest("table");if(!table||!table.tBodies[0])return;var idx=Array.prototype.indexOf.call(th.parentNode.children,th);var tb=table.tBodies[0];var rows=Array.prototype.slice.call(tb.rows).filter(function(r){return r.cells.length>idx;});var dir=th.getAttribute("data-dir")==="asc"?"desc":"asc";Array.prototype.forEach.call(th.parentNode.children,function(c){c.removeAttribute("data-dir");});th.setAttribute("data-dir",dir);var num=function(s){var m=(""+s).replace(/[$,%]/g,"").replace(/[^0-9.\-]/g,"");return m===""||m==="-"?null:parseFloat(m);};rows.sort(function(a,b){var x=(a.cells[idx].innerText||"").trim(),y=(b.cells[idx].innerText||"").trim();var nx=num(x),ny=num(y),r;if(nx!=null&&ny!=null)r=nx-ny;else r=x.localeCompare(y);return dir==="asc"?r:-r;});rows.forEach(function(r){tb.appendChild(r);});}
+
+/* Global keyboard + click handlers */
+document.addEventListener("keydown",function(ev){
+  if((ev.ctrlKey||ev.metaKey)&&(ev.key==="k"||ev.key==="K")){ev.preventDefault();var o=document.getElementById("cmdk");if(o&&o.classList.contains("show"))closeCmdk();else openCmdk();return;}
+  if(ev.key==="Escape"){var o=document.getElementById("cmdk");if(o&&o.classList.contains("show")){closeCmdk();return;}if(document.querySelector(".menu.show")){closeMenus();return;}var mo=Array.prototype.slice.call(document.querySelectorAll(".mo")).filter(function(m){return!m.classList.contains("h");});if(mo.length){mo[mo.length-1].classList.add("h");return;}}
+  var ck=document.getElementById("cmdk");
+  if(ck&&ck.classList.contains("show")){if(ev.key==="ArrowDown"){ev.preventDefault();cmdkMove(1);}else if(ev.key==="ArrowUp"){ev.preventDefault();cmdkMove(-1);}else if(ev.key==="Enter"){ev.preventDefault();cmdkRun();}}
+});
+document.addEventListener("mousedown",function(ev){
+  if(ev.target.classList&&ev.target.classList.contains("mo")){ev.target.classList.add("h");}
+  if(ev.target.id==="cmdk"){closeCmdk();}
+  if(!ev.target.closest||(!ev.target.closest(".menu")&&!ev.target.closest(".iconbtn")))closeMenus();
+});
+document.addEventListener("click",function(ev){var th=ev.target.closest&&ev.target.closest("th");if(th&&th.closest(".tbl")&&th.parentNode&&th.parentNode.parentNode&&th.parentNode.parentNode.tagName==="THEAD"){sortTableByTh(th);}});
+
+/* Note macros + voice dictation */
+function insertMacro(id,txt){var el=document.getElementById(id);if(el){el.value=(el.value?el.value.replace(/\s*$/,"")+" ":"")+txt;el.focus();}}
+function dictate(id){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast("Dictation isn't supported in this browser","err");return;}var r=new SR();r.lang="en-US";r.interimResults=false;r.maxAlternatives=1;r.onresult=function(ev){var t=ev.results[0][0].transcript;insertMacro(id,t);toast("Added dictation");};r.onerror=function(){toast("Dictation error / mic blocked","err");};r.start();toast("🎤 Listening — speak now…");}
+
+/* Draft autosave for the wound note (never lose a half-finished assessment) */
+var _draftT=null;
+function woundFieldIds(){return ["wf-stage","wf-heal","wf-inf","wf-L","wf-W","wf-D","wf-tissueG","wf-tissueS","wf-tissueE","wf-tissueEp","wf-edges","wf-periwound","wf-underDepth","wf-underLoc","wf-tunDepth","wf-tunLoc","wf-exAmt","wf-exType","wf-odor","wf-pain","wf-infSev","wf-culture","wf-organism","wf-abx","wf-osteo","wf-abi","wf-abiDate","wf-vascular","wf-bSensory","wf-bMoisture","wf-bActivity","wf-bMobility","wf-bNutrition","wf-bFriction","wf-braden","wf-classSys","wf-classGrade","wf-poa","wf-avoidable","wf-rootcause","wf-support","wf-reposition","wf-heelOff","wf-prophyl","wf-debride","wf-dressPrimary","wf-dressFreq","wf-offload","wf-compression","wf-vac","wf-vacSetting","wf-collagen","wf-graft","wf-graftType","wf-pcrReq","wf-pcrDone","wf-orderProvider","wf-orderDate","wf-tx","wf-albumin","wf-prealbumin","wf-weightTrend","wf-dietary","wf-goal","wf-consults","wf-icd","wf-cpt","wf-units","wf-consent","wf-education","wf-notes","wf-pv","wf-date","wf-by","wf-attest","wf-cosign"];}
+function saveDraftSoon(id){if(_draftT)clearTimeout(_draftT);_draftT=setTimeout(function(){saveDraft(id);},500);}
+function saveDraft(id){try{var o={};woundFieldIds().forEach(function(f){var el=document.getElementById(f);if(el)o[f]=el.value;});localStorage.setItem("cc_draft_"+id,JSON.stringify(o));}catch(e){}}
+function restoreDraft(id){try{var s=localStorage.getItem("cc_draft_"+id);if(!s)return;var o=JSON.parse(s);var any=false;woundFieldIds().forEach(function(f){var el=document.getElementById(f);if(el&&o[f]!=null&&o[f]!==""){el.value=o[f];any=true;}});if(any)toast("Draft restored — unsaved edits from before","ok");}catch(e){}}
+function clearDraft(id){try{localStorage.removeItem("cc_draft_"+id);}catch(e){}}
+document.addEventListener("input",function(ev){if(_ctx&&_ctx.tp==="wound"&&ev.target.id&&ev.target.id.indexOf("wf-")===0)saveDraftSoon(_ctx.id);});
+
 /* ── FAC STRIP ── */
 var _fcb={};
 function buildFS(id,sel,cb,ac){
@@ -830,6 +994,7 @@ function go(id){
   var idx={dashboard:0,census:1,wound:2,reports:3,help:4}[id];
   document.querySelectorAll("#mnav button")[idx].classList.add("A");
   var nv=document.getElementById("mnav");if(nv)nv.classList.remove("open");
+  saveUI({tab:id});closeMenus();
   if(id==="census")  renderCensus();
   if(id==="wound")   wTab(wCurrentTab);
   if(id==="reports") renderReports();
@@ -872,7 +1037,7 @@ function initDash(){
   new Chart(document.getElementById("c-inf"),{type:"line",data:{labels:MO,datasets:[{data:[8.2,7.8,7.1,6.5,5.9,5.4],borderColor:"#b3433a",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(179,67,58,0.10)"}]},options:OP});
 }
 
-function kv2(v,l,c){return'<div style="background:#f4f6f6;border:1px solid var(--bd);border-radius:6px;padding:5px 7px"><div style="font-size:14px;font-weight:800;font-family:var(--mono);color:'+c+'">'+v+'</div><div style="font-size:9px;color:var(--mu)">'+l+'</div></div>';}
+function kv2(v,l,c){return'<div style="background:var(--in);border:1px solid var(--bd);border-radius:6px;padding:5px 7px"><div style="font-size:14px;font-weight:800;font-family:var(--mono);color:'+c+'">'+v+'</div><div style="font-size:9px;color:var(--mu)">'+l+'</div></div>';}
 function alert2(bg,bdr,color,icon,title,items){return'<div style="background:'+bg+';border:1px solid '+bdr+';border-radius:6px;padding:8px 10px;margin-bottom:6px"><div style="font-size:11px;font-weight:700;color:'+color+';margin-bottom:4px">'+icon+' '+title+'</div>'+items+'</div>';}
 
 function renderDashWounds(){
@@ -1033,7 +1198,7 @@ function saveFac(){
   _facEdit=null;
   document.getElementById("af-title").textContent="🏢 Add Facility";
   ["af-n","af-reg","af-pv","af-cs","af-addr","af-don","af-email","af-phone","af-nc"].forEach(function(id){sv(id,"");});
-  cM("m-addfac");renderCensus();
+  cM("m-addfac");renderCensus();persist();toast("Facility saved","ok");
 }
 function savePt(){
   var n=gv("np-n").trim();var fac=gv("np-fac");
@@ -1041,7 +1206,7 @@ function savePt(){
   var dx=gv("np-dx");var id="p"+(Date.now());
   var fmt=function(d){return d?new Date(d).toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"}):"-";};
   PATIENTS.push({id:id,name:n,dob:fmt(gv("np-dob")),fac:fac,rm:gv("np-rm")||"—",adm:fmt(gv("np-adm")),dx:dx,ins:gv("np-ins"),pv:gv("np-pv"),code:gv("np-cd"),st:"Active",src:"Manual",al:gv("np-al")||"NKDA",gen:gv("np-gn"),mrn:gv("np-mrn"),chart:[{dt:TDS(),tp:"census",by:"Admin",dx:dx,rm:gv("np-rm"),code:gv("np-cd"),pv:gv("np-pv"),ins:gv("np-ins"),notes:"Manual patient entry."}]});
-  cM("m-addpt");renderCensus();
+  cM("m-addpt");renderCensus();persist();toast("Resident added","ok");
 }
 
 /* ── WEEKLY FACILITY REPORT DISTRIBUTION (mailto + send log) ── */
@@ -1076,9 +1241,9 @@ function buildFacReportPDF(name){
   doc.text(TD()+"   |   Prepared for: "+(f.don||"Director of Nursing")+(f.email?"  <"+f.email+">":""),40,74);
   doc.setFontSize(9);doc.setTextColor(120,116,108);
   doc.text("Active wounds: "+ws.length+"   |   Pressure: "+ws.filter(wIsPressure).length+"   |   Infected: "+ws.filter(function(w){return w.inf;}).length+"   |   Healing rate: "+hp+"%   |   Open action items: "+openA,40,90);
-  var rows=ws.map(function(w){var last=(w.chart&&w.chart.length?w.chart[w.chart.length-1]:{});return [w.name,w.tp,w.stage,w.loc,w.tx,[last.L,last.W,last.D].filter(function(x){return x!=null;}).join("×"),w.heal,(w.inf?"ACTIVE":"No"),(w.graft?"Y":"N"),(w.collagen?"Y":"N"),(w.pcrReq?(w.pcrDone?"Done":"Req"):"—"),w.ls];});
-  if(!rows.length)rows=[["No active wounds on the watch list.","","","","","","","","","","",""]];
-  doc.autoTable({startY:104,head:[["Patient","Type","Stage","Location","Treatment","L×W×D","Healing","Infx","Graft","Coll","PCR","Last Seen"]],body:rows,
+  var rows=ws.map(function(w){var last=(w.chart&&w.chart.length?w.chart[w.chart.length-1]:{});var ar=woundAreaOf(last);var rx=woundAreaReductionPct(w);return [w.name,w.tp,w.stage,w.loc,[last.L,last.W,last.D].filter(function(x){return x!=null;}).join("×"),(ar!=null?ar:"—"),(rx!=null?(rx>=0?"-":"+")+Math.abs(rx)+"%":"—"),(last.push!=null?last.push:"—"),w.heal,(w.inf?"ACTIVE":"No"),(w.graft?"Y":"N"),(w.pcrReq?(w.pcrDone?"Done":"Req"):"—"),w.ls];});
+  if(!rows.length)rows=[["No active wounds on the watch list.","","","","","","","","","","","",""]];
+  doc.autoTable({startY:104,head:[["Patient","Type","Stage","Location","L×W×D","Area","Δ","PUSH","Healing","Infx","Graft","PCR","Last Seen"]],body:rows,
     styles:{font:"helvetica",fontSize:7,cellPadding:3,textColor:[60,58,52],lineColor:[231,227,219],lineWidth:.5},
     headStyles:{fillColor:[95,154,120],textColor:[255,255,255],fontSize:7},
     alternateRowStyles:{fillColor:[250,248,244]},margin:{left:40,right:40}});
@@ -1096,7 +1261,7 @@ function emailFacReport(name){
   var body=woundReportText(name);
   var doc=buildFacReportPDF(name);
   var fname=pdfFileName(name);
-  function logSent(){SENTLOG.push({fac:name,to:f.email,don:f.don||"",date:TDS(),count:ws.length,by:"You",pdf:!!doc});renderSendLog();renderFacList();}
+  function logSent(){SENTLOG.push({fac:name,to:f.email,don:f.don||"",date:TDS(),count:ws.length,by:"You",pdf:!!doc});renderSendLog();renderFacList();persist();}
   // Best path: native share sheet WITH the PDF attached (mobile/desktop that support it)
   if(doc){
     try{
@@ -1164,10 +1329,11 @@ function cht(idx){
 }
 function fldCell(f){
   if(f.hdr)return '<div style="grid-column:1/-1;margin:8px 0 -1px;border-bottom:1px solid var(--bd);padding-bottom:3px"><span class="st" style="margin:0;color:#3a6f68">'+e(f.hdr)+'</span></div>';
+  if(f.macros)return '<div style="grid-column:1/-1;display:flex;flex-wrap:wrap;gap:5px;align-items:center"><span class="fl" style="margin:0">Quick insert:</span>'+f.macros.map(function(m){return '<button type="button" class="fb" onclick="insertMacro(\''+f.target+'\',\''+m.replace(/'/g,"\\\\'")+'\')">'+e(m)+'</button>';}).join("")+'<button type="button" class="fb" style="font-weight:700" onclick="dictate(\''+f.target+'\')">🎤 Dictate</button></div>';
   var inner;
   if(f.sel){inner='<select id="'+f.id+'">'+f.sel.map(function(o){return'<option'+(o===f.v?' selected':'')+'>'+o+'</option>';}).join("")+'</select>';}
   else if(f.ta){inner='<textarea id="'+f.id+'" rows="'+(f.rows||3)+'" placeholder="'+(f.ph||"")+'">'+e(f.v||"")+'</textarea>';}
-  else if(f.file){inner='<input type="file" id="'+f.id+'" accept="image/*" style="font-size:11px;padding:5px">'+(f.thumb?'<img src="'+f.thumb+'" alt="last photo" style="margin-top:6px;max-height:96px;border-radius:6px;border:1px solid var(--bd)">':'');}
+  else if(f.file){inner='<input type="file" id="'+f.id+'" accept="image/*" capture="environment" style="font-size:11px;padding:5px">'+(f.thumb?'<img src="'+f.thumb+'" alt="last photo" style="margin-top:6px;max-height:96px;border-radius:6px;border:1px solid var(--bd)">':'');}
   else {inner='<input id="'+f.id+'" value="'+e(f.v==null?"":f.v)+'" placeholder="'+(f.ph||"")+'">';}
   return '<div style="grid-column:'+(f.full?"1/-1":"span 1")+'"><label class="fl">'+e(f.l)+'</label>'+inner+'</div>';
 }
@@ -1192,7 +1358,7 @@ function buildFields(){
     var lv=function(k,d){return (last[k]!=null&&last[k]!=="")?last[k]:((rec[k]!=null&&rec[k]!=="")?rec[k]:(d==null?"":d));};
     var bsel=["No","Yes"];
     var lastArea=woundAreaOf(last),redux=woundAreaReductionPct(rec);
-    var mathLine='<div style="grid-column:1/-1;font-size:11px;color:var(--mu);background:#f4f6f6;border:1px solid var(--bd);border-radius:7px;padding:7px 10px">'
+    var mathLine='<div style="grid-column:1/-1;font-size:11px;color:var(--mu);background:var(--in);border:1px solid var(--bd);border-radius:7px;padding:7px 10px">'
       +(lastArea!=null?'Last area: <b style="color:var(--tx)">'+lastArea+' cm²</b>':'No area on file yet')
       +(redux!=null?' · Area change since baseline: <b style="color:'+(redux>=40?"#4f8268":redux>=0?"#b07d3c":"#b3433a")+'">'+(redux>=0?"−":"+")+Math.abs(redux)+'%</b>'+(woundOnsetDays(rec)>=28?' (target ≥40% by wk 4)':''):'')
       +(last.push!=null?' · Last PUSH score: <b style="color:var(--tx)">'+last.push+'</b>':'')+'</div>';
@@ -1258,12 +1424,13 @@ function buildFields(){
       {id:"wf-consent",l:"Photo Consent on File",v:lv("consent")?"Yes":"No",sel:bsel},
       {id:"wf-education",l:"Patient / Family Education",v:lv("education",""),full:true,ph:"What was taught & teach-back understanding"},
       {hdr:"Progress note & sign-off"},
+      {macros:true,target:"wf-notes",macros:["Wound bed clean with healthy granulation.","Periwound skin intact.","No clinical signs of infection.","Tolerated dressing change well.","Measurements unchanged — continue current plan.","Family/resident updated on plan."]},
       {id:"wf-notes",l:"Progress Note (required if no measurement change)",v:"",ta:true,full:true,ph:"Wound appearance, drainage, odor, patient response, or reason measurements unchanged…"},
       {id:"wf-pv",l:"Wound Provider (owner)",v:rec.pv||"",ph:"Provider on watch list"},
       {id:"wf-date",l:"Visit Date",v:TDS()},{id:"wf-by",l:"Updated By",v:(currentUser&&currentUser.name)||"",ph:"Clinician name"},
       {id:"wf-attest",l:"Attestation: accurate & complete",v:"No",sel:bsel},{id:"wf-cosign",l:"Co-sign (MD/DO if NP/PA)",v:lv("cosign",""),ph:"co-signing physician"}
     ];
-    el.innerHTML=staleAlert+ltAlert+triggerPanelHtml(rec)+'<div class="st" style="margin-bottom:10px">Wound Assessment &amp; Care Note</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+mathLine+flds.map(fldCell).join("")+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:flex-end"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div>';
+    el.innerHTML=staleAlert+ltAlert+triggerPanelHtml(rec)+'<div class="st" style="margin-bottom:10px">Wound Assessment &amp; Care Note</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+mathLine+flds.map(fldCell).join("")+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:space-between"><button class="btn br2 bsm" onclick="deleteWound(\''+rec.id+'\')">🗑 Delete</button><div style="display:flex;gap:7px"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div></div>';setTimeout(function(){restoreDraft(rec.id);},10);
     return;
   } else if(tp==="psych"){
     flds=[{id:"pf-ev",l:"Visit Type",v:"Follow-up Visit",sel:["Follow-up Visit","Initial Assessment","Medication Review","GDR Review","GDR Attempt","Telehealth Visit","Acute Hospitalization","Post-Discharge Follow-up","Behavioral Assessment"]},{id:"pf-date",l:"Visit Date",v:TDS()},{id:"pf-th",l:"Telehealth",v:rec.th?"Yes":"No",sel:["No","Yes"]},{id:"pf-apy",l:"Antipsychotic",v:rec.apy?"Yes":"No",sel:["No","Yes"]},{id:"pf-gdr",l:"GDR Status",v:rec.gdr},{id:"pf-lastH",l:"Last Acute Hosp.",v:rec.lastH},{id:"pf-dx",l:"Diagnoses",v:rec.dx.join(", "),full:true},{id:"pf-meds",l:"Medications (one per line)",v:rec.meds.join("\n"),ta:true,full:true},{id:"pf-notes",l:"Clinical Notes",v:"",ta:true,full:true,ph:"Mood, SI screening, plan…"},{id:"pf-by",l:"Updated By",v:"",ph:"Clinician name"}];
@@ -1301,6 +1468,14 @@ function _saveWoundEntry2(rec,photoData){
   var today=TDS();
   var newL=gnum("wf-L"),newW=gnum("wf-W"),newD=gnum("wf-D");
   var notes=gv("wf-notes").trim();
+  // ── inline validation ──
+  var vErr=[];
+  [["wf-L","Length"],["wf-W","Width"],["wf-D","Depth"]].forEach(function(p){var v=gnum(p[0]);if(v!=null&&(v<0||v>100))vErr.push(p[1]+" must be 0–100 cm");});
+  var pn=gnum("wf-pain");if(pn!=null&&(pn<0||pn>10))vErr.push("Pain must be 0–10");
+  var ab=gnum("wf-abi");if(ab!=null&&(ab<0||ab>2))vErr.push("ABI must be 0–2.0");
+  [["wf-tissueG","Granulation"],["wf-tissueS","Slough"],["wf-tissueE","Eschar"],["wf-tissueEp","Epithelial"]].forEach(function(p){var v=gnum(p[0]);if(v!=null&&(v<0||v>100))vErr.push(p[1]+" % must be 0–100");});
+  [["wf-bSensory",4],["wf-bMoisture",4],["wf-bActivity",4],["wf-bMobility",4],["wf-bNutrition",4],["wf-bFriction",3]].forEach(function(p){var v=gnum(p[0]);if(v!=null&&(v<1||v>p[1]))vErr.push("Braden subscore out of range (1–"+p[1]+")");});
+  if(vErr.length){toast(vErr[0],"err");return;}
   if(woundIsStale(rec)){
     var last=rec.chart&&rec.chart.length?rec.chart[rec.chart.length-1]:{};
     var hasMeasChange=(newL&&newL!==last.L)||(newW&&newW!==last.W);
@@ -1348,8 +1523,8 @@ function _saveWoundEntry2(rec,photoData){
   if(en.heal==="Healed"&&!rec.healedDate)rec.healedDate=en.dt;
   if(en.heal!=="Healed")rec.healedDate="";
   rec.audit.push({dt:nowStamp(),by:en.by,action:"Assessment saved ("+en.dt+")"+(en.attest?" · attested":"")+(en.cosign?" · co-sign "+en.cosign:"")+(en.photo?" · photo added":"")});
-  cht(0);wRefresh();renderDashAlerts();renderDashActions();
-  alert("✓ Wound chart updated."+(woundIsStale(rec)?"":"\n\n✅ Alert cleared.")+(en.area!=null?"\nArea: "+en.area+" cm²"+(en.push!=null?" · PUSH "+en.push:""):""));
+  cht(0);wRefresh();renderDashAlerts();renderDashActions();persist();updateBell();clearDraft(rec.id);
+  toast("✓ Saved"+(en.area!=null?" · "+en.area+" cm²"+(en.push!=null?" · PUSH "+en.push:""):"")+(woundIsStale(rec)?"":" · alert cleared"),"ok");
 }
 
 function saveEntry(){
@@ -1382,7 +1557,7 @@ function saveEntry(){
   }
   cht(0);
   if(tp==="census")renderCensus();else if(tp==="wound")wRefresh();else if(tp==="psych")renderPsych();else if(tp==="qa")renderQA();else if(tp==="primary")renderPrimary();
-  alert("✓ Chart updated and archived.");
+  persist();toast("✓ Chart updated","ok");
 }
 function buildHistory(){
   var tp=_ctx.tp,rec=_ctx.rec;
@@ -1414,12 +1589,12 @@ function buildNotes(){
   var rec=_ctx.rec;
   var notes=[].concat(rec.chart||[]).filter(function(h){return h.notes;}).reverse();
   var el=document.getElementById("ch-p2");
-  el.innerHTML='<div class="st">Notes Log — All Entries</div>'+(notes.length?'<div style="display:flex;flex-direction:column;gap:7px">'+notes.map(function(n){return'<div style="background:#f4f6f6;border:1px solid var(--bd);border-radius:7px;padding:9px 12px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:600;color:var(--tl)">'+(n.ev||n.tp||"Update")+'</span><span style="font-size:10px;color:var(--mu)">'+n.dt+(n.by?" · "+n.by:"")+'</span></div><div style="font-size:12px;color:var(--tx)">'+n.notes+'</div></div>';}).join("")+'</div>':'<p style="color:var(--mu);font-size:13px">No notes recorded yet.</p>');
+  el.innerHTML='<div class="st">Notes Log — All Entries</div>'+(notes.length?'<div style="display:flex;flex-direction:column;gap:7px">'+notes.map(function(n){return'<div style="background:var(--in);border:1px solid var(--bd);border-radius:7px;padding:9px 12px"><div style="display:flex;justify-content:space-between;margin-bottom:3px"><span style="font-size:11px;font-weight:600;color:var(--tl)">'+(n.ev||n.tp||"Update")+'</span><span style="font-size:10px;color:var(--mu)">'+n.dt+(n.by?" · "+n.by:"")+'</span></div><div style="font-size:12px;color:var(--tx)">'+n.notes+'</div></div>';}).join("")+'</div>':'<p style="color:var(--mu);font-size:13px">No notes recorded yet.</p>');
 }
 function discharge(){
   var rec=_ctx.rec;
   if(!confirm("Discharge "+rec.name+"?\n\nThis will mark them Discharged and download a full patient summary."))return;
-  rec.st="Discharged";
+  rec.st="Discharged";persist();
   var hist=[].concat(rec.chart||[]).reverse();
   var wR=WOUNDS.filter(function(w){return w.ptId===rec.id;});
   var psR=PSYCH.filter(function(p){return p.ptId===rec.id;});
@@ -1563,22 +1738,23 @@ function respondTrigger(woundId,key,status){
   w.triggerResp[key]={status:status,note:note.trim(),by:by,dt:TDS()};
   if(!w.chart)w.chart=[];
   w.chart.push({dt:TDS(),stage:w.stage,tx:w.tx,heal:w.heal,inf:w.inf,by:by,notes:"["+(status==="planned"?"ACTION PLAN":"NO ACTION — RATIONALE")+" · "+t.label+"] "+note.trim()});
+  if(!w.audit)w.audit=[];w.audit.push({dt:nowStamp(),by:by,action:(status==="planned"?"Action plan logged":"Reason documented")+": "+t.label});
   if(_ctx&&_ctx.tp==="wound"&&_ctx.id===woundId){buildFields();}
   wRefresh&&wRefresh();
-  renderDashAlerts();renderDashActions&&renderDashActions();
+  renderDashAlerts();renderDashActions&&renderDashActions();persist();updateBell();
 }
 function reopenTrigger(woundId,key){
   var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w||!w.triggerResp)return;
   delete w.triggerResp[key];
   if(_ctx&&_ctx.tp==="wound"&&_ctx.id===woundId){buildFields();}
-  wRefresh&&wRefresh();renderDashActions&&renderDashActions();
+  wRefresh&&wRefresh();renderDashActions&&renderDashActions();persist();updateBell();
 }
 function triggerPanelHtml(w){
   var open=getOpenTriggers(w);
   var resp=getWoundTriggers(w).filter(function(t){return (w.triggerResp||{})[t.key];});
   if(!open.length&&!resp.length)return "";
   var sevC={1:"#7dd3fc",2:"#fcd34d",3:"#f87171"};
-  var h='<div style="background:#f4f6f6;border:1px solid #e3c9a8;border-radius:8px;padding:11px 13px;margin-bottom:13px">';
+  var h='<div style="background:var(--in);border:1px solid #e3c9a8;border-radius:8px;padding:11px 13px;margin-bottom:13px">';
   h+='<div class="st" style="color:#fcd34d;margin-bottom:8px">🚩 Clinical Action Items'+(open.length?' <span class="pill pr2">'+open.length+' open</span>':' <span class="pill pt">all addressed</span>')+'</div>';
   open.forEach(function(t){var c=sevC[t.sev]||"#fcd34d";
     h+='<div style="border-left:3px solid '+c+';background:'+c+'10;border-radius:5px;padding:7px 9px;margin-bottom:6px"><div style="font-size:12px;font-weight:700;color:'+c+'">'+t.label+'</div><div style="font-size:11px;color:var(--mu);margin-bottom:5px">Recommended: '+t.rec+'</div><div style="display:flex;gap:6px"><button class="btn ba2 bsm" onclick="respondTrigger(\''+w.id+'\',\''+t.key+'\',\'planned\')">✓ Log Action / Plan</button><button class="btn bg3 bsm" onclick="respondTrigger(\''+w.id+'\',\''+t.key+'\',\'declined\')">✎ Document Reason</button></div></div>';
@@ -1660,7 +1836,7 @@ function bodyMapHtml(sel){
     {x:130,y:205,r:"R. Lat. Malleolus"},{x:170,y:205,r:"L. Lat. Malleolus"}
   ];
   var dots=sites.map(function(s){var on=sel===s.r;return '<g style="cursor:pointer" onclick="pickBodySite(\''+s.r+'\')"><circle cx="'+s.x+'" cy="'+s.y+'" r="'+(on?7:5)+'" fill="'+(on?"#3f7d76":"#fff")+'" stroke="#3f7d76" stroke-width="1.5"/><title>'+s.r+'</title></g>';}).join("");
-  return '<div style="display:flex;gap:16px;align-items:center;background:#fbfcfc;border:1px solid var(--bd);border-radius:9px;padding:12px"><svg viewBox="0 0 300 280" width="170" height="160"><ellipse cx="150" cy="24" rx="16" ry="18" fill="#eef1f1" stroke="#cfd6d4"/><rect x="120" y="44" width="60" height="92" rx="14" fill="#eef1f1" stroke="#cfd6d4"/><rect x="100" y="60" width="20" height="70" rx="9" fill="#eef1f1" stroke="#cfd6d4"/><rect x="180" y="60" width="20" height="70" rx="9" fill="#eef1f1" stroke="#cfd6d4"/><rect x="122" y="135" width="24" height="115" rx="11" fill="#eef1f1" stroke="#cfd6d4"/><rect x="154" y="135" width="24" height="115" rx="11" fill="#eef1f1" stroke="#cfd6d4"/>'+dots+'</svg><div style="font-size:11px;color:var(--mu);line-height:1.6"><div style="font-weight:700;color:var(--tx);margin-bottom:3px">Posterior pressure points</div>Click a common pressure-injury site to set the location.<div style="margin-top:6px">Selected: <b style="color:#356b64">'+(sel||"—")+'</b></div></div></div>';
+  return '<div style="display:flex;gap:16px;align-items:center;background:var(--in);border:1px solid var(--bd);border-radius:9px;padding:12px"><svg viewBox="0 0 300 280" width="170" height="160"><ellipse cx="150" cy="24" rx="16" ry="18" fill="#eef1f1" stroke="#cfd6d4"/><rect x="120" y="44" width="60" height="92" rx="14" fill="#eef1f1" stroke="#cfd6d4"/><rect x="100" y="60" width="20" height="70" rx="9" fill="#eef1f1" stroke="#cfd6d4"/><rect x="180" y="60" width="20" height="70" rx="9" fill="#eef1f1" stroke="#cfd6d4"/><rect x="122" y="135" width="24" height="115" rx="11" fill="#eef1f1" stroke="#cfd6d4"/><rect x="154" y="135" width="24" height="115" rx="11" fill="#eef1f1" stroke="#cfd6d4"/>'+dots+'</svg><div style="font-size:11px;color:var(--mu);line-height:1.6"><div style="font-weight:700;color:var(--tx);margin-bottom:3px">Posterior pressure points</div>Click a common pressure-injury site to set the location.<div style="margin-top:6px">Selected: <b style="color:#356b64">'+(sel||"—")+'</b></div></div></div>';
 }
 function awFacChange(){
   var fac=gv("aw-fac");var pt=document.getElementById("aw-pt");if(!pt)return;
@@ -1690,13 +1866,14 @@ function saveNewWound(){
   wFac=fac;wProv="All";
   go("wound");wTab(0);
   renderDashAlerts&&renderDashAlerts();renderDashActions&&renderDashActions();
-  alert("✓ Wound added for "+p.name+" at "+fac+".\nIt's now on the wound-care watch list.");
+  persist();updateBell();
+  toast("✓ Wound added for "+p.name.split(",")[0]+" — now on the watch list","ok");
 }
 
 /* ── WOUND SUB-TABS & ANALYTICS ── */
 var wCurrentTab=0;
 function wTab(i){
-  wCurrentTab=i;
+  wCurrentTab=i;saveUI({wTab:i,wFac:wFac,wProv:wProv});
   for(var j=0;j<6;j++){var p=document.getElementById("w-p"+j),b=document.getElementById("w-t"+j);if(p)p.style.display=j===i?"block":"none";if(b)b.className=j===i?"btn bd2 bsm":"btn bg3 bsm";}
   if(i===0)renderWound();
   else if(i===1)renderWAnalytics();
@@ -2859,6 +3036,14 @@ function renderKwResults(results){
   // store for export
   window._kwRes=results;
 }
+function exportWounds(){
+  var w=wFacList();if(!w.length){toast("No wounds to export","err");return;}
+  var rows=[["Resident","Facility","Type","Etiology","Stage","Location","Onset","Last Seen","L","W","D","Area cm2","PUSH","Healing","Infection","Goal","ABI","Provider","Origin","Avoidable"]];
+  w.forEach(function(x){var l=woundLastMeasured(x)||{};rows.push([x.name,x.fac,x.tp,x.etio||"",x.stage,x.loc,x.onset||"",x.ls,l.L||"",l.W||"",l.D||"",woundAreaOf(l)||"",(l.push!=null?l.push:""),x.heal,x.inf?"Yes":"No",x.goal||"",x.abi!=null?x.abi:"",x.pv||"",x.poa||"",x.avoidable||""]);});
+  var csv=rows.map(function(r){return r.map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var blob=new Blob([csv],{type:"text/csv"});var url=URL.createObjectURL(blob);var a=document.createElement("a");a.href=url;a.download="clinilytics_wounds_"+(wFac==="All"?"all":wFac.replace(/[^a-z0-9]/gi,"_"))+"_"+TDS().replace(/\//g,"-")+".csv";document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+  toast("Wound list exported ("+w.length+")","ok");
+}
 function exportKw(){
   if(!window._kwRes)return;
   var rows=[["Patient","DOB","Facility","Company","Room","Primary Dx","Matched Keywords","Wounds","Psych","QA Status"]];
@@ -2943,7 +3128,7 @@ function handleF2(files){
   var q=document.getElementById("up-q");if(!upFiles.length){q.style.display="none";return;}
   q.style.display="block";
   document.getElementById("up-ql").textContent=upFiles.length+" file"+(upFiles.length>1?"s":"")+" queued";
-  document.getElementById("up-fl").innerHTML=upFiles.map(function(f,i){return'<div style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:#f4f6f6;border-radius:6px;margin-bottom:5px;border:1px solid var(--bd)"><span>📄</span><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">'+f.name+'</div><div class="pbar"><div id="pf-'+i+'" class="pfill" style="width:0%"></div></div></div><span id="sf-'+i+'" style="font-size:11px;color:var(--mu)">Pending</span></div>';}).join("");
+  document.getElementById("up-fl").innerHTML=upFiles.map(function(f,i){return'<div style="display:flex;align-items:center;gap:7px;padding:7px 10px;background:var(--in);border-radius:6px;margin-bottom:5px;border:1px solid var(--bd)"><span>📄</span><div style="flex:1"><div style="font-size:12px;font-weight:600;color:var(--tx)">'+f.name+'</div><div class="pbar"><div id="pf-'+i+'" class="pfill" style="width:0%"></div></div></div><span id="sf-'+i+'" style="font-size:11px;color:var(--mu)">Pending</span></div>';}).join("");
 }
 function f64(file){return new Promise(function(res,rej){var r=new FileReader();r.onload=function(){res(r.result.split(",")[1]);};r.onerror=rej;r.readAsDataURL(file);});}
 async function procAll(){
@@ -2970,7 +3155,7 @@ async function procAll(){
 function renderUpRes(){
   var el=document.getElementById("up-res");var rl=document.getElementById("up-rl");
   if(!upExt.length)return;el.style.display="block";
-  rl.innerHTML=upExt.map(function(p,i){return'<div class="card" style="margin-bottom:9px;overflow:hidden"><div style="padding:7px 12px;background:#f4f6f6;border-bottom:1px solid var(--bd);display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--mu)">📄 '+p.srcFile+'</span><span class="pill '+(p._err?"pr2":"pt")+'">'+(p._err?"Error — fill manually":"AI Extracted")+'</span></div><div style="padding:11px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+[["ex-n-"+i,"Name *",p.name||""],["ex-dob-"+i,"DOB",p.dob||""],["ex-rm-"+i,"Room",p.room||""],["ex-adm-"+i,"Admit",p.admit||""],["ex-ins-"+i,"Insurance",p.ins||""],["ex-pv-"+i,"Provider",p.pv||""],["ex-cd-"+i,"Code",p.code||"Full Code"],["ex-mrn-"+i,"MRN",p.mrn||""]].map(function(f){return'<div><label class="fl">'+f[1]+'</label><input id="'+f[0]+'" value="'+e(f[2])+'"></div>';}).join("")+'<div style="grid-column:1/-1"><label class="fl">Primary Diagnosis</label><input id="ex-dx-'+i+'" value="'+e(p.dx||"")+'"></div><div><label class="fl">Allergies</label><input id="ex-al-'+i+'" value="'+e(p.al||"NKDA")+'"></div></div></div>';}).join("");
+  rl.innerHTML=upExt.map(function(p,i){return'<div class="card" style="margin-bottom:9px;overflow:hidden"><div style="padding:7px 12px;background:var(--in);border-bottom:1px solid var(--bd);display:flex;justify-content:space-between"><span style="font-size:11px;color:var(--mu)">📄 '+p.srcFile+'</span><span class="pill '+(p._err?"pr2":"pt")+'">'+(p._err?"Error — fill manually":"AI Extracted")+'</span></div><div style="padding:11px 12px;display:grid;grid-template-columns:repeat(4,1fr);gap:8px">'+[["ex-n-"+i,"Name *",p.name||""],["ex-dob-"+i,"DOB",p.dob||""],["ex-rm-"+i,"Room",p.room||""],["ex-adm-"+i,"Admit",p.admit||""],["ex-ins-"+i,"Insurance",p.ins||""],["ex-pv-"+i,"Provider",p.pv||""],["ex-cd-"+i,"Code",p.code||"Full Code"],["ex-mrn-"+i,"MRN",p.mrn||""]].map(function(f){return'<div><label class="fl">'+f[1]+'</label><input id="'+f[0]+'" value="'+e(f[2])+'"></div>';}).join("")+'<div style="grid-column:1/-1"><label class="fl">Primary Diagnosis</label><input id="ex-dx-'+i+'" value="'+e(p.dx||"")+'"></div><div><label class="fl">Allergies</label><input id="ex-al-'+i+'" value="'+e(p.al||"NKDA")+'"></div></div></div>';}).join("");
 }
 function importAll(){
   var cnt=0;var fac=gv("up-fac");
@@ -3203,13 +3388,22 @@ function delUser(u){
 }
 
 document.addEventListener("DOMContentLoaded",function(){
+  applyPrefs();
   lgateInit();
   // drag/drop for upload zone
   var uz=document.getElementById("up-fi");if(uz){var uzp=uz.closest(".uz");if(uzp){uzp.addEventListener("dragover",function(ev){ev.preventDefault();uzp.style.borderColor="var(--tl)";});uzp.addEventListener("dragleave",function(){uzp.style.borderColor="";});uzp.addEventListener("drop",function(ev){ev.preventDefault();uzp.style.borderColor="";handleF2([].slice.call(ev.dataTransfer.files));});}}
   initWoundData();
+  var hadSaved=loadState();
+  // restore sticky filters
+  var ui=loadUI();if(ui.wFac)wFac=ui.wFac;if(ui.wProv)wProv=ui.wProv;if(ui.wTab!=null)wCurrentTab=ui.wTab;
   initDash();
   renderCensus();
+  if(ui.tab&&ui.tab!=="dashboard"){try{go(ui.tab);}catch(e){}}
+  updateBell();
   document.getElementById("ftr").textContent="Last sync: "+TD()+" · "+FACS.length+" facilities · "+PATIENTS.filter(function(p){return p.st==="Active";}).length+" active residents";
+  if(!hadSaved&&!loadUI().seen){saveUI({seen:1});setTimeout(function(){toast("Welcome! Your work autosaves to this browser. Press Ctrl/⌘-K to search anything.","ok");},900);}
+  // PWA service worker (offline / installable)
+  if("serviceWorker" in navigator){try{navigator.serviceWorker.register("sw.js").catch(function(){});}catch(e){}}
 })
 </script>
 </body>
