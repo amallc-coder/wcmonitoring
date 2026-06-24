@@ -61,7 +61,17 @@ npm start
 | DELETE | `/api/users/:username` | Admin | disable user |
 | GET  | `/api/snapshot` | any | full org state (decrypted) |
 | PUT  | `/api/snapshot` | Admin/Provider | replace org state (encrypted, transactional, audited) |
+| POST | `/api/ai/draft-note` | Admin/Provider | draft a note from de-identified context (501 until an AI provider is configured) |
 | GET  | `/api/audit` | Admin | recent audit entries |
+
+### Optional AI draft-note (clinical decision support)
+Off by default. To enable, set `AI_API_URL` + `AI_API_KEY` (+ `AI_MODEL`) to a
+**BAA-covered, OpenAI-compatible** chat endpoint (e.g. Azure OpenAI). The app's
+in-browser **guideline knowledge base** (deterministic, cited) works without
+this; the AI only drafts the narrative note from **de-identified** context and
+must be clinician-reviewed. Treat all suggestions as *decision support for a
+licensed clinician*, never auto-orders (keeps it within the 21st-Century-Cures
+CDS exemption rather than a regulated device).
 
 ## Restore from a backup
 ```bash
