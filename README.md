@@ -15,6 +15,14 @@ Chart.js, jsPDF, and jsPDF-AutoTable load from CDN at runtime.
 on top, navigation below) collapses to a **hamburger menu** on small screens, grids
 reflow to fewer columns, and wide tables scroll within their cards.
 
+**Optional self-hosted backend (`/server`):** a Node + Postgres API with JWT auth,
+**AES-256-GCM encryption of PHI at rest**, audit logging, and a redundancy stack
+(primary + **hot-standby replica** + **automated `pg_dump` backups**, all via
+`docker compose`). Connect from **Settings → Cloud sync**; the browser keeps a
+local mirror so the app still works offline. The server runs on infrastructure
+you control (not GitHub Pages) — see [`server/README.md`](server/README.md) for
+deploy, restore, and HIPAA/BAA notes.
+
 **Quality-of-life:** all data **autosaves to the browser** (`localStorage`) and
 restores on reload; the long wound note keeps a **draft** so nothing is lost;
 non-blocking **toasts** (with **Undo** on delete) replace native popups;

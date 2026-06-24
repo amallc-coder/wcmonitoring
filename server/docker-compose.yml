@@ -1,0 +1,94 @@
+# Clinilytics — Wound Care · self-hosted stack with redundancy
+#
+#   db          → primary Postgres (source of truth)
+#   db-replica  → streaming hot standby (real-time copy for failover/reads)
+#   backup      → periodic encrypted logical backups (pg_dump) + retention
+#   api         → the Node API (talks to the primary)
+#
+# Redundancy layers: (1) hot standby replica, (2) scheduled dump backups,
+# (3) the browser keeps a local mirror (offline). For production also put the
+# data volumes on encrypted storage and ship `backups/` offsite (e.g. S3).
+#
+# Quick start:
+#   cp .env.example .env   # then edit secrets
+#   docker compose up -d --build
+#   curl localhost:8080/api/health
+
+services:
+  db:
+    image: postgres:16
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: woundcare
+      POSTGRES_USER: wcapp
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      REPL_PASSWORD: ${REPL_PASSWORD:?set REPL_PASSWORD in .env}
+    command: >
+      postgres
+      -c wal_level=replica
+      -c max_wal_senders=10
+      -c max_replication_slots=10
+      -c hot_standby=on
+      -c archive_mode=on
+      -c archive_command=/bin/true
+    volumes:
+      - db_primary:/var/lib/postgresql/data
+      - ./scripts/primary-init.sh:/docker-entrypoint-initdb.d/10-primary-init.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U wcapp -d woundcare"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  db-replica:
+    image: postgres:16
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${REPL_PASSWORD:?set REPL_PASSWORD in .env}
+    entrypoint: ["/bin/bash", "/replica-entrypoint.sh"]
+    volumes:
+      - db_replica:/var/lib/postgresql/data
+      - ./scripts/replica-entrypoint.sh:/replica-entrypoint.sh:ro
+
+  backup:
+    image: postgres:16
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PGPASSWORD: ${DB_PASSWORD:?set DB_PASSWORD in .env}
+      BACKUP_INTERVAL_SECONDS: ${BACKUP_INTERVAL_SECONDS:-21600}   # default every 6h
+      BACKUP_RETENTION: ${BACKUP_RETENTION:-28}                     # keep last 28 dumps
+    entrypoint: ["/bin/bash", "/backup.sh"]
+    volumes:
+      - ./scripts/backup.sh:/backup.sh:ro
+      - ./backups:/backups
+
+  api:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://wcapp:${DB_PASSWORD}@db:5432/woundcare
+      DATA_ENCRYPTION_KEY: ${DATA_ENCRYPTION_KEY:?set DATA_ENCRYPTION_KEY in .env}
+      JWT_SECRET: ${JWT_SECRET:?set JWT_SECRET in .env}
+      JWT_TTL_HOURS: ${JWT_TTL_HOURS:-12}
+      CORS_ORIGIN: ${CORS_ORIGIN}
+      ADMIN_USER: ${ADMIN_USER:-admin}
+      ADMIN_PASS: ${ADMIN_PASS:?set ADMIN_PASS in .env}
+      ADMIN_NAME: ${ADMIN_NAME:-Administrator}
+      ORG_NAME: ${ORG_NAME:-Clinilytics}
+      BODY_LIMIT: ${BODY_LIMIT:-30mb}
+      PORT: 8080
+    ports:
+      - "${API_PORT:-8080}:8080"
+
+volumes:
+  db_primary:
+  db_replica:
