@@ -15,6 +15,20 @@ Chart.js, jsPDF, and jsPDF-AutoTable load from CDN at runtime.
 on top, navigation below) collapses to a **hamburger menu** on small screens, grids
 reflow to fewer columns, and wide tables scroll within their cards.
 
+**Calm UI:** the interface uses a near-monochrome system (neutral grays + a
+single teal accent) with muted status colors and muted, mostly-grayscale charts,
+for a quieter, easier-to-read workspace.
+
+**Add Wound:** providers build their watch list via **Wound Care → ＋ Add Wound**
+(facility → resident → type/stage/etiology/location/onset, size, infection,
+graft/collagen/PCR), which creates the wound with its first chart entry.
+
+**Help & Training:** an in-app **Help & Training** tab provides searchable,
+step-by-step guides for every workflow (sign-in, dashboard, facilities &
+contacts, residents/facesheets, add wound, weekly rounds, action items, emailing
+reports, leadership reports, admin) — each with a labeled screen illustration and
+plain-language steps and tips.
+
 **User management:** Admins get an **Admin** panel (header) to create sign-in
 accounts (username, name, role: Admin / Wound Provider / Viewer) with per-user
 SHA-256 password hashes stored in the browser (`localStorage`). The seed admin is
