@@ -242,6 +242,21 @@ function buildApp() {
     } catch (e) { res.status(502).json({ error: "AI analysis failed" }); }
   }));
 
+  // ── AI billing self-audit (Claude) ──
+  app.post("/api/ai/audit-note", authed, requireRole("Admin", "Wound Provider"), wrap(async (req, res) => {
+    if (!anthropic.configured()) return res.status(501).json({ error: "Claude not configured" });
+    const body = req.body || {};
+    try {
+      const a = await anthropic.auditNote({
+        note: typeof body.note === "string" ? body.note.slice(0, 12000) : "",
+        codes: Array.isArray(body.codes) ? body.codes.slice(0, 60) : [],
+        context: body.context || {}
+      });
+      await audit(req, "ai.audit-note", null);
+      res.json({ audit: a });
+    } catch (e) { res.status(502).json({ error: "AI audit failed" }); }
+  }));
+
   // ── audit log (admin) ──
   app.get("/api/audit", authed, requireRole("Admin"), wrap(async (req, res) => {
     const r = await db.query("SELECT username,action,detail,ip,at FROM audit_log WHERE org_id=$1 ORDER BY at DESC LIMIT 500", [req.user.org]);

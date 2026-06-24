@@ -694,6 +694,70 @@ img,canvas,svg{max-width:100%}
 </div>
 </div>
 
+<!-- VISIT NOTE & CHARGE BUILDER -->
+<div id="m-billing" class="mo h">
+<div class="mb xl">
+  <div class="mh"><div class="mtt">🧾 Visit Note &amp; Charge Builder <span class="pill pt" style="font-weight:600">SOAP · CPT · ICD-10</span></div><button class="xb" onclick="cM('m-billing')">✕</button></div>
+  <div class="mbd" style="max-height:74vh;overflow-y:auto">
+    <div style="padding:8px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:12px;font-size:11px;color:var(--mu)">
+      Builds a reimbursement-ready SOAP note with the suggested CPT/HCPCS, modifiers and ICD-10 from the latest assessment. Edit the fields below — the note, charges and self-audit refresh automatically. Run the <b>🤖 AI self-audit</b> before finalizing to catch documentation gaps and under-coding.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+      <div><label class="fl">Rendering Provider</label><input id="bk-provider" onchange="computeBilling()" placeholder="name"></div>
+      <div><label class="fl">NPI</label><input id="bk-npi" onchange="computeBilling()" placeholder="10-digit"></div>
+      <div><label class="fl">Place of Service</label><select id="bk-pos" onchange="computeBilling()"><option value="31">31 · SNF</option><option value="32">32 · Nursing facility</option><option value="11">11 · Office</option><option value="12">12 · Home</option><option value="13">13 · Assisted living</option></select></div>
+      <div><label class="fl">Payer</label><input id="bk-payer" onchange="computeBilling()" placeholder="e.g. Medicare A"></div>
+      <div><label class="fl">E/M Level</label><select id="bk-em" onchange="computeBilling()"><option value="None">None</option><option value="99212">99212 · est, straightforward</option><option value="99213">99213 · est, low</option><option value="99214">99214 · est, moderate</option><option value="99215">99215 · est, high</option><option value="99202">99202 · new, straightforward</option><option value="99203">99203 · new, low</option><option value="99204">99204 · new, moderate</option></select></div>
+      <div><label class="fl">≥4 wks standard care failed</label><select id="bk-cons" onchange="computeBilling()"><option>No</option><option>Yes</option></select></div>
+      <div><label class="fl">Weeks of conservative care</label><input id="bk-consdur" onchange="computeBilling()" placeholder="e.g. 4"></div>
+    </div>
+    <div class="st" style="margin-top:14px;margin-bottom:6px">Debridement</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+      <div><label class="fl">Type</label><select id="bk-deb" onchange="computeBilling()"><option>No</option><option>Selective</option><option>Surgical</option></select></div>
+      <div><label class="fl">Deepest tissue level</label><select id="bk-deblevel" onchange="computeBilling()"><option>Subcutaneous</option><option>Muscle / Fascia</option><option>Bone</option></select></div>
+      <div><label class="fl">Total area debrided (cm²)</label><input id="bk-debsq" onchange="computeBilling()" placeholder="drives add-on units"></div>
+      <div style="grid-column:1/-1"><label class="fl">Instrument / technique</label><input id="bk-debinstr" onchange="computeBilling()" placeholder="e.g. curette, scalpel, hydrosurgery"></div>
+    </div>
+    <div class="st" style="margin-top:14px;margin-bottom:6px">Skin substitute / CTP</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+      <div><label class="fl">Applied</label><select id="bk-ctp" onchange="computeBilling()"><option>No</option><option>Yes</option></select></div>
+      <div><label class="fl">Product</label><input id="bk-ctpprod" onchange="computeBilling()" placeholder="e.g. Apligraf"></div>
+      <div><label class="fl">HCPCS Q-code</label><input id="bk-ctpq" onchange="computeBilling()" placeholder="e.g. Q4101"></div>
+      <div><label class="fl">Graft area (cm²)</label><input id="bk-ctpunits" onchange="computeBilling()" placeholder="sq cm applied"></div>
+      <div><label class="fl">Application #</label><input id="bk-ctpapps" onchange="computeBilling()" placeholder="1"></div>
+      <div><label class="fl">NPWT</label><select id="bk-npwt" onchange="computeBilling()"><option>No</option><option>Durable</option><option>Disposable</option></select></div>
+    </div>
+    <div class="st" style="margin-top:14px;margin-bottom:6px">Narrative &amp; attestation</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+      <div><label class="fl">Subjective (S)</label><textarea id="bk-subj" rows="2" onchange="computeBilling()" placeholder="patient-reported / interval history (blank = auto)"></textarea></div>
+      <div><label class="fl">Plan (P)</label><textarea id="bk-plan" rows="2" onchange="computeBilling()" placeholder="leave blank to auto-generate"></textarea></div>
+      <div><label class="fl">Attestation</label><select id="bk-attest" onchange="computeBilling()"><option>No</option><option>Yes</option></select></div>
+      <div><label class="fl">Co-signing provider</label><input id="bk-cosign" onchange="computeBilling()" placeholder="if required"></div>
+    </div>
+    <div style="margin:12px 0;display:flex;justify-content:flex-end"><button class="btn bg3 bsm" style="font-weight:600" onclick="computeBilling()">↻ Recompute</button></div>
+    <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:13px">
+      <div><div class="st" style="margin-bottom:5px">SOAP / Billing note <span style="font-size:10px;color:var(--mu);font-weight:400">— editable; copies into eCW</span></div><textarea id="bk-note" rows="18" style="width:100%;font-family:var(--mono);font-size:11px;line-height:1.45"></textarea></div>
+      <div>
+        <div class="st" style="margin-bottom:5px">Suggested charges</div>
+        <div id="bk-charges"></div>
+        <div id="bk-audit" style="margin-top:12px"></div>
+      </div>
+    </div>
+    <div id="bk-ai"></div>
+  </div>
+  <div class="mft" style="flex-wrap:wrap;gap:7px">
+    <button class="btn bg3" onclick="cM('m-billing')">Close</button>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      <button class="btn bg3" onclick="copyBillingNote()">📋 Copy note</button>
+      <button class="btn bg3" onclick="billingPDF()">📄 PDF</button>
+      <button class="btn bg3" onclick="billingSuperbill()">📊 Superbill CSV</button>
+      <button class="btn bg3" style="font-weight:600" onclick="aiAuditBilling()">🤖 AI self-audit</button>
+      <button class="btn bt" onclick="finalizeBilling()">✓ Finalize &amp; save</button>
+    </div>
+  </div>
+</div>
+</div>
+
 <!-- ADMIN / USER MANAGEMENT -->
 <div id="m-admin" class="mo h">
 <div class="mb">
@@ -1902,7 +1966,7 @@ function woundSuggestions(w){var c=clinContext(w);var out=[];WOUND_KB.forEach(fu
 function suggestionsPanelHtml(w){
   var list=woundSuggestions(w);window._sugCache={id:w.id,list:list};
   var h='<div style="background:rgba(63,125,118,.07);border:1px solid rgba(63,125,118,.22);border-radius:8px;padding:11px 13px;margin-bottom:13px">';
-  h+='<div class="st" style="color:#356b64;margin-bottom:3px">💡 Suggested Care &amp; Smart Notes <span class="pill pt">'+list.length+'</span> <span style="float:right"><button class="btn bg3 bsm" style="font-weight:600" onclick="analyzeWoundPhoto(\''+w.id+'\')">🔬 Analyze photo</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="compareWoundPhotos(\''+w.id+'\')">📊 Compare to last</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="draftAINote(\''+w.id+'\')">✨ Draft note</button></span></div>';
+  h+='<div class="st" style="color:#356b64;margin-bottom:3px">💡 Suggested Care &amp; Smart Notes <span class="pill pt">'+list.length+'</span> <span style="float:right"><button class="btn bg3 bsm" style="font-weight:600" onclick="analyzeWoundPhoto(\''+w.id+'\')">🔬 Analyze photo</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="compareWoundPhotos(\''+w.id+'\')">📊 Compare to last</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="draftAINote(\''+w.id+'\')">✨ Draft note</button> <button class="btn bt bsm" style="font-weight:600" onclick="openBilling(\''+w.id+'\')">🧾 Note &amp; Charges</button></span></div>';
   h+='<div style="font-size:10px;color:var(--mu);margin-bottom:8px">Guideline-based decision support — review &amp; confirm before use.</div>';
   if(!list.length){h+='<div style="font-size:12px;color:var(--mu)">No specific guideline prompts for the current data.</div>';}
   list.forEach(function(s,i){
@@ -1982,6 +2046,181 @@ function insertAnalysisIntoNote(){
   parts.push("(AI photo analysis — clinician to verify.)");
   cM("m-aiwound");
   var el=document.getElementById("wf-notes");if(el){insertMacro("wf-notes",parts.join(" "));toast("Analysis added to note — review before saving","ok");}else{toast("Open the wound note to insert");}
+}
+
+/* ════ VISIT NOTE & CHARGE BUILDER (SOAP + ICD/CPT/modifiers + self-audit) ════
+   Suggests codes from the documented work; a clinician/coder confirms. Not a
+   certified grouper — verify against current CPT/ICD and your MAC LCDs. */
+function woundSite(loc){loc=(loc||"").toLowerCase();
+  var lat=/(^|[^a-z])(l\.|left|lt\b)/.test(loc)?"left":(/(^|[^a-z])(r\.|right|rt\b)/.test(loc)?"right":"unspecified");
+  var site=/sacr|coccy/.test(loc)?"sacrum":/ischi/.test(loc)?"ischium":/trochan|hip/.test(loc)?"hip":/buttock|gluteal/.test(loc)?"buttock":/heel/.test(loc)?"heel":/ankle|malleol/.test(loc)?"ankle":/plantar|sole|toe|forefoot|midfoot|metatars|foot/.test(loc)?"foot":/calf|shin|gaiter|lower\s*leg|\bleg\b/.test(loc)?"lowerleg":/thigh/.test(loc)?"thigh":/elbow/.test(loc)?"elbow":/scalp|occiput|head/.test(loc)?"head":"other";
+  return {lat:lat,site:site};
+}
+function _stageDigit(s){return ({"Stage 1":"1","Stage 2":"2","Stage 3":"3","Stage 4":"4","Unstageable":"0","Deep Tissue Inj.":"6"})[s]||"9";}
+function _latDigit(l){return l==="right"?"1":l==="left"?"2":"0";}
+function _depthDigit(w){var le=woundLastMeasured(w)||{};if((le.tissueE||0)>0||w.stage==="Stage 4")return"4";if(["Stage 3","Unstageable"].indexOf(w.stage)>=0)return"3";if((le.tissueS||0)>0||w.stage==="Stage 2")return"2";return"1";}
+function _l97(st,dd){var reg={thigh:"L97.1",calf:"L97.2",lowerleg:"L97.8",ankle:"L97.3",heel:"L97.4",foot:"L97.5"}[st.site]||"L97.9";var ld=st.lat==="right"?"1":st.lat==="left"?"2":"9";return reg+ld+dd;}
+function icdForWound(w){
+  var st=woundSite(w.loc),out=[],flags=[];
+  var press=(w.etio==="Pressure"||w.tp==="Pressure Injury");
+  var sd=_stageDigit(w.stage),ld=_latDigit(st.lat),dd=_depthDigit(w);
+  function add(c,d){out.push({code:c,desc:d});}
+  if(press){
+    var base={sacrum:"L89.15",ischium:"L89.4"+ld,hip:"L89.2"+ld,buttock:"L89.3"+ld,heel:"L89.6"+ld,ankle:"L89.5"+ld}[st.site];
+    if(base)add(base+sd,"Pressure ulcer, "+st.site+(st.lat!=="unspecified"?" ("+st.lat+")":"")+", "+(w.stage||"unspecified stage"));
+    else {add("L89.89"+sd,"Pressure ulcer, other site, "+(w.stage||"unspecified stage"));flags.push("Confirm pressure-ulcer site code (mapped to ‘other site’).");}
+    if(st.lat==="unspecified"&&["ischium","hip","buttock","heel","ankle"].indexOf(st.site)>=0)flags.push("Specify laterality (L/R) for a precise L89 code.");
+  } else if(w.tp==="Diabetic Ulcer"){add("E11.621","Type 2 diabetes mellitus with foot ulcer (code first)");add(_l97(st,dd),"Non-pressure chronic ulcer, "+st.site+(st.lat!=="unspecified"?" ("+st.lat+")":"")+", depth "+dd);flags.push("Confirm diabetes type/control and ulcer depth/laterality.");}
+  else if(w.tp==="Venous Ulcer"){add("I87.31"+(st.lat==="right"?"1":st.lat==="left"?"2":"9"),"Chronic venous hypertension with ulcer (code first)");add(_l97(st,dd),"Non-pressure chronic ulcer, "+st.site+", depth "+dd);}
+  else if(w.tp==="Arterial Ulcer"){add("I70.23x","Atherosclerosis of native leg artery with ulceration — VERIFY full code/laterality");add(_l97(st,dd),"Non-pressure chronic ulcer, "+st.site+", depth "+dd);flags.push("Arterial: confirm I70.23-/I70.24- complete code.");}
+  else add(_l97(st,dd),"Non-pressure chronic ulcer, "+st.site+", depth "+dd);
+  if(w.inf)add("L08.9","Local skin/subcutaneous infection (if documented; consider cellulitis L03.- / osteomyelitis M86.-)");
+  return {codes:out,flags:flags};
+}
+function _latMods(st){return st.lat==="right"?["RT"]:st.lat==="left"?["LT"]:[];}
+function cptForVisit(w,inp){
+  var st=woundSite(w.loc),le=woundLastMeasured(w)||{},area=woundAreaOf(le)||0,out=[],hasProc=false;
+  function C(code,desc,units,mods,hcpcs){out.push({code:code,desc:desc,units:units||1,mods:mods||[],hcpcs:!!hcpcs});}
+  if(inp.deb==="Surgical"){hasProc=true;var lvl=inp.debLevel||"Subcutaneous";
+    var first=({"Subcutaneous":"11042","Muscle / Fascia":"11043","Bone":"11044"})[lvl]||"11042";
+    var addc=({"Subcutaneous":"11045","Muscle / Fascia":"11046","Bone":"11047"})[lvl]||"11045";
+    var sq=parseFloat(inp.debSqcm)||0,au=Math.max(0,Math.ceil((sq-20)/20));
+    C(first,"Surgical debridement ("+lvl+"), first 20 cm²",1,_latMods(st));if(au>0)C(addc,"…each additional 20 cm²",au,[]);
+  } else if(inp.deb==="Selective"){hasProc=true;var sq2=parseFloat(inp.debSqcm)||0,au2=Math.max(0,Math.ceil((sq2-20)/20));
+    C("97597","Selective debridement, first 20 cm²",1,_latMods(st));if(au2>0)C("97598","…each additional 20 cm²",au2,[]);}
+  if(inp.ctp==="Yes"){hasProc=true;var special=/foot|heel|ankle/.test(st.site);var sq3=parseFloat(inp.ctpUnits)||area||0,big=sq3>=100;
+    var f2=special?"15275":(big?"15273":"15271"),a2=special?"15276":(big?"15274":"15272");
+    var mods=_latMods(st);if((parseInt(inp.ctpApps)||1)>4)mods.push("KX");
+    C(f2,"Skin substitute application"+(special?" (foot/ankle)":"")+", first 25 cm²",1,mods);
+    var au3=Math.max(0,Math.ceil((sq3-25)/25));if(au3>0)C(a2,"…each additional 25 cm²",au3,[]);
+    if(inp.ctpQ)C(inp.ctpQ.toUpperCase(),"CTP product"+(inp.ctpProduct?" — "+inp.ctpProduct:""),Math.round(sq3),[],true);
+  }
+  if(inp.npwt==="Durable"){hasProc=true;C(area>50?"97606":"97605","NPWT (DME pump), "+(area>50?">50":"≤50")+" cm²",1,[]);}
+  else if(inp.npwt==="Disposable"){hasProc=true;C(area>50?"97608":"97607","NPWT (disposable)",1,[]);}
+  if(inp.em&&inp.em!=="None")out.unshift({code:inp.em,desc:"Office/outpatient E/M",units:1,mods:hasProc?["25"]:[],hcpcs:false});
+  return {codes:out,hasProc:hasProc};
+}
+function auditCharges(w,inp,cpt,icd){
+  var f=[],le=woundLastMeasured(w)||{},st=woundSite(w.loc);
+  if(!le.L||!le.W)f.push({lvl:"warn",t:"Latest entry missing L×W measurements — required for medical necessity and debridement units."});
+  if((inp.deb==="Surgical"||inp.deb==="Selective")&&!(parseFloat(inp.debSqcm)>0))f.push({lvl:"warn",t:"Debridement billed but total sq cm not entered — drives add-on units (under-coding risk)."});
+  if(inp.deb==="Surgical"&&!inp.debLevel)f.push({lvl:"warn",t:"Surgical debridement needs deepest tissue level documented (11042 vs 11043 vs 11044)."});
+  if(inp.ctp==="Yes"){if(!inp.ctpQ)f.push({lvl:"warn",t:"Skin substitute applied but no product Q-code/units — claim will deny."});if((parseInt(inp.ctpApps)||1)>4)f.push({lvl:"info",t:"More than 4 applications — KX added; ≥8/episode risks denial (LCD)."});if(inp.consFailed!=="Yes")f.push({lvl:"warn",t:"CTP requires documented failure of ≥4 weeks standard care (medical necessity)."});}
+  if(inp.npwt&&inp.npwt!=="No"&&inp.consFailed!=="Yes")f.push({lvl:"warn",t:"NPWT requires documented failure of standard wound care."});
+  if(cpt.hasProc&&inp.em&&inp.em!=="None")f.push({lvl:"info",t:"E/M with a procedure — modifier 25 applied; the evaluation must be significant & separately identifiable."});
+  if((!inp.em||inp.em==="None")&&!cpt.hasProc)f.push({lvl:"warn",t:"No procedure and no E/M selected — nothing billable on this visit."});
+  if(cpt.hasProc&&(!inp.em||inp.em==="None"))f.push({lvl:"info",t:"Procedure only. If a separate evaluation occurred, an E/M with modifier 25 may be warranted (avoid under-coding)."});
+  if(st.lat==="unspecified"&&/foot|heel|ankle|lowerleg|thigh|calf|ischium|hip|buttock/.test(st.site))f.push({lvl:"warn",t:"Laterality unspecified — add L/R for code specificity and LT/RT."});
+  if(!(w.chart||[]).some(function(h){return h.photo;}))f.push({lvl:"info",t:"No wound photo on file — recommended for chronic-wound documentation."});
+  (icd.flags||[]).forEach(function(x){f.push({lvl:"info",t:x});});
+  return f;
+}
+function buildSoapNote(w,inp,cpt,icd){
+  var p=PATIENTS.find(function(x){return x.id===w.ptId;})||{};
+  var le=woundLastMeasured(w)||(w.chart||[]).slice(-1)[0]||{};
+  var area=woundAreaOf(le),redux=woundAreaReductionPct(w),st=woundSite(w.loc);
+  var dims=[le.L,le.W,le.D].filter(function(x){return x!=null;}).join(" × ");
+  var dx=icd.codes.map(function(c){return c.code;}).join(", ");
+  var L=[];
+  L.push("WOUND CARE VISIT NOTE — "+TD());
+  if(p.name)L.push("Patient: "+p.name+(p.dob?"  DOB: "+p.dob:"")+(p.mrn?"  MRN: "+p.mrn:""));
+  L.push("Facility: "+w.fac+"   POS: "+(inp.pos||"")+"   Provider: "+(inp.provider||w.pv||"")+(inp.npi?"  NPI: "+inp.npi:"")+(inp.payer?"   Payer: "+inp.payer:""));
+  L.push("");
+  L.push("S: "+(inp.subjective||("Pain "+(le.pain!=null?le.pain+"/10":"not reported")+" at the "+w.loc+" wound; interval history reviewed.")));
+  L.push("");
+  L.push("O:");
+  L.push("  Wound: "+w.tp+(w.stage&&w.stage!=="N/A"?" ("+w.stage+")":"")+", "+w.loc+(st.lat!=="unspecified"?" ["+st.lat+"]":"")+"; etiology "+(w.etio||"—")+".");
+  L.push("  Measurements: "+(dims||"—")+" cm"+(area!=null?"  (area "+area+" cm²"+(redux!=null?", "+(redux>=0?"−":"+")+Math.abs(redux)+"% vs baseline":"")+")":"")+(le.push!=null?"  PUSH "+le.push:"")+".");
+  var bed=[le.tissueG?le.tissueG+"% granulation":"",le.tissueS?le.tissueS+"% slough":"",le.tissueE?le.tissueE+"% eschar":"",le.tissueEp?le.tissueEp+"% epithelial":""].filter(Boolean).join(", ");
+  L.push("  Wound bed: "+(bed||"—")+".  Exudate: "+(le.exAmt||"—")+(le.exType?" / "+le.exType:"")+(le.odor?", odor":"")+".  Periwound: "+(le.periwound||"—")+".  Edges: "+(le.edges||"—")+".");
+  if(le.underDepth||le.tunDepth)L.push("  Undermining "+(le.underDepth||0)+" cm "+(le.underLoc||"")+"; tunneling "+(le.tunDepth||0)+" cm "+(le.tunLoc||"")+".");
+  L.push("  Infection: "+(w.inf?("present"+(le.infSev?" — "+le.infSev:"")):"no clinical signs")+(le.culture&&le.culture!=="Not indicated"?"; culture "+le.culture:"")+(le.organism?" ("+le.organism+")":"")+".");
+  if(w.abi!=null)L.push("  Perfusion: ABI "+w.abi+(le.abiDate?" ("+le.abiDate+")":"")+".");
+  if(w.braden!=null)L.push("  Braden: "+w.braden+".");
+  var procs=[];
+  if(inp.deb&&inp.deb!=="No")procs.push(inp.deb+" debridement"+(inp.debLevel?" to "+inp.debLevel:"")+", total "+(inp.debSqcm||"?")+" cm²"+(inp.debInstr?" using "+inp.debInstr:"")+"; hemostasis achieved; tolerated well.");
+  if(inp.ctp==="Yes")procs.push("Applied skin substitute"+(inp.ctpProduct?" "+inp.ctpProduct:"")+(inp.ctpQ?" ("+inp.ctpQ.toUpperCase()+")":"")+", "+(inp.ctpUnits||"?")+" cm², application #"+(inp.ctpApps||1)+".");
+  if(inp.npwt&&inp.npwt!=="No")procs.push("NPWT ("+inp.npwt+") "+(le.vacSetting||"")+" applied.");
+  if(le.tx)procs.push("Dressing/treatment: "+le.tx+".");
+  if(procs.length)L.push("  Procedures: "+procs.join(" "));
+  L.push("");
+  L.push("A:");
+  icd.codes.forEach(function(c){L.push("  • "+c.code+" — "+c.desc);});
+  L.push("  Trajectory: "+(w.heal||"—")+(redux!=null?" ("+(redux>=0?"−":"+")+Math.abs(redux)+"% area)":"")+".  Goal of care: "+(w.goal||"Healable")+".");
+  if(inp.consFailed==="Yes")L.push("  ≥"+(inp.consDur||"4")+" weeks of standard care without adequate progress — advanced therapy medically necessary.");
+  L.push("");
+  L.push("P: "+(inp.plan||((le.tx?le.tx+"; ":"")+"continue current plan; reassess in 1 week; "+(w.goal==="Non-healable / Palliative"?"palliative/comfort-focused care.":"escalate (advanced therapy / specialist) if <40% area reduction by week 4."))));
+  L.push("");
+  L.push("CHARGES:");
+  cpt.codes.forEach(function(c){L.push("  • "+c.code+(c.units>1?" ×"+c.units:"")+(c.mods.length?" -"+c.mods.join(" -"):"")+"  "+c.desc+(c.hcpcs?"  [HCPCS · units = sq cm applied]":"")+"  | Dx: "+dx);});
+  L.push("");
+  L.push("Diagnoses (ICD-10): "+dx);
+  L.push("Attestation: "+(inp.attest==="Yes"?"I attest this note accurately reflects the service personally provided.":"[attestation pending]")+"  Signed: "+(inp.provider||w.pv||"")+(inp.cosign?"  Co-sign: "+inp.cosign:""));
+  L.push("(Suggested codes are clinician/coder-confirmed decision support — verify against current CPT/ICD and your MAC LCDs.)");
+  return L.join("\n");
+}
+function readBillingInputs(){return {provider:gv("bk-provider"),npi:gv("bk-npi"),pos:gv("bk-pos"),payer:gv("bk-payer"),em:gv("bk-em"),consFailed:gv("bk-cons"),consDur:gv("bk-consdur"),deb:gv("bk-deb"),debLevel:gv("bk-deblevel"),debSqcm:gv("bk-debsq"),debInstr:gv("bk-debinstr"),ctp:gv("bk-ctp"),ctpProduct:gv("bk-ctpprod"),ctpQ:gv("bk-ctpq"),ctpUnits:gv("bk-ctpunits"),ctpApps:gv("bk-ctpapps"),npwt:gv("bk-npwt"),attest:gv("bk-attest"),cosign:gv("bk-cosign"),subjective:gv("bk-subj"),plan:gv("bk-plan")};}
+function openBilling(woundId){
+  var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;window._billW=w;
+  var le=woundLastMeasured(w)||(w.chart||[]).slice(-1)[0]||{};var area=woundAreaOf(le)||0;var st=woundSite(w.loc);
+  var debDef=({Sharp:"Surgical",Excisional:"Surgical",Selective:"Selective",Enzymatic:"Selective",Autolytic:"Selective"})[le.debride]||"No";
+  sv("bk-provider",(currentUser&&currentUser.name)||w.pv||"");sv("bk-npi","");sv("bk-pos","31");sv("bk-payer","");
+  sv("bk-em","99213");sv("bk-cons",w.graft||(le.vac)?"Yes":"No");sv("bk-consdur","4");
+  sv("bk-deb",debDef);sv("bk-deblevel","Subcutaneous");sv("bk-debsq",area?String(Math.round(area)):"");sv("bk-debinstr","");
+  sv("bk-ctp",w.graft?"Yes":"No");sv("bk-ctpprod",w.graftType||"");sv("bk-ctpq","");sv("bk-ctpunits",area?String(Math.round(area)):"");sv("bk-ctpapps","1");
+  sv("bk-npwt",le.vac?"Durable":"No");sv("bk-attest","No");sv("bk-cosign","");sv("bk-subj","");sv("bk-plan","");
+  document.getElementById("bk-ai").innerHTML="";
+  computeBilling();oM("m-billing");
+}
+function computeBilling(){
+  var w=window._billW;if(!w)return;var inp=readBillingInputs();
+  var icd=icdForWound(w),cpt=cptForVisit(w,inp),note=buildSoapNote(w,inp,cpt,icd),flags=auditCharges(w,inp,cpt,icd);
+  window._bill={w:w,inp:inp,icd:icd,cpt:cpt};
+  document.getElementById("bk-note").value=note;
+  document.getElementById("bk-charges").innerHTML='<table class="tbl" style="font-size:11px"><thead><tr><th>Code</th><th>Units</th><th>Modifiers</th><th>Description</th></tr></thead><tbody>'+cpt.codes.map(function(c){return'<tr><td class="b">'+e(c.code)+'</td><td>'+c.units+'</td><td>'+(c.mods.join(", ")||"—")+'</td><td>'+e(c.desc)+'</td></tr>';}).join("")+'</tbody></table><div style="font-size:11px;color:var(--mu);margin-top:5px">Dx: '+e(icd.codes.map(function(c){return c.code;}).join(", "))+'</div>';
+  document.getElementById("bk-audit").innerHTML='<div class="st" style="margin-bottom:5px">Self-audit ('+flags.length+')</div>'+(flags.length?flags.map(function(x){var c=x.lvl==="warn"?"#b3433a":"#356b64";return'<div style="font-size:11.5px;color:'+c+';margin-bottom:3px">'+(x.lvl==="warn"?"⚠ ":"• ")+e(x.t)+'</div>';}).join(""):'<div style="font-size:12px;color:var(--gn)">✓ No issues detected.</div>');
+}
+function aiAuditBilling(){
+  if(!cloudOn()){toast("AI self-audit needs the cloud server + Claude — connect in Settings","err");return;}
+  var b=window._bill;if(!b)return;var g=cloudGet();
+  var codes=b.cpt.codes.map(function(c){return c.code+(c.units>1?" x"+c.units:"")+(c.mods.length?" -"+c.mods.join(" -"):"")+" "+c.desc;}).concat(b.icd.codes.map(function(c){return c.code+" "+c.desc;}));
+  var ctx=clinContext(b.w);delete ctx.name;
+  document.getElementById("bk-ai").innerHTML='<div style="font-size:12px;color:var(--mu)">🤖 Claude is auditing the note & charges…</div>';
+  fetch(g.api+"/api/ai/audit-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify({note:gv("bk-note"),codes:codes,context:ctx})})
+   .then(function(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();})
+   .then(function(d){renderBillingAudit(d.audit||{});})
+   .catch(function(err){document.getElementById("bk-ai").innerHTML='';toast(err.message==="notcfg"?"Claude isn't configured on the server yet":"AI audit failed","err");});
+}
+function renderBillingAudit(a){
+  function sec(t,arr,clr){if(!arr||!arr.length)return"";return '<div style="margin-bottom:8px"><div class="st" style="margin-bottom:3px;color:'+(clr||"#356b64")+'">'+e(t)+'</div><ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.5;color:#42474d">'+arr.map(function(x){return"<li>"+e(x)+"</li>";}).join("")+'</ul></div>';}
+  var h='<div style="background:rgba(63,125,118,.07);border:1px solid rgba(63,125,118,.22);border-radius:8px;padding:11px 13px;margin-top:10px">';
+  h+='<div class="st" style="margin-bottom:6px">🤖 Claude reimbursement self-audit</div>';
+  if(a.summary)h+='<div style="font-size:12.5px;color:#42474d;margin-bottom:8px">'+e(a.summary)+'</div>';
+  h+=sec("⚠ Documentation gaps",a.gaps,"#b3433a")+sec("Verbiage to add (supports the codes)",a.verbiage)+sec("Under-coding / capture opportunities",a.underCoding,"#946325")+sec("Recommended ICD / CPT / modifiers",a.recommendedCodes)+sec("Compliance flags",a.complianceFlags,"#b3433a");
+  h+='<div style="font-size:10.5px;color:var(--mu);margin-top:4px">AI decision support — a clinician/certified coder must confirm before billing.</div></div>';
+  document.getElementById("bk-ai").innerHTML=h;
+}
+function finalizeBilling(){
+  var b=window._bill;if(!b)return;var w=b.w;
+  var le=(w.chart&&w.chart.length)?w.chart[w.chart.length-1]:null;
+  var rec={dt:nowStamp(),soap:gv("bk-note"),icd:b.icd.codes,cpt:b.cpt.codes,by:b.inp.provider||(currentUser&&currentUser.name)||"",pos:b.inp.pos,payer:b.inp.payer};
+  if(le){le.billing=rec;le.soap=rec.soap;le.icd=b.icd.codes.map(function(c){return c.code;}).join(", ");le.cpt=b.cpt.codes.map(function(c){return c.code;}).join(", ");}
+  if(!w.audit)w.audit=[];w.audit.push({dt:nowStamp(),by:rec.by,action:"Visit note & charges finalized ("+b.cpt.codes.map(function(c){return c.code;}).join(", ")+")"});
+  persist();updateBell&&updateBell();cM("m-billing");toast("Visit note & charges finalized & saved","ok");
+}
+function copyBillingNote(){var t=gv("bk-note");if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast("Note copied — paste into eCW","ok");},function(){toast("Copy failed","err");});}else toast("Clipboard not available","err");}
+function billingSuperbill(){
+  var b=window._bill;if(!b)return;var w=b.w;var p=PATIENTS.find(function(x){return x.id===w.ptId;})||{};
+  var dx=b.icd.codes.map(function(c){return c.code;}).join("; ");
+  var rows=[["Date","Patient","MRN","Facility","POS","Provider","NPI","Payer","CPT/HCPCS","Units","Modifiers","ICD-10 (pointers)","Description"]];
+  b.cpt.codes.forEach(function(c){rows.push([TD(),p.name||"",p.mrn||"",w.fac,b.inp.pos||"",b.inp.provider||"",b.inp.npi||"",b.inp.payer||"",c.code,c.units,c.mods.join(" "),dx,c.desc]);});
+  var csv=rows.map(function(r){return r.map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var blob=new Blob([csv],{type:"text/csv"});var u=URL.createObjectURL(blob);var a=document.createElement("a");a.href=u;a.download="superbill_"+(p.name||"patient").replace(/[^a-z0-9]/gi,"_")+"_"+TDS().replace(/\//g,"-")+".csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);toast("Superbill CSV downloaded for billing","ok");
+}
+function billingPDF(){
+  if(!window.jspdf||!window.jspdf.jsPDF){toast("PDF library not loaded","err");return;}
+  var doc=new window.jspdf.jsPDF({unit:"pt",format:"letter"});doc.setFont("courier","normal");doc.setFontSize(9);
+  var lines=doc.splitTextToSize(gv("bk-note"),532);doc.text(lines,40,48);doc.save("visit_note_"+TDS().replace(/\//g,"-")+".pdf");toast("Note PDF downloaded","ok");
 }
 
 function renderWound(){
@@ -3536,6 +3775,12 @@ var HELP=[
   fig:["Wound",[{label:"Attach / select a wound photo",n:1},{label:"🔬 Analyze photo  /  📊 Compare to last",n:2},{label:"Structured analysis + red flags",n:3},{label:"＋ Insert into note",n:4}]],
   steps:["Add a photo in the wound note (or use one already on the chart) (1).","Click <span class='help-pill'>🔬 Analyze photo</span> for a single image, or <span class='help-pill'>📊 Compare to last</span> to compare this visit with the previous photo (2).","Review the analysis — assessment, imaging, meds, grafts/CTP, labs & wound-care PCR, dressings, referrals, and any 🚩 red flags (3). Compare also shows a healing trajectory.","Click <span class='help-pill'>＋ Insert into note</span> (4) to add a summary, then edit and save."],
   tips:["Always verify — it’s clinician decision support, never a diagnosis or order.","Photos are PHI; analysis runs through your organization’s BAA-covered Claude connection."]},
+
+ {id:"billing",cat:"AI & knowledge base",title:"Visit Note & Charge Builder (SOAP + CPT/ICD)",sub:"Reimbursement-ready note with an AI self-audit",
+  intro:"From any wound note, the builder turns the latest assessment into a reimbursement-ready SOAP note with the suggested CPT/HCPCS codes, modifiers (25, 59/XU, KX, LT/RT) and ICD-10 diagnoses — then a self-audit (deterministic, plus an optional Claude pass) checks for documentation gaps and under-coding before you finalize.",
+  fig:["Wound",[{label:"🧾 Note & Charges (suggestions panel)",n:1},{label:"Fill provider, E/M, debridement, CTP, NPWT",n:2},{label:"SOAP note + suggested charges + self-audit",n:3},{label:"🤖 AI self-audit, then ✓ Finalize",n:4}]],
+  steps:["In a wound note, click <span class='help-pill'>🧾 Note &amp; Charges</span> in the Suggested Care panel (1).","Confirm the visit details — provider/NPI, place of service, payer, E/M level, whether ≥4 weeks of conservative care failed, and any debridement (type/level/cm²), skin substitute (product/Q-code/area/application #) or NPWT performed (2). The note, charges and self-audit refresh as you type.","Review the <b>SOAP note</b>, the <b>suggested charges</b> (CPT/HCPCS with units &amp; modifiers, plus ICD-10), and the <b>self-audit</b> flags — e.g. missing measurements, laterality, sq-cm for debridement add-ons, or medical-necessity verbiage (3).","Click <span class='help-pill'>🤖 AI self-audit</span> for Claude to check the note &amp; codes for gaps, missing verbiage, under-coding and the optimal modifier/ICD/CPT combination; then <span class='help-pill'>📋 Copy</span> into eCW, download a <span class='help-pill'>📄 PDF</span> or <span class='help-pill'>📊 Superbill CSV</span> for billers, and <span class='help-pill'>✓ Finalize &amp; save</span> to attach it to the visit (4)."],
+  tips:["Suggested codes are decision support — a clinician/certified coder must confirm against current CPT/ICD and your MAC LCDs before billing.","The AI self-audit needs the server connected to Claude; the deterministic audit and code suggestions work with no AI.","Debridement add-on units come from total sq cm; enter it so you don’t under-code (e.g. 45 cm² of surgical debridement = first 20 cm² + 2 add-on units)."]},
 
  {id:"search",cat:"Power features",title:"Instant search & command palette",sub:"Jump anywhere with one shortcut",
   intro:"Press Ctrl/⌘-K (or the 🔍 in the top bar) to search every resident, wound, and facility — and run quick actions like Add Wound.",

@@ -63,6 +63,7 @@ npm start
 | PUT  | `/api/snapshot` | Admin/Provider | replace org state (encrypted, transactional, audited) |
 | POST | `/api/ai/draft-note` | Admin/Provider | draft a note from de-identified context (501 until an AI provider is configured) |
 | POST | `/api/ai/analyze-wound` | Admin/Provider | Claude **vision** analysis of a wound photo → imaging/meds/grafts/labs-PCR/dressings/referrals (501 until `ANTHROPIC_API_KEY` set) |
+| POST | `/api/ai/audit-note` | Admin/Provider | Claude **reimbursement self-audit** of a visit note + proposed CPT/ICD/modifiers → documentation gaps, verbiage, under-coding, recommended code combination, compliance flags (501 until an AI provider is configured) |
 | GET  | `/api/audit` | Admin | recent audit entries |
 
 ### Optional AI (Claude) — photo analysis + note drafting
