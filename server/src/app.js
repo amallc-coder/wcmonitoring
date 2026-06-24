@@ -5,6 +5,7 @@ const cors = require("cors");
 const rateLimit = require("express-rate-limit");
 
 const db = require("./db");
+const anthropic = require("./anthropic");
 const { encrypt, decrypt } = require("./crypto");
 const { hashPassword, verifyPassword, signToken, authRequired, requireRole } = require("./auth");
 
@@ -192,11 +193,19 @@ function buildApp() {
   // endpoint (e.g. Azure OpenAI). Context arrives de-identified from the client.
   const AI_URL = process.env.AI_API_URL, AI_KEY = process.env.AI_API_KEY, AI_MODEL = process.env.AI_MODEL || "gpt-4o-mini";
   app.post("/api/ai/draft-note", authed, requireRole("Admin", "Wound Provider"), wrap(async (req, res) => {
-    if (!AI_URL || !AI_KEY) return res.status(501).json({ error: "AI not configured" });
     const ctx = (req.body && req.body.context) || {};
     const sugs = Array.isArray(req.body && req.body.suggestions) ? req.body.suggestions.slice(0, 30) : [];
-    const sys = "You are a wound-care documentation assistant for licensed clinicians. Write ONE concise, professional progress note (brief assessment + plan) for the wound described. Use ONLY the structured facts provided — never invent measurements, identifiers, dates, or history. Base recommendations on the provided guideline suggestions and cite the standard in parentheses. Do not include any patient identifiers. End with exactly: 'AI-drafted — clinician to verify.'";
-    const user = "De-identified wound/patient context:\n" + JSON.stringify(ctx) + "\n\nGuideline suggestions:\n" + (sugs.length ? sugs.map(s => "- " + s).join("\n") : "(none)");
+    // Prefer Claude when configured; else fall back to an OpenAI-compatible endpoint.
+    if (anthropic.configured()) {
+      try {
+        const text = await anthropic.draftNote({ context: ctx, suggestions: sugs });
+        await audit(req, "ai.draft", "claude chars=" + text.length);
+        return res.json({ text: text });
+      } catch (e) { return res.status(502).json({ error: "AI request failed" }); }
+    }
+    if (!AI_URL || !AI_KEY) return res.status(501).json({ error: "AI not configured" });
+    const sys = "You are a wound-care documentation assistant for licensed clinicians. Write ONE concise progress note (assessment + plan). Use ONLY provided facts; never invent measurements/identifiers/history; cite guidelines in parentheses; no identifiers. End with: 'AI-drafted — clinician to verify.'";
+    const user = "De-identified context:\n" + JSON.stringify(ctx) + "\n\nGuideline suggestions:\n" + (sugs.length ? sugs.map(s => "- " + s).join("\n") : "(none)");
     try {
       const r = await fetch(AI_URL, {
         method: "POST",
@@ -209,6 +218,24 @@ function buildApp() {
       await audit(req, "ai.draft", "chars=" + text.length);
       res.json({ text: text });
     } catch (e) { res.status(502).json({ error: "AI request failed" }); }
+  }));
+
+  // ── AI wound-photo analysis (Claude vision) ──
+  app.post("/api/ai/analyze-wound", authed, requireRole("Admin", "Wound Provider"), wrap(async (req, res) => {
+    if (!anthropic.configured()) return res.status(501).json({ error: "Claude not configured (set ANTHROPIC_API_KEY)" });
+    const body = req.body || {};
+    const image = typeof body.image === "string" ? body.image : "";
+    if (image && image.length > 9 * 1024 * 1024) return res.status(413).json({ error: "image too large" });
+    try {
+      const analysis = await anthropic.analyzeWound({
+        context: body.context || {},
+        suggestions: Array.isArray(body.suggestions) ? body.suggestions.slice(0, 30) : [],
+        image: image || null,
+        mime: body.mime || "image/jpeg"
+      });
+      await audit(req, "ai.analyze", "img=" + (image ? "y" : "n"));
+      res.json({ analysis: analysis });
+    } catch (e) { res.status(502).json({ error: "AI analysis failed" }); }
   }));
 
   // ── audit log (admin) ──

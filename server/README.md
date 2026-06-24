@@ -62,16 +62,28 @@ npm start
 | GET  | `/api/snapshot` | any | full org state (decrypted) |
 | PUT  | `/api/snapshot` | Admin/Provider | replace org state (encrypted, transactional, audited) |
 | POST | `/api/ai/draft-note` | Admin/Provider | draft a note from de-identified context (501 until an AI provider is configured) |
+| POST | `/api/ai/analyze-wound` | Admin/Provider | Claude **vision** analysis of a wound photo → imaging/meds/grafts/labs-PCR/dressings/referrals (501 until `ANTHROPIC_API_KEY` set) |
 | GET  | `/api/audit` | Admin | recent audit entries |
 
-### Optional AI draft-note (clinical decision support)
-Off by default. To enable, set `AI_API_URL` + `AI_API_KEY` (+ `AI_MODEL`) to a
-**BAA-covered, OpenAI-compatible** chat endpoint (e.g. Azure OpenAI). The app's
-in-browser **guideline knowledge base** (deterministic, cited) works without
-this; the AI only drafts the narrative note from **de-identified** context and
-must be clinician-reviewed. Treat all suggestions as *decision support for a
-licensed clinician*, never auto-orders (keeps it within the 21st-Century-Cures
-CDS exemption rather than a regulated device).
+### Optional AI (Claude) — photo analysis + note drafting
+Off by default. To enable Claude, set `ANTHROPIC_API_KEY` (+ optional
+`ANTHROPIC_MODEL`, default `claude-opus-4-8`). Then the app's **🔬 Analyze photo**
+sends the wound image + **de-identified** context to Claude **vision** and returns
+structured suggestions (imaging, medications, grafts/CTP, labs & wound-care PCR,
+debridement, dressings, referrals, red flags); **✨ Draft note** writes the
+narrative note. An OpenAI-compatible endpoint (`AI_API_URL`/`AI_API_KEY`) is a
+text-only fallback for note drafting.
+
+The behavior is driven by the **wound-care skill** in
+`.claude/skills/wound-care/` (the backend uses an equivalent embedded system
+prompt in `src/anthropic.js`). The in-browser **guideline knowledge base**
+(deterministic, cited) works with no AI at all.
+
+**PHI:** wound photos are PHI — use a **BAA-covered** Anthropic path (Anthropic
+commercial with a signed BAA, or Claude via **AWS Bedrock** with a BAA;
+point `ANTHROPIC_API_URL` at the gateway). All output is *decision support for a
+licensed clinician* (cited, human-in-the-loop) — never auto-orders, keeping it
+within the 21st-Century-Cures CDS exemption.
 
 ## Restore from a backup
 ```bash
