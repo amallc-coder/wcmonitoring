@@ -13,6 +13,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#f6f7f7;--sf:#ffffff;--bd:#e7e8e7;--b2:#d7d9d8;--tx:#23262b;--mu:#888d92;--tl:#3f7d76;--ac:#3f7d76;--bl:#4a6f86;--rd:#b3433a;--am:#b07d3c;--pu:#7d6a9c;--gn:#5b8c6e;--ink:#23262b;--in:var(--in);--mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
@@ -210,12 +211,12 @@ img,canvas,svg{max-width:100%}
     <div class="lhd"><div class="lic2"><svg width="30" height="30" viewBox="0 0 22 22" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="3.4" width="18" height="3.5" rx="1.75" fill="#c2603f"/><rect x="2" y="9.25" width="12" height="3.5" rx="1.75" fill="#26282d"/><rect x="2" y="15.1" width="15.5" height="3.5" rx="1.75" fill="#26282d"/></svg></div><h2>clinilytics</h2></div>
     <div class="lsub">Wound Care · Secure Sign-In</div>
     <form id="lform" onsubmit="return doLogin(event)">
-      <div class="frow"><label for="lg-user">Username</label><input id="lg-user" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="username"></div>
+      <div class="frow"><label for="lg-user">Email</label><input id="lg-user" type="email" autocomplete="username" autocapitalize="none" spellcheck="false" placeholder="you@facility.com"></div>
       <div class="frow"><label for="lg-pass">Password</label><input id="lg-pass" type="password" autocomplete="current-password" placeholder="password"></div>
       <button type="submit" class="btn ba2 lbtn">Sign In</button>
       <div class="lerr" id="lg-err"></div>
     </form>
-    <div class="lft">Authorized Clinilytics staff only.<br>Sessions end when the browser tab is closed.</div>
+    <div class="lft">Authorized Clinilytics staff only · secured by Supabase Auth.</div>
   </div>
 </div>
 
@@ -895,6 +896,46 @@ img,canvas,svg{max-width:100%}
 <div id="pm-prim"  style="position:fixed;inset:0;background:#000c;z-index:300;overflow-y:auto;padding:18px;display:none"></div>
 
 <script>
+/* ── Supabase (cloud backend: Auth + Postgres with RLS) ── */
+const SB_URL="https://prvzcbyeuqlstqrlbbum.supabase.co";
+const SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBydnpjYnlldXFsc3RxcmxiYnVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzU2MTIsImV4cCI6MjA5NzkxMTYxMn0._sddwUbrMQsHDWnVawDoLB3M-VuueqOUoPjcEmlZEsI";
+var sbc=null;
+try{ if(window.supabase&&SB_ANON){ sbc=window.supabase.createClient(SB_URL,SB_ANON,{auth:{persistSession:true,autoRefreshToken:true}}); } }catch(e){}
+function sbReady(){return !!(sbc&&currentUser&&currentUser.org_id);}
+var _sbLoaded=false,_sbT=null;
+function _sbStrip(o){var c=Object.assign({},o);delete c._sbid;return c;}
+async function sbLoad(){
+  if(!sbc||!currentUser)return;
+  try{
+    var res=await Promise.all([sbc.from("facilities").select("id,data"),sbc.from("patients").select("id,data"),sbc.from("wounds").select("id,data")]);
+    var fr=res[0].data||[],pr=res[1].data||[],wr=res[2].data||[];
+    if(!fr.length&&!pr.length&&!wr.length){await sbSeed();return;}
+    FACS=fr.map(function(r){return Object.assign({},r.data,{_sbid:r.id});});
+    PATIENTS=pr.map(function(r){return Object.assign({},r.data,{_sbid:r.id});});
+    WOUNDS=wr.map(function(r){return Object.assign({},r.data,{_sbid:r.id});});
+  }catch(e){toast("Could not load from Supabase — showing cached data","err");}
+}
+async function sbSeed(){
+  [FACS,PATIENTS,WOUNDS].forEach(function(a){a.forEach(function(x){if(!x._sbid)x._sbid=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random());});});
+  _sbLoaded=true;await sbPush();toast("Starter data loaded into Supabase","ok");
+}
+function sbPushSoon(){if(!sbReady()||!_sbLoaded)return;if(_sbT)clearTimeout(_sbT);_sbT=setTimeout(sbPush,1000);}
+async function sbSync(table,arr,toRow){
+  arr.forEach(function(x){if(!x._sbid)x._sbid=(crypto.randomUUID?crypto.randomUUID():String(Date.now())+Math.random());});
+  var rows=arr.map(function(x){return Object.assign({id:x._sbid},toRow(x));});
+  if(rows.length){var up=await sbc.from(table).upsert(rows,{onConflict:"id"});if(up.error)throw up.error;}
+  var ids=arr.map(function(x){return x._sbid;});
+  if(ids.length){await sbc.from(table).delete().not("id","in","("+ids.join(",")+")");}
+}
+async function sbPush(){
+  if(!sbReady())return;
+  try{
+    await sbSync("facilities",FACS,function(x){return {name:x.name||"",data:_sbStrip(x)};});
+    await sbSync("patients",PATIENTS,function(x){return {name:x.name||"",dob:x.dob||null,data:_sbStrip(x)};});
+    await sbSync("wounds",WOUNDS,function(x){return {data:_sbStrip(x)};});
+    saveUI({lastSync:nowStamp()});
+  }catch(e){toast("Cloud save failed — kept locally; will retry","err");}
+}
 /* ── DATA ── */
 const COM={"Embassy Healthcare":{c:"#4a6f86",a:"#4a6f86"},"Reliant Senior Care":{c:"#5b8c6e",a:"#5b8c6e"},"Sunrise Health Group":{c:"#b07d3c",a:"#b07d3c"},"Valley SNF Partners":{c:"#8a6f9c",a:"#8a6f9c"}};
 let FACS=[
@@ -1070,7 +1111,7 @@ function persistNow(){
       localStorage.setItem("cc_state",JSON.stringify(lite));toast("Saved — photos too large to store locally","err");}
     catch(e2){toast("Could not save locally (storage full)","err");}
   }
-  cloudPushSoon();
+  sbPushSoon();
 }
 function loadState(){try{var s=localStorage.getItem("cc_state");if(!s)return false;var d=JSON.parse(s);if(d.WOUNDS)WOUNDS=d.WOUNDS;if(d.PATIENTS)PATIENTS=d.PATIENTS;if(d.FACS)FACS=d.FACS;if(d.SENTLOG)SENTLOG=d.SENTLOG;_loadedFromStore=true;return true;}catch(e){return false;}}
 function exportData(){closeMenus();try{var blob=new Blob([JSON.stringify({WOUNDS:WOUNDS,PATIENTS:PATIENTS,FACS:FACS,SENTLOG:SENTLOG,exported:nowStamp()},null,1)],{type:"application/json"});var u=URL.createObjectURL(blob);var a=document.createElement("a");a.href=u;a.download="clinilytics_backup_"+TDS().replace(/\//g,"-")+".json";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);toast("Backup downloaded","ok");}catch(e){toast("Export failed","err");}}
@@ -1222,7 +1263,8 @@ var AI_SKILL=[
 ].join("\n");
 function aiCfg(){return {key:(localStorage.getItem("cc_ai_key")||"").trim(),model:(localStorage.getItem("cc_ai_model")||"claude-opus-4-8").trim()};}
 function aiDirectOn(){return !!aiCfg().key;}
-function aiAvailable(){return aiDirectOn()||cloudOn();}
+function aiAvailable(){return aiDirectOn()||sbReady();}
+function _sbAI(path,body){return sbc.functions.invoke(path,{body:body}).then(function(r){if(r.error){throw new Error((r.error&&r.error.message)||"ai");}return r.data;});}
 function aiSourceLabel(){return aiDirectOn()?"Claude (direct key)":cloudOn()?"server":"";}
 function updateAIStat(){var el=document.getElementById("ai-stat");if(!el)return;el.textContent=aiDirectOn()?("Connected · "+aiCfg().model):(cloudOn()?"Via server":"Not set");}
 function _aiImg(data,mime){return {type:"image",source:{type:"base64",media_type:mime||"image/jpeg",data:data}};}
@@ -1240,30 +1282,29 @@ function aiAnalyzeReq(p){
     if(p.image)content.push(_aiImg(p.image,p.mime));
     return _aiDirectCall([{role:"user",content:content}],1600).then(function(t){return {analysis:_aiExtractJson(t)};});
   }
-  var g=cloudGet();return fetch(g.api+"/api/ai/analyze-wound",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
+  if(sbReady())return _sbAI("ai/analyze",p);
+  return Promise.reject(new Error("notcfg"));
 }
 function aiDraftReq(p){
   if(aiDirectOn()){
     var txt="Write ONE concise progress note (brief assessment + plan) from this de-identified context. Use only provided facts; cite guidelines in parentheses; end with 'AI-drafted — clinician to verify.'\n\nContext:\n"+JSON.stringify(p.context||{})+"\n\nGuideline suggestions:\n"+((p.suggestions||[]).map(function(s){return "- "+s;}).join("\n")||"(none)");
     return _aiDirectCall([{role:"user",content:[{type:"text",text:txt}]}],500).then(function(t){return {text:(t||"").trim()};});
   }
-  var g=cloudGet();return fetch(g.api+"/api/ai/draft-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
+  if(sbReady())return _sbAI("ai/draft",p);
+  return Promise.reject(new Error("notcfg"));
 }
 function aiAuditReq(p){
   if(aiDirectOn()){
     var txt="You are auditing a wound-care visit note and its proposed charges for COMPLIANT, fully-captured reimbursement (avoid under-coding AND over-coding). Identify: (1) documentation GAPS / missing verbiage required to SUPPORT the billed codes (tissue depth & total sq cm for debridement, failed-conservative-care for NPWT/CTP, medical necessity, progress/rationale); (2) UNDER-CODING — services done but not captured, add-on units missed, or a justified higher level; (3) the recommended ICD-10 / CPT / MODIFIER combination (incl. 25, 59/XU, KX, LT/RT) for this work; (4) COMPLIANCE flags (LCD caps, modifier necessity, laterality/depth specificity, bundling). Recommend only what the documented work supports — NEVER invent clinical facts; if support is missing, state exactly what must be documented. Cite the rule briefly. Return STRICT JSON only: {\"gaps\":[string],\"verbiage\":[string],\"underCoding\":[string],\"recommendedCodes\":[string],\"complianceFlags\":[string],\"summary\":string}.\n\nNOTE:\n"+(p.note||"")+"\n\nPROPOSED CHARGES:\n"+((p.codes||[]).join("\n")||"(none)")+"\n\nDE-IDENTIFIED CONTEXT:\n"+JSON.stringify(p.context||{});
     return _aiDirectCall([{role:"user",content:[{type:"text",text:txt}]}],1300).then(function(t){return {audit:_aiExtractJson(t)};});
   }
-  var g=cloudGet();return fetch(g.api+"/api/ai/audit-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
+  if(sbReady())return _sbAI("ai/audit",p);
+  return Promise.reject(new Error("notcfg"));
 }
-function _aiSrvJson(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();}
 function openAI(){closeMenus();sv("ai-key","");sv("ai-key-show",aiCfg().key?"•••••••• (saved)":"");sv("ai-model",aiCfg().model);var s=document.getElementById("ai-test-stat");if(s)s.textContent="";aiRenderOrg();oM("m-ai");}
 function aiRenderOrg(){
   var el=document.getElementById("ai-org-body");if(!el)return;
-  if(!cloudOn()){el.innerHTML='<div style="font-size:11.5px;color:var(--mu)">Connect <b>Settings → Cloud sync</b> first, then an Admin can save a team-wide key here.</div>';return;}
-  if(!(currentUser&&currentUser.role==="Admin")){el.innerHTML='<div style="font-size:11.5px;color:var(--mu)">Your administrator sets the team key. Once set, AI works for you automatically — no key needed on this device.</div>';return;}
-  el.innerHTML='<div style="display:grid;gap:9px"><div><label class="fl">Claude API key (saved on server)</label><input id="ai-org-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…"></div><div><label class="fl">Model</label><input id="ai-org-model" placeholder="claude-opus-4-8"></div><div id="ai-org-stat" style="font-size:12px;color:var(--mu);min-height:15px"></div><div style="display:flex;justify-content:flex-end;gap:7px"><button class="btn br2 bsm" onclick="aiClearOrgKey()">Remove team key</button><button class="btn bt bsm" onclick="aiSaveOrgKey()">Save for whole team</button></div></div>';
-  cloudFetch("/api/ai/key").then(function(d){var st=document.getElementById("ai-org-stat");if(!st)return;sv("ai-org-model",d.model||"claude-opus-4-8");st.textContent=d.hasKey?"✓ Team key active — every signed-in user has AI.":d.envConfigured?"Server has a key configured by env.":"No team key set yet.";st.style.color=d.hasKey?"var(--gn)":"var(--mu)";}).catch(function(){});
+  el.innerHTML='<div style="font-size:11.5px;color:var(--mu);line-height:1.6">The team-wide key now lives as a <b>Supabase secret</b> (server-side), so every signed-in user gets AI automatically with no per-device key. An admin sets it once:<br><code style="font-size:10.5px;background:var(--in);padding:2px 5px;border-radius:4px">supabase secrets set ANTHROPIC_API_KEY=sk-ant-…</code><br>(or in the Supabase dashboard → Edge Functions → Secrets). The per-device key above is just a fallback for testing.</div>';
 }
 function aiSaveOrgKey(){
   var k=gv("ai-org-key").trim(),m=gv("ai-org-model").trim()||"claude-opus-4-8";var st=document.getElementById("ai-org-stat");
@@ -4218,26 +4259,40 @@ function saveUsers(){try{localStorage.setItem("cc_users",JSON.stringify(USERS));
 async function sha256hex(s){var b=new TextEncoder().encode(s);var h=await crypto.subtle.digest("SHA-256",b);return Array.from(new Uint8Array(h)).map(function(x){return x.toString(16).padStart(2,"0");}).join("");}
 async function doLogin(ev){
   ev.preventDefault();
-  var u=(document.getElementById("lg-user").value||"").trim().toLowerCase();
+  var email=(document.getElementById("lg-user").value||"").trim();
   var p=document.getElementById("lg-pass").value||"";
   var err=document.getElementById("lg-err");
-  if(!crypto||!crypto.subtle){err.textContent="Secure sign-in requires an https:// connection.";return false;}
+  if(!sbc){err.textContent="Cloud backend not configured.";return false;}
+  err.textContent="Signing in…";
   try{
-    var h=await sha256hex(p);
-    var user=USERS.find(function(x){return x.u===u&&x.h===h;});
-    if(user){currentUser=user;sessionStorage.setItem("cc_auth",user.u);document.getElementById("lgate").classList.add("h");err.textContent="";updateUserUI();}
-    else{err.textContent="Invalid username or password.";document.getElementById("lg-pass").value="";document.getElementById("lg-pass").focus();}
+    var r=await sbc.auth.signInWithPassword({email:email,password:p});
+    if(r.error){err.textContent=r.error.message||"Invalid email or password.";document.getElementById("lg-pass").value="";document.getElementById("lg-pass").focus();return false;}
+    await afterAuth();
   }catch(e){err.textContent="Sign-in error. Please retry.";}
   return false;
 }
-function ccLogout(){sessionStorage.removeItem("cc_auth");location.reload();}
+async function afterAuth(){
+  var err=document.getElementById("lg-err");
+  try{
+    var ur=await sbc.auth.getUser();var user=ur.data&&ur.data.user;
+    if(!user){if(err)err.textContent="Sign-in failed.";return;}
+    var pr=await sbc.from("profiles").select("org_id,role,full_name").eq("id",user.id).maybeSingle();
+    if(pr.error||!pr.data||!pr.data.org_id){if(err)err.textContent="No organization is assigned to this account yet — ask an admin to set it up.";await sbc.auth.signOut();return;}
+    currentUser={u:user.email,name:pr.data.full_name||user.email,role:pr.data.role||"Viewer",org_id:pr.data.org_id};
+    if(err)err.textContent="";
+    document.getElementById("lgate").classList.add("h");
+    await sbLoad();_sbLoaded=true;
+    initWoundData();initDash();renderCensus();updateBell();updateUserUI();
+  }catch(e){if(err)err.textContent="Sign-in error. Please retry.";}
+}
+function ccLogout(){if(sbc){sbc.auth.signOut().finally(function(){location.reload();});}else location.reload();}
 function lgateInit(){
   var g=document.getElementById("lgate");if(!g)return;
-  var au=sessionStorage.getItem("cc_auth");
-  var user=au?USERS.find(function(x){return x.u===au;}):null;
-  if(user){currentUser=user;g.classList.add("h");}
-  else{var u=document.getElementById("lg-user");if(u)u.focus();}
-  updateUserUI();
+  if(!sbc){var u0=document.getElementById("lg-user");if(u0)u0.focus();return;}
+  sbc.auth.getSession().then(function(r){
+    if(r.data&&r.data.session){afterAuth();}
+    else{var u=document.getElementById("lg-user");if(u)u.focus();}
+  });
 }
 function updateUserUI(){
   var b=document.getElementById("admin-btn");
@@ -4287,7 +4342,7 @@ document.addEventListener("DOMContentLoaded",function(){
   renderCensus();
   if(ui.tab&&ui.tab!=="dashboard"){try{go(ui.tab);}catch(e){}}
   updateBell();
-  if(cloudOn())setTimeout(function(){cloudPull(true);},300);
+  // Data now loads from Supabase after sign-in (see afterAuth); local cache shows behind the gate.
   document.getElementById("ftr").textContent="Last sync: "+TD()+" · "+FACS.length+" facilities · "+PATIENTS.filter(function(p){return p.st==="Active";}).length+" active residents";
   if(!hadSaved&&!loadUI().seen){saveUI({seen:1});setTimeout(function(){toast("Welcome! Your work autosaves to this browser. Press Ctrl/⌘-K to search anything.","ok");},900);}
   // PWA service worker (offline / installable)

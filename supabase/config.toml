@@ -1,0 +1,16 @@
+project_id = "prvzcbyeuqlstqrlbbum"
+
+# "api" + "ai" use auth: "user" — keep the platform JWT gate on.
+[functions.api]
+verify_jwt = true
+
+[functions.ai]
+verify_jwt = true
+
+# "health" is public.
+[functions.health]
+verify_jwt = false
+
+# "email-cron" is invoked by pg_cron with the service-role key, which it checks itself.
+[functions.email-cron]
+verify_jwt = false
