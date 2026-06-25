@@ -37,11 +37,11 @@ function extractJson(text) {
   return { assessment: t, disclaimer: "AI-generated — clinician to verify." };
 }
 
-async function callAnthropic(messages, maxTokens) {
+async function callAnthropic(messages, maxTokens, keyOverride, modelOverride) {
   const r = await fetch(API_URL, {
     method: "POST",
-    headers: { "content-type": "application/json", "x-api-key": antKey(), "anthropic-version": VERSION },
-    body: JSON.stringify({ model: model(), max_tokens: maxTokens, system: SKILL, messages: messages })
+    headers: { "content-type": "application/json", "x-api-key": keyOverride || antKey(), "anthropic-version": VERSION },
+    body: JSON.stringify({ model: modelOverride || model(), max_tokens: maxTokens, system: SKILL, messages: messages })
   });
   if (!r.ok) { const e = new Error("anthropic " + r.status); e.status = r.status; throw e; }
   const d = await r.json();
@@ -61,13 +61,16 @@ async function callBedrock(messages, maxTokens) {
   return (d && d.content && d.content[0] && d.content[0].text) || "";
 }
 
-function callModel(messages, maxTokens) {
+function callModel(messages, maxTokens, opts) {
+  opts = opts || {};
+  // An org-provided Anthropic key (set by an admin, stored encrypted) overrides env and forces the native path.
+  if (opts.apiKey) return callAnthropic(messages, maxTokens || 1200, opts.apiKey, opts.model);
   return provider() === "bedrock" ? callBedrock(messages, maxTokens || 1200) : callAnthropic(messages, maxTokens || 1200);
 }
 
 function imgBlock(image, mime) { return { type: "image", source: { type: "base64", media_type: mime || "image/jpeg", data: image } }; }
 
-async function analyzeWound({ context, suggestions, image, mime, prevImage, prevMime }) {
+async function analyzeWound({ context, suggestions, image, mime, prevImage, prevMime, apiKey, aiModel }) {
   const content = [{
     type: "text",
     text: "De-identified wound/patient context:\n" + JSON.stringify(context || {}) +
@@ -79,23 +82,23 @@ async function analyzeWound({ context, suggestions, image, mime, prevImage, prev
   }];
   if (prevImage) { content.push({ type: "text", text: "PREVIOUS visit photo:" }); content.push(imgBlock(prevImage, prevMime)); content.push({ type: "text", text: "CURRENT visit photo:" }); }
   if (image) content.push(imgBlock(image, mime));
-  const text = await callModel([{ role: "user", content: content }], 1600);
+  const text = await callModel([{ role: "user", content: content }], 1600, { apiKey: apiKey, model: aiModel });
   return extractJson(text);
 }
 
-async function draftNote({ context, suggestions }) {
+async function draftNote({ context, suggestions, apiKey, aiModel }) {
   const text = await callModel([{
     role: "user",
     content: [{ type: "text", text:
       "Write ONE concise progress note (brief assessment + plan) from this de-identified context. " +
-      "Use only provided facts; cite guidelines in parentheses; end with 'AI-drafted — clinician to verify.'\n\n" +
+      "Use only provided facts; cite guidelines in parentheses. Do NOT add any AI/disclaimer footer.\n\n" +
       "Context:\n" + JSON.stringify(context || {}) + "\n\nGuideline suggestions:\n" +
       ((suggestions || []).map(s => "- " + s).join("\n") || "(none)") }]
-  }], 500);
+  }], 500, { apiKey: apiKey, model: aiModel });
   return (text || "").trim();
 }
 
-async function auditNote({ note, codes, context }) {
+async function auditNote({ note, codes, context, apiKey, aiModel }) {
   const text = await callModel([{ role: "user", content: [{ type: "text", text:
     "You are auditing a wound-care visit note and its proposed charges for COMPLIANT, fully-captured reimbursement (avoid under-coding AND over-coding). Identify: " +
     "(1) documentation GAPS / missing verbiage required to SUPPORT the billed codes (e.g., tissue depth & total sq cm for debridement, failed-conservative-care for NPWT/CTP, medical necessity, progress or rationale); " +
@@ -105,7 +108,7 @@ async function auditNote({ note, codes, context }) {
     "Recommend only what the documented work supports — NEVER invent clinical facts; if support is missing, state exactly what must be documented to bill it. Cite the rule briefly. " +
     "Return STRICT JSON only: {\"gaps\":[string],\"verbiage\":[string],\"underCoding\":[string],\"recommendedCodes\":[string],\"complianceFlags\":[string],\"summary\":string}.\n\n" +
     "NOTE:\n" + (note || "") + "\n\nPROPOSED CHARGES:\n" + ((codes || []).join("\n") || "(none)") +
-    "\n\nDE-IDENTIFIED CONTEXT:\n" + JSON.stringify(context || {}) }] }], 1300);
+    "\n\nDE-IDENTIFIED CONTEXT:\n" + JSON.stringify(context || {}) }] }], 1300, { apiKey: apiKey, model: aiModel });
   return extractJson(text);
 }
 

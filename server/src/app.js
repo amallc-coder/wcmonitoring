@@ -195,13 +195,48 @@ function buildApp() {
   // Inert unless an LLM provider is configured. Use a BAA-covered, OpenAI-compatible
   // endpoint (e.g. Azure OpenAI). Context arrives de-identified from the client.
   const AI_URL = process.env.AI_API_URL, AI_KEY = process.env.AI_API_KEY, AI_MODEL = process.env.AI_MODEL || "gpt-4o-mini";
+
+  // Org-wide Claude key (admin-set, encrypted at rest). Returned to the server's AI calls only — never to the browser.
+  async function orgAIKey(orgId) {
+    try {
+      const r = await db.query("SELECT key_enc,model FROM ai_settings WHERE org_id=$1", [orgId]);
+      if (!r.rows[0] || !r.rows[0].key_enc) return null;
+      return { apiKey: decrypt(r.rows[0].key_enc), aiModel: r.rows[0].model || undefined };
+    } catch (e) { return null; }
+  }
+  async function aiReady(orgId) { return anthropic.configured() || !!(await orgAIKey(orgId)); }
+
+  // Admin: view (masked) / set / clear the shared Claude key.
+  app.get("/api/ai/key", authed, requireRole("Admin"), wrap(async (req, res) => {
+    const r = await db.query("SELECT key_enc,model FROM ai_settings WHERE org_id=$1", [req.user.org]);
+    const hasOrg = !!(r.rows[0] && r.rows[0].key_enc);
+    res.json({ hasKey: hasOrg, model: (r.rows[0] && r.rows[0].model) || "claude-opus-4-8", envConfigured: anthropic.configured(), source: hasOrg ? "org" : (anthropic.configured() ? "env" : "none") });
+  }));
+  app.put("/api/ai/key", authed, requireRole("Admin"), wrap(async (req, res) => {
+    const key = String((req.body && req.body.apiKey) || "").trim();
+    const mdl = String((req.body && req.body.model) || "").trim() || "claude-opus-4-8";
+    if (!key || !/^sk-ant-/.test(key)) return res.status(400).json({ error: "A valid Anthropic API key (sk-ant-…) is required" });
+    await db.query(
+      "INSERT INTO ai_settings (org_id,key_enc,model,updated_at,updated_by) VALUES ($1,$2,$3,now(),$4) " +
+      "ON CONFLICT (org_id) DO UPDATE SET key_enc=EXCLUDED.key_enc, model=EXCLUDED.model, updated_at=now(), updated_by=EXCLUDED.updated_by",
+      [req.user.org, encrypt(key), mdl, req.user.username]
+    );
+    await audit(req, "ai.key.set", null);
+    res.json({ ok: true });
+  }));
+  app.delete("/api/ai/key", authed, requireRole("Admin"), wrap(async (req, res) => {
+    await db.query("DELETE FROM ai_settings WHERE org_id=$1", [req.user.org]);
+    await audit(req, "ai.key.clear", null);
+    res.json({ ok: true });
+  }));
   app.post("/api/ai/draft-note", authed, requireRole("Admin", "Wound Provider"), wrap(async (req, res) => {
     const ctx = (req.body && req.body.context) || {};
     const sugs = Array.isArray(req.body && req.body.suggestions) ? req.body.suggestions.slice(0, 30) : [];
-    // Prefer Claude when configured; else fall back to an OpenAI-compatible endpoint.
-    if (anthropic.configured()) {
+    // Prefer Claude when configured (env or org key); else fall back to an OpenAI-compatible endpoint.
+    const ok = await orgAIKey(req.user.org);
+    if (anthropic.configured() || ok) {
       try {
-        const text = await anthropic.draftNote({ context: ctx, suggestions: sugs });
+        const text = await anthropic.draftNote({ context: ctx, suggestions: sugs, apiKey: ok && ok.apiKey, aiModel: ok && ok.aiModel });
         await audit(req, "ai.draft", "claude chars=" + text.length);
         return res.json({ text: text });
       } catch (e) { return res.status(502).json({ error: "AI request failed" }); }
@@ -225,7 +260,8 @@ function buildApp() {
 
   // ── AI wound-photo analysis (Claude vision) ──
   app.post("/api/ai/analyze-wound", authed, requireRole("Admin", "Wound Provider"), wrap(async (req, res) => {
-    if (!anthropic.configured()) return res.status(501).json({ error: "Claude not configured (set ANTHROPIC_API_KEY)" });
+    const ok = await orgAIKey(req.user.org);
+    if (!anthropic.configured() && !ok) return res.status(501).json({ error: "Claude not configured" });
     const body = req.body || {};
     const image = typeof body.image === "string" ? body.image : "";
     const prevImage = typeof body.prevImage === "string" ? body.prevImage : "";
@@ -238,7 +274,8 @@ function buildApp() {
         image: image || null,
         mime: body.mime || "image/jpeg",
         prevImage: prevImage || null,
-        prevMime: body.prevMime || "image/jpeg"
+        prevMime: body.prevMime || "image/jpeg",
+        apiKey: ok && ok.apiKey, aiModel: ok && ok.aiModel
       });
       await audit(req, "ai.analyze", "img=" + (image ? "y" : "n") + (prevImage ? " compare" : ""));
       res.json({ analysis: analysis });
@@ -247,13 +284,15 @@ function buildApp() {
 
   // ── AI billing self-audit (Claude) ──
   app.post("/api/ai/audit-note", authed, requireRole("Admin", "Wound Provider"), wrap(async (req, res) => {
-    if (!anthropic.configured()) return res.status(501).json({ error: "Claude not configured" });
+    const ok = await orgAIKey(req.user.org);
+    if (!anthropic.configured() && !ok) return res.status(501).json({ error: "Claude not configured" });
     const body = req.body || {};
     try {
       const a = await anthropic.auditNote({
         note: typeof body.note === "string" ? body.note.slice(0, 12000) : "",
         codes: Array.isArray(body.codes) ? body.codes.slice(0, 60) : [],
-        context: body.context || {}
+        context: body.context || {},
+        apiKey: ok && ok.apiKey, aiModel: ok && ok.aiModel
       });
       await audit(req, "ai.audit-note", null);
       res.json({ audit: a });

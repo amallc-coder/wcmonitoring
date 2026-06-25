@@ -68,6 +68,16 @@ CREATE TABLE IF NOT EXISTS email_log (
 );
 CREATE INDEX IF NOT EXISTS email_log_org_at_idx ON email_log (org_id, at DESC);
 
+-- Org-wide AI (Claude) key, set by an admin in-app and stored encrypted. When
+-- present, all signed-in users get AI through the server (key never reaches browsers).
+CREATE TABLE IF NOT EXISTS ai_settings (
+  org_id      BIGINT PRIMARY KEY REFERENCES orgs(id) ON DELETE CASCADE,
+  key_enc     TEXT,                       -- AES-256-GCM Anthropic API key
+  model       TEXT,
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by  TEXT
+);
+
 -- Append-only audit trail (no PHI in the action text).
 CREATE TABLE IF NOT EXISTS audit_log (
   id          BIGSERIAL PRIMARY KEY,

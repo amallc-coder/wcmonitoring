@@ -714,10 +714,17 @@ img,canvas,svg{max-width:100%}
     </div>
     <div style="margin-top:12px;font-size:10.5px;color:var(--mu);line-height:1.5">
       Get a key at <b>console.anthropic.com → API Keys</b>. Your key is stored only in <b>this browser</b> and is sent directly to Claude.<br>
-      <b>For real patient photos (PHI):</b> use a server with a signed BAA (Settings → Cloud sync) instead of paste-key mode — paste-key is best for testing &amp; non-PHI use.
+      <b>For real patient photos (PHI):</b> use the team option below (server) with a signed BAA — paste-key is best for testing &amp; non-PHI use.
+    </div>
+    <div style="margin-top:8px;display:flex;justify-content:flex-end;gap:7px"><button class="btn br2 bsm" onclick="aiClearKey()">Remove from this device</button><button class="btn bt bsm" onclick="aiSaveKey()">Test &amp; Connect (this device)</button></div>
+
+    <div id="ai-org-wrap" style="margin-top:16px;border-top:1px solid var(--bd);padding-top:13px">
+      <div class="st" style="margin-bottom:5px">Share with your whole team <span class="pill pt" style="font-weight:600">recommended</span></div>
+      <div style="font-size:11px;color:var(--mu);margin-bottom:9px">An Admin saves the key once on your server (stored <b>encrypted</b>); then <b>every signed-in user on any device</b> gets AI automatically — the key never touches their browsers. Requires Cloud sync.</div>
+      <div id="ai-org-body"></div>
     </div>
   </div>
-  <div class="mft"><button class="btn br2" onclick="aiClearKey()">Remove key</button><div style="display:flex;gap:7px"><button class="btn bg3" onclick="cM('m-ai')">Cancel</button><button class="btn bt" onclick="aiSaveKey()">Test &amp; Connect</button></div></div>
+  <div class="mft"><span id="ai-test-stat2" style="font-size:11px;color:var(--mu)"></span><button class="btn bg3" onclick="cM('m-ai')">Close</button></div>
 </div>
 </div>
 
@@ -1250,7 +1257,21 @@ function aiAuditReq(p){
   var g=cloudGet();return fetch(g.api+"/api/ai/audit-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
 }
 function _aiSrvJson(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();}
-function openAI(){closeMenus();sv("ai-key","");sv("ai-key-show",aiCfg().key?"•••••••• (saved)":"");sv("ai-model",aiCfg().model);var s=document.getElementById("ai-test-stat");if(s)s.textContent="";oM("m-ai");}
+function openAI(){closeMenus();sv("ai-key","");sv("ai-key-show",aiCfg().key?"•••••••• (saved)":"");sv("ai-model",aiCfg().model);var s=document.getElementById("ai-test-stat");if(s)s.textContent="";aiRenderOrg();oM("m-ai");}
+function aiRenderOrg(){
+  var el=document.getElementById("ai-org-body");if(!el)return;
+  if(!cloudOn()){el.innerHTML='<div style="font-size:11.5px;color:var(--mu)">Connect <b>Settings → Cloud sync</b> first, then an Admin can save a team-wide key here.</div>';return;}
+  if(!(currentUser&&currentUser.role==="Admin")){el.innerHTML='<div style="font-size:11.5px;color:var(--mu)">Your administrator sets the team key. Once set, AI works for you automatically — no key needed on this device.</div>';return;}
+  el.innerHTML='<div style="display:grid;gap:9px"><div><label class="fl">Claude API key (saved on server)</label><input id="ai-org-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…"></div><div><label class="fl">Model</label><input id="ai-org-model" placeholder="claude-opus-4-8"></div><div id="ai-org-stat" style="font-size:12px;color:var(--mu);min-height:15px"></div><div style="display:flex;justify-content:flex-end;gap:7px"><button class="btn br2 bsm" onclick="aiClearOrgKey()">Remove team key</button><button class="btn bt bsm" onclick="aiSaveOrgKey()">Save for whole team</button></div></div>';
+  cloudFetch("/api/ai/key").then(function(d){var st=document.getElementById("ai-org-stat");if(!st)return;sv("ai-org-model",d.model||"claude-opus-4-8");st.textContent=d.hasKey?"✓ Team key active — every signed-in user has AI.":d.envConfigured?"Server has a key configured by env.":"No team key set yet.";st.style.color=d.hasKey?"var(--gn)":"var(--mu)";}).catch(function(){});
+}
+function aiSaveOrgKey(){
+  var k=gv("ai-org-key").trim(),m=gv("ai-org-model").trim()||"claude-opus-4-8";var st=document.getElementById("ai-org-stat");
+  if(!/^sk-ant-/.test(k)){toast("Enter a valid Claude key (sk-ant-…)","err");return;}
+  if(st){st.style.color="var(--mu)";st.textContent="Saving to server…";}
+  cloudFetch("/api/ai/key",{method:"PUT",body:JSON.stringify({apiKey:k,model:m})}).then(function(){if(st){st.style.color="var(--gn)";st.textContent="✓ Saved — every signed-in user now has AI.";}sv("ai-org-key","");toast("Team Claude key saved","ok");}).catch(function(err){if(st){st.style.color="var(--rd)";st.textContent="✕ "+err.message;}toast("Save failed","err");});
+}
+function aiClearOrgKey(){if(!confirm("Remove the team-wide Claude key from the server?"))return;cloudFetch("/api/ai/key",{method:"DELETE"}).then(function(){var st=document.getElementById("ai-org-stat");if(st){st.style.color="var(--mu)";st.textContent="Team key removed.";}toast("Team key removed");}).catch(function(err){toast("Failed: "+err.message,"err");});}
 function aiSaveKey(){
   var k=gv("ai-key").trim(),m=gv("ai-model").trim()||"claude-opus-4-8";
   if(!k){toast("Paste your Claude API key first","err");return;}
