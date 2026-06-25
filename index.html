@@ -602,7 +602,7 @@ img,canvas,svg{max-width:100%}
   <div class="mh"><div class="mtt">＋ Add Patient</div><button class="xb" onclick="cM('m-addpt')">✕</button></div>
   <div class="mbd"><div class="g2">
     <div><label class="fl">Full Name *</label><input id="np-n" placeholder="Last, First"></div>
-    <div><label class="fl">Date of Birth</label><input type="date" id="np-dob"></div>
+    <div><label class="fl">Date of Birth *</label><input type="date" id="np-dob"></div>
     <div><label class="fl">Facility *</label><select id="np-fac"><option value="">— Select —</option></select></div>
     <div><label class="fl">Room #</label><input id="np-rm"></div>
     <div><label class="fl">Admit Date</label><input type="date" id="np-adm"></div>
@@ -714,10 +714,17 @@ img,canvas,svg{max-width:100%}
     </div>
     <div style="margin-top:12px;font-size:10.5px;color:var(--mu);line-height:1.5">
       Get a key at <b>console.anthropic.com → API Keys</b>. Your key is stored only in <b>this browser</b> and is sent directly to Claude.<br>
-      <b>For real patient photos (PHI):</b> use a server with a signed BAA (Settings → Cloud sync) instead of paste-key mode — paste-key is best for testing &amp; non-PHI use.
+      <b>For real patient photos (PHI):</b> use the team option below (server) with a signed BAA — paste-key is best for testing &amp; non-PHI use.
+    </div>
+    <div style="margin-top:8px;display:flex;justify-content:flex-end;gap:7px"><button class="btn br2 bsm" onclick="aiClearKey()">Remove from this device</button><button class="btn bt bsm" onclick="aiSaveKey()">Test &amp; Connect (this device)</button></div>
+
+    <div id="ai-org-wrap" style="margin-top:16px;border-top:1px solid var(--bd);padding-top:13px">
+      <div class="st" style="margin-bottom:5px">Share with your whole team <span class="pill pt" style="font-weight:600">recommended</span></div>
+      <div style="font-size:11px;color:var(--mu);margin-bottom:9px">An Admin saves the key once on your server (stored <b>encrypted</b>); then <b>every signed-in user on any device</b> gets AI automatically — the key never touches their browsers. Requires Cloud sync.</div>
+      <div id="ai-org-body"></div>
     </div>
   </div>
-  <div class="mft"><button class="btn br2" onclick="aiClearKey()">Remove key</button><div style="display:flex;gap:7px"><button class="btn bg3" onclick="cM('m-ai')">Cancel</button><button class="btn bt" onclick="aiSaveKey()">Test &amp; Connect</button></div></div>
+  <div class="mft"><span id="ai-test-stat2" style="font-size:11px;color:var(--mu)"></span><button class="btn bg3" onclick="cM('m-ai')">Close</button></div>
 </div>
 </div>
 
@@ -1140,20 +1147,43 @@ document.addEventListener("click",function(ev){var th=ev.target.closest&&ev.targ
 
 /* Note macros + voice dictation */
 function insertMacro(id,txt){var el=document.getElementById(id);if(el){el.value=(el.value?el.value.replace(/\s*$/,"")+" ":"")+txt;el.focus();}}
-/* Opt-out AI input: auto-insert AI/suggested text as a clearly-marked, easily-deleted
-   block in a textarea. Re-running replaces the same-tagged block (no duplicates).
-   The provider deletes any line they don't agree with before saving/finalizing. */
-function _aiBlockMarkers(tag){return {s:"━━ AI-SUGGESTED ["+tag+"] — delete anything you don't agree with ━━",e:"━━ end AI-suggested ["+tag+"] ━━"};}
+/* Opt-out AI input: auto-insert AI/suggested text directly into the note — CLEAN,
+   with no disclaimer/marker wording in the note body (disclaimers live in the UI
+   window, not the chart). Re-running replaces the same-tagged text (tracked in JS,
+   not in the note) so there are no duplicates. The provider deletes what they
+   don't agree with before saving. */
+var _aiBlocks={};
 function setAIBlock(id,tag,text){
   var el=document.getElementById(id);if(!el)return;
-  var m=_aiBlockMarkers(tag);
-  function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
-  var re=new RegExp("\\n*"+esc(m.s)+"[\\s\\S]*?"+esc(m.e),"g");
-  var v=(el.value||"").replace(re,"");
-  if(text&&text.trim()){v=v.replace(/\s*$/,"");v+=(v?"\n\n":"")+m.s+"\n"+text.trim()+"\n"+m.e;}
-  el.value=v;return el;
+  var key=id+"|"+tag,prev=_aiBlocks[key];
+  var v=el.value||"";
+  if(prev){var i=v.indexOf(prev);if(i>=0){v=(v.slice(0,i)+v.slice(i+prev.length)).replace(/\n{3,}/g,"\n\n").replace(/\s+$/,"");}}
+  text=(text||"").trim();
+  if(text){v=v.replace(/\s*$/,"");v+=(v?"\n":"")+text;}
+  el.value=v;_aiBlocks[key]=text||null;return el;
 }
-function dictate(id){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast("Dictation isn't supported in this browser","err");return;}var r=new SR();r.lang="en-US";r.interimResults=false;r.maxAlternatives=1;r.onresult=function(ev){var t=ev.results[0][0].transcript;insertMacro(id,t);toast("Added dictation");};r.onerror=function(){toast("Dictation error / mic blocked","err");};r.start();toast("🎤 Listening — speak now…");}
+// Strip AI self-disclaimer lines so they never land in the chart note (shown in the UI instead).
+function stripAIDisclaimer(t){return String(t||"").replace(/\(?\b(AI[- ]?(generated|drafted|assisted)|AI photo analysis|clinician to (verify|confirm)|AI decision support)[^.\n]*\.?\)?/gi,"").replace(/\n{3,}/g,"\n\n").trim();}
+var _dictRec=null,_dictId=null;
+function dictate(id){
+  var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+  if(!SR){toast("Dictation isn't supported here — try Chrome or Safari","err");return;}
+  if(!window.isSecureContext){toast("Dictation needs a secure (https) connection","err");return;}
+  // If a session is already running, a second start() crashes some browsers — toggle off instead.
+  if(_dictRec){try{_dictRec.onend=null;_dictRec.onerror=null;_dictRec.onresult=null;_dictRec.abort();}catch(e){}_dictRec=null;toast("Dictation stopped");return;}
+  var r;try{r=new SR();}catch(e){toast("Couldn't start dictation","err");return;}
+  _dictRec=r;_dictId=id;
+  r.lang="en-US";r.interimResults=false;r.maxAlternatives=1;r.continuous=false;
+  r.onresult=function(ev){try{var t="";for(var i=ev.resultIndex;i<ev.results.length;i++){if(ev.results[i].isFinal)t+=ev.results[i][0].transcript;}t=t.trim();if(t){insertMacro(_dictId||id,t);toast("Added dictation","ok");}}catch(e){}};
+  r.onerror=function(ev){var c=ev&&ev.error;
+    var msg=(c==="not-allowed"||c==="service-not-allowed")?"Microphone blocked — allow mic access for this site in your browser settings":
+      c==="no-speech"?"Didn't catch anything — tap 🎤 and speak":c==="audio-capture"?"No microphone found":
+      c==="network"?"Speech service unreachable — check your connection":c==="aborted"?"":"Dictation error";
+    if(msg)toast(msg,"err");};
+  r.onend=function(){if(_dictRec===r)_dictRec=null;};
+  try{r.start();toast("🎤 Listening — speak now (tap 🎤 again to stop)…");}
+  catch(e){_dictRec=null;toast("Microphone is busy — try again in a moment","err");}
+}
 
 /* Draft autosave for the wound note (never lose a half-finished assessment) */
 var _draftT=null;
@@ -1227,7 +1257,21 @@ function aiAuditReq(p){
   var g=cloudGet();return fetch(g.api+"/api/ai/audit-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
 }
 function _aiSrvJson(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();}
-function openAI(){closeMenus();sv("ai-key","");sv("ai-key-show",aiCfg().key?"•••••••• (saved)":"");sv("ai-model",aiCfg().model);var s=document.getElementById("ai-test-stat");if(s)s.textContent="";oM("m-ai");}
+function openAI(){closeMenus();sv("ai-key","");sv("ai-key-show",aiCfg().key?"•••••••• (saved)":"");sv("ai-model",aiCfg().model);var s=document.getElementById("ai-test-stat");if(s)s.textContent="";aiRenderOrg();oM("m-ai");}
+function aiRenderOrg(){
+  var el=document.getElementById("ai-org-body");if(!el)return;
+  if(!cloudOn()){el.innerHTML='<div style="font-size:11.5px;color:var(--mu)">Connect <b>Settings → Cloud sync</b> first, then an Admin can save a team-wide key here.</div>';return;}
+  if(!(currentUser&&currentUser.role==="Admin")){el.innerHTML='<div style="font-size:11.5px;color:var(--mu)">Your administrator sets the team key. Once set, AI works for you automatically — no key needed on this device.</div>';return;}
+  el.innerHTML='<div style="display:grid;gap:9px"><div><label class="fl">Claude API key (saved on server)</label><input id="ai-org-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…"></div><div><label class="fl">Model</label><input id="ai-org-model" placeholder="claude-opus-4-8"></div><div id="ai-org-stat" style="font-size:12px;color:var(--mu);min-height:15px"></div><div style="display:flex;justify-content:flex-end;gap:7px"><button class="btn br2 bsm" onclick="aiClearOrgKey()">Remove team key</button><button class="btn bt bsm" onclick="aiSaveOrgKey()">Save for whole team</button></div></div>';
+  cloudFetch("/api/ai/key").then(function(d){var st=document.getElementById("ai-org-stat");if(!st)return;sv("ai-org-model",d.model||"claude-opus-4-8");st.textContent=d.hasKey?"✓ Team key active — every signed-in user has AI.":d.envConfigured?"Server has a key configured by env.":"No team key set yet.";st.style.color=d.hasKey?"var(--gn)":"var(--mu)";}).catch(function(){});
+}
+function aiSaveOrgKey(){
+  var k=gv("ai-org-key").trim(),m=gv("ai-org-model").trim()||"claude-opus-4-8";var st=document.getElementById("ai-org-stat");
+  if(!/^sk-ant-/.test(k)){toast("Enter a valid Claude key (sk-ant-…)","err");return;}
+  if(st){st.style.color="var(--mu)";st.textContent="Saving to server…";}
+  cloudFetch("/api/ai/key",{method:"PUT",body:JSON.stringify({apiKey:k,model:m})}).then(function(){if(st){st.style.color="var(--gn)";st.textContent="✓ Saved — every signed-in user now has AI.";}sv("ai-org-key","");toast("Team Claude key saved","ok");}).catch(function(err){if(st){st.style.color="var(--rd)";st.textContent="✕ "+err.message;}toast("Save failed","err");});
+}
+function aiClearOrgKey(){if(!confirm("Remove the team-wide Claude key from the server?"))return;cloudFetch("/api/ai/key",{method:"DELETE"}).then(function(){var st=document.getElementById("ai-org-stat");if(st){st.style.color="var(--mu)";st.textContent="Team key removed.";}toast("Team key removed");}).catch(function(err){toast("Failed: "+err.message,"err");});}
 function aiSaveKey(){
   var k=gv("ai-key").trim(),m=gv("ai-model").trim()||"claude-opus-4-8";
   if(!k){toast("Paste your Claude API key first","err");return;}
@@ -1590,11 +1634,17 @@ function saveFac(){
   cM("m-addfac");renderCensus();persist();toast("Facility saved","ok");
 }
 function savePt(){
-  var n=gv("np-n").trim();var fac=gv("np-fac");
-  if(!n||!fac){alert("Name and facility required.");return;}
+  var n=gv("np-n").trim();var fac=gv("np-fac");var dobRaw=gv("np-dob");
+  if(!n||!fac){alert("Name and facility are required.");return;}
+  if(!dobRaw){alert("Date of birth is required (used to prevent duplicate residents).");return;}
   var dx=gv("np-dx");var id="p"+(Date.now());
   var fmt=function(d){return d?new Date(d).toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"}):"-";};
-  PATIENTS.push({id:id,name:n,dob:fmt(gv("np-dob")),fac:fac,rm:gv("np-rm")||"—",adm:fmt(gv("np-adm")),dx:dx,ins:gv("np-ins"),pv:gv("np-pv"),code:gv("np-cd"),st:"Active",src:"Manual",al:gv("np-al")||"NKDA",gen:gv("np-gn"),mrn:gv("np-mrn"),chart:[{dt:TDS(),tp:"census",by:"Admin",dx:dx,rm:gv("np-rm"),code:gv("np-cd"),pv:gv("np-pv"),ins:gv("np-ins"),notes:"Manual patient entry."}]});
+  var fdob=fmt(dobRaw);
+  // Duplicate guard: same name + facility + DOB ⇒ block, so a patient (and their wounds) isn't split across records.
+  var norm=function(s){return (""+s).toLowerCase().replace(/\s+/g,"");};
+  var dup=PATIENTS.find(function(p){return norm(p.name)===norm(n)&&p.fac===fac&&(p.dob||"")===fdob;});
+  if(dup){alert("A resident named “"+dup.name+"” at "+fac+" with that date of birth already exists.\n\nOpen their existing record to add the wound — don't create a duplicate.");return;}
+  PATIENTS.push({id:id,name:n,dob:fdob,fac:fac,rm:gv("np-rm")||"—",adm:fmt(gv("np-adm")),dx:dx,ins:gv("np-ins"),pv:gv("np-pv"),code:gv("np-cd"),st:"Active",src:"Manual",al:gv("np-al")||"NKDA",gen:gv("np-gn"),mrn:gv("np-mrn"),chart:[{dt:TDS(),tp:"census",by:"Admin",dx:dx,rm:gv("np-rm"),code:gv("np-cd"),pv:gv("np-pv"),ins:gv("np-ins"),notes:"Manual patient entry."}]});
   cM("m-addpt");renderCensus();persist();toast("Resident added","ok");
 }
 
@@ -1836,6 +1886,20 @@ function woundAreaOf(h){return (h&&h.L&&h.W)?+(h.L*h.W).toFixed(1):null;}
 function woundFirstMeasured(w){return (w.chart||[]).filter(function(h){return h.L&&h.W;})[0]||null;}
 function woundLastMeasured(w){var m=(w.chart||[]).filter(function(h){return h.L&&h.W;});return m.length?m[m.length-1]:null;}
 function woundAreaReductionPct(w){var f=woundFirstMeasured(w),l=woundLastMeasured(w);if(!f||!l||f===l)return null;var fa=f.L*f.W,la=l.L*l.W;if(fa<=0)return null;return Math.round((fa-la)/fa*100);}
+function _dimsStr(x){return [x.L,x.W,x.D].filter(function(v){return v!=null;}).join("×");}
+// Build a concise "what changed since last visit" string for auto-documentation.
+function woundChangeLog(prev,en){
+  if(!prev)return "";
+  var ch=[];
+  var od=_dimsStr(prev),nd=_dimsStr(en);if(nd&&od!==nd)ch.push("size "+(od||"—")+"→"+nd+" cm");
+  var oa=woundAreaOf(prev),na=woundAreaOf(en);if(oa!=null&&na!=null&&oa!==na)ch.push("area "+oa+"→"+na+" cm²");
+  [["stage","stage"],["healing","heal"],["exudate","exAmt"],["exudate type","exType"],["infection severity","infSev"],["periwound","periwound"],["edges","edges"],["primary dressing","dressPrimary"],["change freq","dressFreq"],["offloading","offload"],["compression","compression"],["NPWT setting","vacSetting"],["debridement","debride"],["treatment","tx"],["graft product","graftType"],["goal of care","goal"]].forEach(function(p){
+    var o=(prev[p[1]]==null?"":prev[p[1]]),nw=(en[p[1]]==null?"":en[p[1]]);if((""+o)!==(""+nw)&&(""+nw).trim())ch.push(p[0]+" "+(o!==""?o:"—")+"→"+nw);});
+  if(!!prev.inf!==!!en.inf)ch.push("infection "+(prev.inf?"present":"none")+"→"+(en.inf?"present":"none"));
+  [["pain","pain"],["Braden","braden"],["ABI","abi"],["albumin","albumin"]].forEach(function(p){var o=prev[p[1]],nw=en[p[1]];if(nw!=null&&o!==nw)ch.push(p[0]+" "+(o!=null?o:"—")+"→"+nw);});
+  [["graft","Graft/CTP"],["collagen","collagen"],["vac","NPWT"],["pcrDone","PCR"]].forEach(function(p){if(!!prev[p[0]]!==!!en[p[0]])ch.push(p[1]+" "+(en[p[0]]?"started/added":"discontinued"));});
+  return ch.join("; ");
+}
 function pushScore(en){
   if(en.area==null&&!(en.L&&en.W))return null;
   var area=en.area!=null?en.area:en.L*en.W;
@@ -1905,10 +1969,14 @@ function _saveWoundEntry2(rec,photoData){
     notes:notes,by:gv("wf-by")||"Wound Team",attest:gv("wf-attest")==="Yes",cosign:gv("wf-cosign")};
   en.area=(en.L&&en.W)?+(en.L*en.W).toFixed(1):null;
   en.push=pushScore(en);
+  // Auto-documentation: append a concise record of what changed vs the previous visit.
+  var prevEntry=(rec.chart&&rec.chart.length)?rec.chart[rec.chart.length-1]:null;
+  var chg=woundChangeLog(prevEntry,en);
+  if(chg){en.changes=chg;en.notes=(en.notes?en.notes+"\n\n":"")+"Interval changes: "+chg;}
   rec.chart.push(en);
   rec.stage=en.stage;if(en.tx)rec.tx=en.tx;rec.heal=en.heal;rec.inf=en.inf;rec.ls=en.dt;if(en.notes)rec.notes=en.notes;
   rec.poa=en.poa;rec.braden=braden;rec.debride=en.debride;rec.vac=en.vac;rec.albumin=albumin;rec.vascular=en.vascular;rec.dietary=en.dietary;
-  rec.graft=en.graft;rec.collagen=en.collagen;rec.pcrReq=en.pcrReq;rec.pcrDone=en.pcrDone;if(en.graftType)rec.graftType=en.graftType;
+  rec.graft=en.graft;rec.collagen=en.collagen;rec.pcrReq=en.pcrReq;rec.pcrDone=en.pcrDone;if(en.graftType)rec.graftType=en.graftType;rec.consent=en.consent;
   rec.abi=en.abi;rec.goal=en.goal;rec.classSys=en.classSys;rec.classGrade=en.classGrade;rec.osteo=en.osteo;rec.infSev=en.infSev;rec.avoidable=en.avoidable;
   if(en.graft&&!rec.graftDate)rec.graftDate=en.dt;if(en.pcrDone&&!rec.pcrDate)rec.pcrDate=en.dt;
   var pvv=gv("wf-pv");if(pvv)rec.pv=pvv;
@@ -2262,7 +2330,7 @@ function draftAINote(woundId){
   var sugs=woundSuggestions(w).map(function(s){return s.cat+": "+s.sug+" ["+s.cite+"]";});
   toast("Drafting note…");
   aiDraftReq({context:c,suggestions:sugs})
-   .then(function(d){if(d.text){setAIBlock("wf-notes","AI draft note",d.text);toast("AI draft added — delete anything you don't agree with before saving","ok");}})
+   .then(function(d){if(d.text){var txt=stripAIDisclaimer(d.text);setAIBlock("wf-notes","AI draft note",txt);toast("AI draft added — review & edit before saving","ok");}})
    .catch(function(err){toast(err.message==="notcfg"?"AI isn't configured on the server yet":"AI draft failed","err");});
 }
 function _woundPhotoURL(file,cb){var fr=new FileReader();fr.onload=function(){cb(fr.result);};fr.readAsDataURL(file);}
@@ -2322,7 +2390,6 @@ function _analysisNoteText(a){
   if(a.redFlags&&a.redFlags.length)parts.push("RED FLAGS: "+a.redFlags.join("; "));
   if(a.comparison)parts.push("Interval: "+a.comparison+(a.trajectory?" ("+a.trajectory+")":""));
   ["imaging","medications","advancedTherapy","labs","debridement","dressings","referrals"].forEach(function(k){if(a[k]&&a[k].length)parts.push(({imaging:"Imaging",medications:"Meds",advancedTherapy:"Advanced therapy",labs:"Labs/PCR",debridement:"Debridement",dressings:"Dressings",referrals:"Referrals"}[k])+": "+a[k].join("; "));});
-  parts.push("(AI photo analysis — clinician to verify.)");
   return parts.join("\n");
 }
 function insertAnalysisIntoNote(){
@@ -2439,7 +2506,6 @@ function buildSoapNote(w,inp,cpt,icd){
   L.push("");
   L.push("Diagnoses (ICD-10): "+dx);
   L.push("Attestation: "+(inp.attest==="Yes"?"I attest this note accurately reflects the service personally provided.":"[attestation pending]")+"  Signed: "+(inp.provider||w.pv||"")+(inp.cosign?"  Co-sign: "+inp.cosign:""));
-  L.push("(Suggested codes are clinician/coder-confirmed decision support — verify against current CPT/ICD and your MAC LCDs.)");
   return L.join("\n");
 }
 function readBillingInputs(){return {provider:gv("bk-provider"),npi:gv("bk-npi"),pos:gv("bk-pos"),payer:gv("bk-payer"),em:gv("bk-em"),consFailed:gv("bk-cons"),consDur:gv("bk-consdur"),deb:gv("bk-deb"),debLevel:gv("bk-deblevel"),debSqcm:gv("bk-debsq"),debInstr:gv("bk-debinstr"),ctp:gv("bk-ctp"),ctpProduct:gv("bk-ctpprod"),ctpQ:gv("bk-ctpq"),ctpUnits:gv("bk-ctpunits"),ctpApps:gv("bk-ctpapps"),npwt:gv("bk-npwt"),attest:gv("bk-attest"),cosign:gv("bk-cosign"),subjective:gv("bk-subj"),plan:gv("bk-plan")};}
@@ -2608,7 +2674,7 @@ function saveNewWound(){
   var w={id:id,ptId:ptId,name:p.name,fac:fac,tp:tp,stage:gv("aw-stage"),loc:loc,etio:gv("aw-etio"),tx:gv("aw-tx"),ls:onset,heal:gv("aw-heal"),inf:gv("aw-inf")==="Yes",notes:gv("aw-notes")||"",
     poa:gv("aw-poa"),braden:braden,debride:"None",vac:false,vacBrand:"",albumin:null,vascular:"Not assessed",dietary:false,
     abi:abi,goal:gv("aw-goal"),classSys:gv("aw-classSys"),classGrade:gv("aw-classGrade"),avoidable:(gv("aw-poa")==="Facility-Acquired"?"Not assessed":""),
-    graft:gv("aw-graft")==="Yes",graftType:"",graftDate:"",collagen:gv("aw-collagen")==="Yes",pcrReq:gv("aw-pcr")==="Yes",pcrDone:false,pcrDate:"",
+    graft:gv("aw-graft")==="Yes",graftType:"",graftDate:"",collagen:gv("aw-collagen")==="Yes",pcrReq:gv("aw-pcr")==="Yes",pcrDone:false,pcrDate:"",consent:gv("aw-consent")==="Yes",
     pv:gv("aw-pv")||"Wound Team",triggerResp:{},onset:onset,healedDate:"",audit:[{dt:nowStamp(),by:(gv("aw-pv")||"Wound Team"),action:"Wound created on watch list"}],chart:[en]};
   WOUNDS.push(w);
   cM("m-addwound");
