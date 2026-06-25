@@ -241,11 +241,16 @@ img,canvas,svg{max-width:100%}
       <div class="mi" onclick="prefToggle('dense')">Compact density <small id="pf-dense">Off</small></div>
       <div class="mi" onclick="prefToggle('theme')">Dark theme <small id="pf-theme">Off</small></div>
       <div class="mi" onclick="prefToggle('reduce')">Reduce motion <small id="pf-reduce">Off</small></div>
+      <h4>AI (Claude)</h4>
+      <div class="mi" style="cursor:default"><span>Status</span><small id="ai-stat">Not set</small></div>
+      <div class="mi" onclick="openAI()">Connect Claude API key… <small>🤖</small></div>
       <h4>Cloud sync (self-hosted server)</h4>
       <div class="mi" style="cursor:default"><span>Status</span><small id="cloud-stat">Local only</small></div>
       <div class="mi" onclick="cloudConnect()">Connect to server… <small>🔗</small></div>
       <div class="mi" onclick="cloudSyncNow()">Sync now <small>⟳</small></div>
       <div class="mi" onclick="cloudDisconnect()">Disconnect <small>⏏</small></div>
+      <h4>Email &amp; automation</h4>
+      <div class="mi" onclick="openMail()">Reports, schedules &amp; alerts… <small>✉️</small></div>
       <h4>Data (this browser)</h4>
       <div class="mi" onclick="exportData()">Export all data <small>⬇ .json</small></div>
       <div class="mi" onclick="document.getElementById('import-file').click()">Import data <small>⬆ .json</small></div>
@@ -694,6 +699,100 @@ img,canvas,svg{max-width:100%}
 </div>
 </div>
 
+<!-- AI (CLAUDE) CONNECT -->
+<div id="m-ai" class="mo h">
+<div class="mb">
+  <div class="mh"><div class="mtt">🤖 Connect Claude AI</div><button class="xb" onclick="cM('m-ai')">✕</button></div>
+  <div class="mbd">
+    <div style="padding:9px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:13px;font-size:11.5px;color:var(--mu)">
+      Paste your Claude API key and the AI features turn on instantly — <b>photo analysis, draft notes, and the billing self-audit</b>. No server to set up; the system handles the rest.
+    </div>
+    <div style="display:grid;gap:10px">
+      <div><label class="fl">Claude API key</label><input id="ai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…"><div id="ai-key-show" style="font-size:10.5px;color:var(--mu);margin-top:3px"></div></div>
+      <div><label class="fl">Model <span style="color:var(--mu);font-weight:400">(default is best)</span></label><input id="ai-model" placeholder="claude-opus-4-8"></div>
+      <div id="ai-test-stat" style="font-size:12px;min-height:16px"></div>
+    </div>
+    <div style="margin-top:12px;font-size:10.5px;color:var(--mu);line-height:1.5">
+      Get a key at <b>console.anthropic.com → API Keys</b>. Your key is stored only in <b>this browser</b> and is sent directly to Claude.<br>
+      <b>For real patient photos (PHI):</b> use a server with a signed BAA (Settings → Cloud sync) instead of paste-key mode — paste-key is best for testing &amp; non-PHI use.
+    </div>
+  </div>
+  <div class="mft"><button class="btn br2" onclick="aiClearKey()">Remove key</button><div style="display:flex;gap:7px"><button class="btn bg3" onclick="cM('m-ai')">Cancel</button><button class="btn bt" onclick="aiSaveKey()">Test &amp; Connect</button></div></div>
+</div>
+</div>
+
+<!-- EMAIL & AUTOMATION -->
+<div id="m-mail" class="mo h">
+<div class="mb xl">
+  <div class="mh"><div class="mtt">✉️ Email &amp; Automation <span class="pill pt" style="font-weight:600">scheduled &amp; triggered</span></div><button class="xb" onclick="cM('m-mail')">✕</button></div>
+  <div class="mbd" style="max-height:74vh;overflow-y:auto">
+    <div style="padding:8px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:14px;font-size:11px;color:var(--mu)">
+      Set up your email server once, then create rules: <b>schedule</b> a report to send daily/weekly/monthly, or <b>trigger</b> an alert when wounds go overdue, get infected, or turn high-risk. Your server does the rest automatically — even when no one is logged in.
+    </div>
+
+    <div class="st" style="margin-bottom:6px">1 · Email server (SMTP)</div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:9px">
+      <div><label class="fl">SMTP host *</label><input id="ml-host" placeholder="smtp.yourprovider.com"></div>
+      <div><label class="fl">Port</label><input id="ml-port" placeholder="587"></div>
+      <div><label class="fl">SSL/TLS (port 465)</label><select id="ml-secure"><option>No</option><option>Yes</option></select></div>
+      <div><label class="fl">Username</label><input id="ml-user" autocomplete="off" placeholder="login / API user"></div>
+      <div><label class="fl">Password</label><input id="ml-pass" type="password" autocomplete="off" placeholder="SMTP password"></div>
+      <div><label class="fl">From name</label><input id="ml-fromname" placeholder="Clinilytics Wound Care"></div>
+      <div style="grid-column:1/-1"><label class="fl">From address *</label><input id="ml-from" placeholder="woundcare@yourfacility.com"></div>
+    </div>
+    <div style="margin-top:9px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input id="ml-test-to" placeholder="send a test to…" style="flex:1;min-width:160px">
+      <button class="btn bg3 bsm" onclick="mailTest()">Send test</button>
+      <button class="btn bt bsm" onclick="mailSaveSettings()">Save settings</button>
+      <span id="ml-smtp-stat" style="font-size:11px;color:var(--mu)"></span>
+    </div>
+    <div style="font-size:10px;color:var(--mu);margin-top:6px">Tip: most providers use host <b>smtp.…</b>, port <b>587</b>, SSL <b>No</b> (STARTTLS). The password is stored encrypted on your server.</div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 6px"><div class="st">2 · Automation rules</div><button class="btn bt bsm" onclick="mailNewRule()">＋ New rule</button></div>
+    <div id="mail-rules"></div>
+
+    <div id="mail-rule-form" style="display:none;margin-top:12px;padding:12px;border:1px solid var(--bd);border-radius:8px;background:var(--in)">
+      <div class="st" id="mail-rule-title" style="margin-bottom:8px">New automation rule</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+        <div style="grid-column:1/-1"><label class="fl">Rule name *</label><input id="rl-name" placeholder="e.g. Weekly wound summary to DON"></div>
+        <div><label class="fl">Mode</label><select id="rl-mode" onchange="mailSchedUI()"><option value="schedule">Schedule (send on a timetable)</option><option value="trigger">Trigger (send when a condition is met)</option></select></div>
+        <div><label class="fl">Report</label><select id="rl-report"></select></div>
+        <div><label class="fl">Format</label><select id="rl-format"><option value="html+csv">Email + CSV attachment</option><option value="html">Email only</option><option value="csv">CSV attachment only</option></select></div>
+        <div style="grid-column:1/-1"><label class="fl">Recipients * <span style="color:var(--mu);font-weight:400">(comma-separated)</span></label><input id="rl-recip" placeholder="don@facility.com, admin@facility.com"></div>
+        <div style="grid-column:1/-1"><label class="fl">CC <span style="color:var(--mu);font-weight:400">(optional)</span></label><input id="rl-cc" placeholder="optional"></div>
+        <div><label class="fl">Limit to facility</label><select id="rl-fac"></select></div>
+        <div><label class="fl">Limit to provider</label><select id="rl-prov"></select></div>
+        <div style="display:flex;align-items:flex-end"><label class="fl" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="rl-skipempty" checked> Skip sending when there's nothing to report</label></div>
+      </div>
+      <div id="rl-sched-wrap" style="margin-top:9px">
+        <div class="fl" style="margin-bottom:4px">Schedule</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px">
+          <div><label class="fl">Frequency</label><select id="rl-freq" onchange="mailSchedUI()"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="hourly">Hourly</option></select></div>
+          <div id="rl-dow-wrap"><label class="fl">Day of week</label><select id="rl-dow"><option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option></select></div>
+          <div id="rl-dom-wrap"><label class="fl">Day of month (1–28)</label><input id="rl-dom" placeholder="1"></div>
+          <div id="rl-time-wrap"><label class="fl">Time (24h)</label><div style="display:flex;gap:5px;align-items:center"><input id="rl-hour" style="width:50px" placeholder="08"> : <input id="rl-min" style="width:50px" placeholder="00"></div></div>
+          <div id="rl-min-wrap" style="display:none"><label class="fl">Minute</label><input id="rl-min2" placeholder="(uses Minute field)" disabled></div>
+        </div>
+        <div style="font-size:10px;color:var(--mu);margin-top:5px">Times use the server's timezone.</div>
+      </div>
+      <div id="rl-trig-wrap" style="display:none;margin-top:9px">
+        <div class="fl" style="margin-bottom:4px">Trigger</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+          <div><label class="fl">Send this alert</label><select id="rl-trep"></select></div>
+          <div><label class="fl">Don't resend within (hours)</label><input id="rl-cooldown" placeholder="24"></div>
+        </div>
+        <div style="font-size:10px;color:var(--mu);margin-top:5px">The server checks continuously and emails when matching wounds exist, then waits the cooldown before it can fire again.</div>
+      </div>
+      <div style="margin-top:11px;display:flex;justify-content:flex-end;gap:7px"><button class="btn bg3" onclick="mailCancelRule()">Cancel</button><button class="btn bt" onclick="mailSaveRule()">Save rule</button></div>
+    </div>
+
+    <div class="st" style="margin:18px 0 6px">3 · Recent deliveries</div>
+    <div id="mail-log"></div>
+  </div>
+  <div class="mft"><button class="btn bg3" onclick="cM('m-mail')">Close</button></div>
+</div>
+</div>
+
 <!-- VISIT NOTE & CHARGE BUILDER -->
 <div id="m-billing" class="mo h">
 <div class="mb xl">
@@ -982,7 +1081,7 @@ function saveUI(o){try{var u=JSON.parse(localStorage.getItem("cc_ui")||"{}");for
 function loadUI(){try{return JSON.parse(localStorage.getItem("cc_ui")||"{}");}catch(e){return {};}}
 
 /* Menus */
-function toggleMenu(id){var m=document.getElementById(id);if(!m)return;var open=m.classList.contains("show");closeMenus();if(!open){if(id==="notif-menu")renderNotif();if(id==="settings-menu")updateCloudStat();m.classList.add("show");}}
+function toggleMenu(id){var m=document.getElementById(id);if(!m)return;var open=m.classList.contains("show");closeMenus();if(!open){if(id==="notif-menu")renderNotif();if(id==="settings-menu"){updateCloudStat();updateAIStat();}m.classList.add("show");}}
 function closeMenus(){var ms=document.querySelectorAll(".menu.show");for(var i=0;i<ms.length;i++)ms[i].classList.remove("show");}
 
 /* Notifications / worklist bell */
@@ -1072,6 +1171,167 @@ document.addEventListener("input",function(ev){if(_ctx&&_ctx.tp==="wound"&&ev.ta
 function cloudGet(){return {api:(localStorage.getItem("cc_api")||"").replace(/\/+$/,""),token:sessionStorage.getItem("cc_token")||""};}
 function cloudOn(){var c=cloudGet();return !!(c.api&&c.token);}
 function updateCloudStat(){var el=document.getElementById("cloud-stat");if(!el)return;el.textContent=cloudOn()?("Connected"+(loadUI().lastSync?" · "+loadUI().lastSync:"")):(localStorage.getItem("cc_api")?"Configured (signed out)":"Local only");}
+/* ── AI (Claude) connection ──────────────────────────────────────────────
+   Two ways to power the AI features:
+   (A) DIRECT — paste a Claude API key in Settings; the browser calls Claude
+       directly (no server). Best for testing / non-PHI. Key lives only in
+       this browser's localStorage.
+   (B) SERVER — connect to the self-hosted backend (Cloud sync); the key/BAA
+       live on the server (recommended for real patient photos / PHI).
+   aiAvailable() = either is set; direct takes priority when both exist. */
+var AI_SKILL=[
+"You are a wound-care clinical decision-support assistant for licensed clinicians in skilled-nursing settings.",
+"Ground every recommendation in standard guidelines and name them: NPIAP 2019, IWGDF/IDSA 2023, WOCN, TIME, ISTAP.",
+"You receive de-identified structured context and may receive one or two wound photographs.",
+"With one photo: describe only what is visibly supported — wound-bed tissue (granulation/slough/eschar/epithelial, approx %), exudate, periwound skin, edges, signs suggestive of infection. State uncertainty; never invent measurements or identifiers.",
+"With two photos (PREVIOUS then CURRENT): also compare them — interval change in size, tissue quality, granulation, exudate — and state the healing trajectory.",
+"Give concrete, prioritized suggestions where relevant: imaging, medications (classes/considerations — not exact prescriptions), advanced therapy (CTP / skin grafts, NPWT), labs & wound-care PCR / cultures, debridement, dressings & offloading/compression, nutrition, and referrals.",
+"Flag red flags for urgent escalation (spreading infection/sepsis, critical limb ischemia, exposed bone).",
+"This is decision support requiring clinician confirmation; recommend, do not diagnose or order. Note photo-assessment limitations.",
+"When asked for a wound analysis, respond with STRICT JSON ONLY (no prose, no markdown fences) matching: {\"assessment\":string,\"tissue\":string,\"infectionSigns\":string,\"comparison\":string,\"trajectory\":string,\"imaging\":[string],\"medications\":[string],\"advancedTherapy\":[string],\"labs\":[string],\"debridement\":[string],\"dressings\":[string],\"referrals\":[string],\"redFlags\":[string],\"confidence\":string,\"disclaimer\":string}. Use [] for empty arrays and \"\" for comparison/trajectory when only one photo is given."
+].join("\n");
+function aiCfg(){return {key:(localStorage.getItem("cc_ai_key")||"").trim(),model:(localStorage.getItem("cc_ai_model")||"claude-opus-4-8").trim()};}
+function aiDirectOn(){return !!aiCfg().key;}
+function aiAvailable(){return aiDirectOn()||cloudOn();}
+function aiSourceLabel(){return aiDirectOn()?"Claude (direct key)":cloudOn()?"server":"";}
+function updateAIStat(){var el=document.getElementById("ai-stat");if(!el)return;el.textContent=aiDirectOn()?("Connected · "+aiCfg().model):(cloudOn()?"Via server":"Not set");}
+function _aiImg(data,mime){return {type:"image",source:{type:"base64",media_type:mime||"image/jpeg",data:data}};}
+function _aiExtractJson(text){if(!text)return null;var t=String(text).trim().replace(/^```json\s*/i,"").replace(/^```\s*/i,"").replace(/```$/,"").trim();try{return JSON.parse(t);}catch(e){}var a=t.indexOf("{"),b=t.lastIndexOf("}");if(a>=0&&b>a){try{return JSON.parse(t.slice(a,b+1));}catch(e){}}return {assessment:t,disclaimer:"AI-generated — clinician to verify."};}
+function _aiDirectCall(messages,maxTokens){var cfg=aiCfg();
+  return fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":cfg.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:cfg.model||"claude-opus-4-8",max_tokens:maxTokens,system:AI_SKILL,messages:messages})})
+   .then(function(r){if(!r.ok){var e=new Error("anthropic "+r.status);e.status=r.status;throw e;}return r.json();})
+   .then(function(d){return (d&&d.content&&d.content[0]&&d.content[0].text)||"";});
+}
+// Unified requests — resolve to the SAME shapes the server returns ({analysis}/{text}/{audit}).
+function aiAnalyzeReq(p){
+  if(aiDirectOn()){
+    var content=[{type:"text",text:"De-identified wound/patient context:\n"+JSON.stringify(p.context||{})+"\n\nDeterministic guideline prompts already surfaced by the app:\n"+((p.suggestions||[]).map(function(s){return "- "+s;}).join("\n")||"(none)")+(p.prevImage?"\n\nTwo photos follow — the FIRST is the PREVIOUS visit, the SECOND is the CURRENT visit. Compare them and fill 'comparison' and 'trajectory'.":"\n\nAnalyze the wound"+(p.image?" photograph":"")+".")+" Return the JSON described in your instructions."}];
+    if(p.prevImage){content.push({type:"text",text:"PREVIOUS visit photo:"});content.push(_aiImg(p.prevImage,p.prevMime));content.push({type:"text",text:"CURRENT visit photo:"});}
+    if(p.image)content.push(_aiImg(p.image,p.mime));
+    return _aiDirectCall([{role:"user",content:content}],1600).then(function(t){return {analysis:_aiExtractJson(t)};});
+  }
+  var g=cloudGet();return fetch(g.api+"/api/ai/analyze-wound",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
+}
+function aiDraftReq(p){
+  if(aiDirectOn()){
+    var txt="Write ONE concise progress note (brief assessment + plan) from this de-identified context. Use only provided facts; cite guidelines in parentheses; end with 'AI-drafted — clinician to verify.'\n\nContext:\n"+JSON.stringify(p.context||{})+"\n\nGuideline suggestions:\n"+((p.suggestions||[]).map(function(s){return "- "+s;}).join("\n")||"(none)");
+    return _aiDirectCall([{role:"user",content:[{type:"text",text:txt}]}],500).then(function(t){return {text:(t||"").trim()};});
+  }
+  var g=cloudGet();return fetch(g.api+"/api/ai/draft-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
+}
+function aiAuditReq(p){
+  if(aiDirectOn()){
+    var txt="You are auditing a wound-care visit note and its proposed charges for COMPLIANT, fully-captured reimbursement (avoid under-coding AND over-coding). Identify: (1) documentation GAPS / missing verbiage required to SUPPORT the billed codes (tissue depth & total sq cm for debridement, failed-conservative-care for NPWT/CTP, medical necessity, progress/rationale); (2) UNDER-CODING — services done but not captured, add-on units missed, or a justified higher level; (3) the recommended ICD-10 / CPT / MODIFIER combination (incl. 25, 59/XU, KX, LT/RT) for this work; (4) COMPLIANCE flags (LCD caps, modifier necessity, laterality/depth specificity, bundling). Recommend only what the documented work supports — NEVER invent clinical facts; if support is missing, state exactly what must be documented. Cite the rule briefly. Return STRICT JSON only: {\"gaps\":[string],\"verbiage\":[string],\"underCoding\":[string],\"recommendedCodes\":[string],\"complianceFlags\":[string],\"summary\":string}.\n\nNOTE:\n"+(p.note||"")+"\n\nPROPOSED CHARGES:\n"+((p.codes||[]).join("\n")||"(none)")+"\n\nDE-IDENTIFIED CONTEXT:\n"+JSON.stringify(p.context||{});
+    return _aiDirectCall([{role:"user",content:[{type:"text",text:txt}]}],1300).then(function(t){return {audit:_aiExtractJson(t)};});
+  }
+  var g=cloudGet();return fetch(g.api+"/api/ai/audit-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
+}
+function _aiSrvJson(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();}
+function openAI(){closeMenus();sv("ai-key","");sv("ai-key-show",aiCfg().key?"•••••••• (saved)":"");sv("ai-model",aiCfg().model);var s=document.getElementById("ai-test-stat");if(s)s.textContent="";oM("m-ai");}
+function aiSaveKey(){
+  var k=gv("ai-key").trim(),m=gv("ai-model").trim()||"claude-opus-4-8";
+  if(!k){toast("Paste your Claude API key first","err");return;}
+  localStorage.setItem("cc_ai_model",m);
+  var s=document.getElementById("ai-test-stat");if(s){s.style.color="var(--mu)";s.textContent="Testing key…";}
+  fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":k,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:m,max_tokens:8,messages:[{role:"user",content:"Reply with the single word OK."}]})})
+   .then(function(r){if(r.status===401||r.status===403)throw new Error("key");if(!r.ok)throw new Error("http "+r.status);return r.json();})
+   .then(function(){localStorage.setItem("cc_ai_key",k);if(s){s.style.color="var(--gn)";s.textContent="✓ Connected — AI features are now live.";}updateAIStat();toast("Claude connected — AI is ready","ok");setTimeout(function(){cM("m-ai");},900);})
+   .catch(function(err){if(s){s.style.color="var(--rd)";s.textContent=err.message==="key"?"✕ Key rejected — check it and try again.":"✕ Couldn't reach Claude ("+err.message+"). Check the key/model.";}toast("AI connection failed","err");});
+}
+function aiClearKey(){localStorage.removeItem("cc_ai_key");updateAIStat();var s=document.getElementById("ai-test-stat");if(s){s.style.color="var(--mu)";s.textContent="Key removed.";}sv("ai-key-show","");toast("Claude key removed");}
+/* ── Email & automation (server-backed) ─────────────────────────────────────
+   The always-on backend sends scheduled reports and triggered alerts; this UI
+   just configures SMTP and the rules. Requires Cloud sync to be connected. */
+function cloudFetch(path,opts){var g=cloudGet();opts=opts||{};opts.headers=Object.assign({"Content-Type":"application/json",Authorization:"Bearer "+g.token},opts.headers||{});
+  return fetch(g.api+path,opts).then(function(r){return r.json().catch(function(){return {};}).then(function(j){if(r.status===401){toast("Session expired — reconnect","err");throw new Error("401");}if(!r.ok)throw new Error(j.error||("HTTP "+r.status));return j;});});}
+function _provList(){var s={};WOUNDS.forEach(function(w){if(w.pv)s[w.pv]=1;});PATIENTS.forEach(function(p){if(p.pv)s[p.pv]=1;});return Object.keys(s).sort();}
+function _optList(arr,sel,blank){return '<option value="">'+(blank||"— Any —")+'</option>'+arr.map(function(x){return '<option'+(x===sel?' selected':'')+'>'+e(x)+'</option>';}).join("");}
+function openMail(){
+  if(!cloudOn()){toast("Email automation runs on your server — connect Cloud sync first (Settings)","err");return;}
+  closeMenus();
+  // facility + provider filter options
+  var fac=FACS.map(function(f){return f.name;}).sort();
+  document.getElementById("rl-fac").innerHTML=_optList(fac,"","— All facilities —");
+  document.getElementById("rl-prov").innerHTML=_optList(_provList(),"","— All providers —");
+  document.getElementById("mail-rule-form").style.display="none";
+  mailLoadReports();mailLoadSettings();mailLoadRules();mailLoadLog();
+  oM("m-mail");
+}
+function mailLoadReports(){
+  cloudFetch("/api/email/reports").then(function(d){window._mailReports=d.types||[];
+    var html=(window._mailReports).map(function(t){return '<option value="'+e(t.key)+'">'+e(t.label)+'</option>';}).join("");
+    document.getElementById("rl-report").innerHTML=html;document.getElementById("rl-trep").innerHTML=html;
+  }).catch(function(){});
+}
+function mailLoadSettings(){
+  cloudFetch("/api/email/settings").then(function(c){
+    if(c&&c.configured){sv("ml-host",c.host);sv("ml-port",c.port);sv("ml-secure",c.secure?"Yes":"No");sv("ml-user",c.user);sv("ml-from",c.from);sv("ml-fromname",c.fromName);
+      var p=document.getElementById("ml-pass");if(p)p.placeholder=c.hasPass?"•••••••• (saved — leave blank to keep)":"SMTP password";
+      document.getElementById("ml-smtp-stat").textContent=c.host?("Configured · "+c.host):"";}
+    else{document.getElementById("ml-smtp-stat").textContent="Not configured yet";}
+  }).catch(function(){});
+}
+function mailSaveSettings(){
+  var body={host:gv("ml-host").trim(),port:parseInt(gv("ml-port"))||587,secure:gv("ml-secure")==="Yes",user:gv("ml-user").trim(),pass:gv("ml-pass"),from:gv("ml-from").trim(),fromName:gv("ml-fromname").trim()};
+  if(!body.host||!body.from){toast("Enter at least the SMTP host and From address","err");return;}
+  var s=document.getElementById("ml-smtp-stat");if(s){s.style.color="var(--mu)";s.textContent="Saving…";}
+  cloudFetch("/api/email/settings",{method:"PUT",body:JSON.stringify(body)}).then(function(){if(s){s.style.color="var(--gn)";s.textContent="✓ Saved";}sv("ml-pass","");toast("SMTP settings saved","ok");mailLoadSettings();})
+   .catch(function(err){if(s){s.style.color="var(--rd)";s.textContent="✕ "+err.message;}toast("Save failed","err");});
+}
+function mailTest(){
+  var to=gv("ml-test-to").trim();if(!to){toast("Enter an email to send the test to","err");return;}
+  var s=document.getElementById("ml-smtp-stat");if(s){s.style.color="var(--mu)";s.textContent="Sending test…";}
+  cloudFetch("/api/email/test",{method:"POST",body:JSON.stringify({to:to})}).then(function(){if(s){s.style.color="var(--gn)";s.textContent="✓ Test sent to "+to;}toast("Test email sent — check the inbox","ok");})
+   .catch(function(err){if(s){s.style.color="var(--rd)";s.textContent="✕ "+err.message;}toast("Test failed","err");});
+}
+function _freqSummary(c){var s=c.schedule||{};var dn=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var t=(("0"+(parseInt(s.hour)||8)).slice(-2))+":"+(("0"+(parseInt(s.minute)||0)).slice(-2));
+  if(c.mode==="trigger")return "When triggered · checks continuously (cooldown "+((c.trigger&&c.trigger.cooldownHours)||24)+"h)";
+  if(s.freq==="hourly")return "Hourly at :"+(("0"+(parseInt(s.minute)||0)).slice(-2));
+  if(s.freq==="weekly")return "Weekly · "+dn[parseInt(s.dow)||1]+" "+t;
+  if(s.freq==="monthly")return "Monthly · day "+(parseInt(s.dom)||1)+" "+t;
+  return "Daily · "+t;}
+function _repLabel(k){var r=(window._mailReports||[]).find(function(x){return x.key===k;});return r?r.label:k;}
+function mailLoadRules(){
+  cloudFetch("/api/email/rules").then(function(rules){window._mailRules=rules||[];
+    var el=document.getElementById("mail-rules");
+    if(!rules.length){el.innerHTML='<div style="font-size:12px;color:var(--mu);padding:6px 0">No automation rules yet. Click <b>＋ New rule</b> to schedule a report or set up a triggered alert.</div>';return;}
+    el.innerHTML='<table class="tbl" style="font-size:11.5px;width:100%"><thead><tr><th>On</th><th>Name</th><th>Report</th><th>When</th><th>To</th><th>Next</th><th></th></tr></thead><tbody>'+rules.map(function(r){var c=r.config||{};
+      return '<tr><td><input type="checkbox" '+(r.enabled?"checked":"")+' onchange="mailToggleRule('+r.id+',this.checked)"></td><td class="b">'+e(r.name)+'</td><td>'+e(_repLabel(c.mode==="trigger"?(c.trigger&&c.trigger.report):c.report))+'</td><td>'+e(_freqSummary(c))+'</td><td>'+((c.recipients||[]).length)+'</td><td style="white-space:nowrap">'+(r.next_run?e(new Date(r.next_run).toLocaleString()):"—")+'</td>'+
+      '<td style="white-space:nowrap"><button class="btn bg3 bsm" onclick="mailRunRule('+r.id+')">▶ Run</button> <button class="btn bg3 bsm" onclick="mailEditRule('+r.id+')">✎</button> <button class="btn br2 bsm" onclick="mailDeleteRule('+r.id+')">🗑</button></td></tr>';
+    }).join("")+'</tbody></table>';
+  }).catch(function(err){toast("Couldn't load rules: "+err.message,"err");});
+}
+function mailLoadLog(){
+  cloudFetch("/api/email/log").then(function(log){var el=document.getElementById("mail-log");
+    if(!log.length){el.innerHTML='<div style="font-size:11.5px;color:var(--mu)">No deliveries yet.</div>';return;}
+    el.innerHTML=log.slice(0,30).map(function(x){var c=x.status==="sent"?"var(--gn)":x.status==="error"?"var(--rd)":"var(--mu)";return '<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--bd)"><span style="color:'+c+'">'+(x.status==="sent"?"✓":x.status==="error"?"✕":"•")+' '+e(x.status)+'</span> · '+e(x.subject||"")+' <span style="color:var(--mu)">→ '+e(x.to_addrs||"")+' · '+e(new Date(x.at).toLocaleString())+(x.detail?" · "+e(x.detail):"")+'</span></div>';}).join("");
+  }).catch(function(){});
+}
+function mailSchedUI(){var mode=gv("rl-mode");document.getElementById("rl-sched-wrap").style.display=mode==="schedule"?"":"none";document.getElementById("rl-trig-wrap").style.display=mode==="trigger"?"":"none";
+  var f=gv("rl-freq");document.getElementById("rl-dow-wrap").style.display=f==="weekly"?"":"none";document.getElementById("rl-dom-wrap").style.display=f==="monthly"?"":"none";
+  var tw=document.getElementById("rl-time-wrap");var hr=document.getElementById("rl-hour");if(hr)hr.style.display=(f==="hourly")?"none":"";var lbl=tw?tw.querySelector("label"):null;if(lbl)lbl.textContent=(f==="hourly")?"Minute of each hour":"Time (24h)";}
+function mailNewRule(){window._editRuleId=null;sv("rl-name","");sv("rl-mode","schedule");sv("rl-report",(window._mailReports[0]||{}).key||"weekly-wound");sv("rl-recip","");sv("rl-cc","");sv("rl-format","html+csv");sv("rl-fac","");sv("rl-prov","");sv("rl-freq","weekly");sv("rl-dow","1");sv("rl-dom","1");sv("rl-hour","8");sv("rl-min","0");sv("rl-trep","stale-wounds");sv("rl-cooldown","24");document.getElementById("rl-skipempty").checked=true;mailSchedUI();document.getElementById("mail-rule-title").textContent="New automation rule";document.getElementById("mail-rule-form").style.display="";document.getElementById("mail-rule-form").scrollIntoView({behavior:"smooth",block:"nearest"});}
+function mailEditRule(id){var r=(window._mailRules||[]).find(function(x){return x.id===id;});if(!r)return;var c=r.config||{};var s=c.schedule||{};var tg=c.trigger||{};
+  window._editRuleId=id;sv("rl-name",r.name);sv("rl-mode",c.mode||"schedule");sv("rl-report",c.report||"weekly-wound");sv("rl-recip",(c.recipients||[]).join(", "));sv("rl-cc",(c.cc||[]).join(", "));sv("rl-format",c.format||"html+csv");
+  sv("rl-fac",(c.filters&&c.filters.facility)||"");sv("rl-prov",(c.filters&&c.filters.provider)||"");sv("rl-freq",s.freq||"weekly");sv("rl-dow",String(s.dow!=null?s.dow:1));sv("rl-dom",String(s.dom||1));sv("rl-hour",String(s.hour!=null?s.hour:8));sv("rl-min",String(s.minute||0));
+  sv("rl-trep",tg.report||"stale-wounds");sv("rl-cooldown",String(tg.cooldownHours||24));document.getElementById("rl-skipempty").checked=c.skipIfEmpty!==false;
+  mailSchedUI();document.getElementById("mail-rule-title").textContent="Edit rule";document.getElementById("mail-rule-form").style.display="";document.getElementById("mail-rule-form").scrollIntoView({behavior:"smooth",block:"nearest"});}
+function mailCancelRule(){document.getElementById("mail-rule-form").style.display="none";}
+function mailSaveRule(){
+  var body={id:window._editRuleId||undefined,name:gv("rl-name").trim(),enabled:true,mode:gv("rl-mode"),report:gv("rl-report"),recipients:gv("rl-recip"),cc:gv("rl-cc"),format:gv("rl-format"),skipIfEmpty:document.getElementById("rl-skipempty").checked,
+    filters:{facility:gv("rl-fac"),provider:gv("rl-prov")},
+    schedule:{freq:gv("rl-freq"),dow:parseInt(gv("rl-dow")),dom:parseInt(gv("rl-dom")),hour:parseInt(gv("rl-hour")),minute:parseInt(gv("rl-min"))},
+    trigger:{report:gv("rl-trep"),cooldownHours:parseInt(gv("rl-cooldown"))||24}};
+  if(!body.name){toast("Give the rule a name","err");return;}
+  if(!gv("rl-recip").trim()){toast("Add at least one recipient email","err");return;}
+  cloudFetch("/api/email/rules",{method:"POST",body:JSON.stringify(body)}).then(function(){toast("Rule saved","ok");document.getElementById("mail-rule-form").style.display="none";mailLoadRules();})
+   .catch(function(err){toast("Save failed: "+err.message,"err");});
+}
+function mailToggleRule(id,on){var r=(window._mailRules||[]).find(function(x){return x.id===id;});if(!r)return;var c=r.config||{};
+  var body=Object.assign({id:id,name:r.name,enabled:on},c);
+  cloudFetch("/api/email/rules",{method:"POST",body:JSON.stringify(body)}).then(function(){toast(on?"Rule enabled":"Rule paused","ok");mailLoadRules();}).catch(function(err){toast("Failed: "+err.message,"err");mailLoadRules();});}
+function mailRunRule(id){toast("Running rule…");cloudFetch("/api/email/rules/"+id+"/run",{method:"POST",body:"{}"}).then(function(d){toast(d.status==="sent"?"Sent ✓":d.status==="no-condition"?"No matching items — nothing sent":d.status==="no-smtp"?"Configure SMTP first":"Status: "+d.status,d.status==="sent"?"ok":"err");mailLoadLog();}).catch(function(err){toast("Run failed: "+err.message,"err");});}
+function mailDeleteRule(id){if(!confirm("Delete this automation rule?"))return;cloudFetch("/api/email/rules/"+id,{method:"DELETE"}).then(function(){toast("Rule deleted");mailLoadRules();}).catch(function(err){toast("Delete failed: "+err.message,"err");});}
 function cloudConnect(){closeMenus();
   var api=prompt("Server API base URL (e.g. https://your-host.com):",localStorage.getItem("cc_api")||"");if(!api)return;api=api.replace(/\/+$/,"");
   var u=prompt("Username:");if(!u)return;var p=prompt("Password:");if(p==null)return;
@@ -1996,21 +2256,19 @@ function autoInsertSmartNotes(w){
   setAIBlock("wf-notes","guideline smart notes",txt);
 }
 function draftAINote(woundId){
-  if(!cloudOn()){toast("AI drafting needs the cloud server — connect in Settings","err");return;}
+  if(!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
   var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;
   var c=clinContext(w);delete c.name; // de-identify: send minimum-necessary context only
   var sugs=woundSuggestions(w).map(function(s){return s.cat+": "+s.sug+" ["+s.cite+"]";});
-  var g=cloudGet();
   toast("Drafting note…");
-  fetch(g.api+"/api/ai/draft-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify({context:c,suggestions:sugs})})
-   .then(function(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();})
+  aiDraftReq({context:c,suggestions:sugs})
    .then(function(d){if(d.text){setAIBlock("wf-notes","AI draft note",d.text);toast("AI draft added — delete anything you don't agree with before saving","ok");}})
-   .catch(function(err){toast(err.message==="notcfg"?"AI drafting isn't configured on the server yet":"AI draft failed","err");});
+   .catch(function(err){toast(err.message==="notcfg"?"AI isn't configured on the server yet":"AI draft failed","err");});
 }
 function _woundPhotoURL(file,cb){var fr=new FileReader();fr.onload=function(){cb(fr.result);};fr.readAsDataURL(file);}
 function _chartPhotos(w){return (w.chart||[]).filter(function(h){return h.photo;}).map(function(h){return {dt:h.dt,url:h.photo};});}
 function analyzeWoundPhoto(woundId){
-  if(!cloudOn()){toast("Photo analysis needs the cloud server — connect in Settings","err");return;}
+  if(!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
   var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;
   var pin=document.getElementById("wf-photo");
   if(pin&&pin.files&&pin.files[0]){_woundPhotoURL(pin.files[0],function(u){_sendAnalyze(w,u,null);});return;}
@@ -2019,7 +2277,7 @@ function analyzeWoundPhoto(woundId){
   toast("Add a wound photo first (in this note or a prior visit)","err");
 }
 function compareWoundPhotos(woundId){
-  if(!cloudOn()){toast("Photo analysis needs the cloud server — connect in Settings","err");return;}
+  if(!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
   var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;
   var ph=_chartPhotos(w);var pin=document.getElementById("wf-photo");
   if(pin&&pin.files&&pin.files[0]){ // selected = current, latest chart photo = previous
@@ -2034,13 +2292,10 @@ function _sendAnalyze(w,curURL,prevURL){
   var pm=prevURL?(""+prevURL).match(/^data:([^;]+);base64,(.*)$/):null;
   var c=clinContext(w);delete c.name; // de-identify
   var sugs=woundSuggestions(w).map(function(s){return s.cat+": "+s.sug+" ["+s.cite+"]";});
-  var g=cloudGet();
   toast(prevURL?"Comparing photos with Claude…":"Analyzing photo with Claude…");
-  fetch(g.api+"/api/ai/analyze-wound",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},
-    body:JSON.stringify({context:c,suggestions:sugs,image:cm?cm[2]:null,mime:cm?cm[1]:null,prevImage:pm?pm[2]:null,prevMime:pm?pm[1]:null})})
-   .then(function(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();})
+  aiAnalyzeReq({context:c,suggestions:sugs,image:cm?cm[2]:null,mime:cm?cm[1]:null,prevImage:pm?pm[2]:null,prevMime:pm?pm[1]:null})
    .then(function(d){renderWoundAnalysis(w.id,d.analysis||{},{cur:curURL,prev:prevURL});})
-   .catch(function(err){toast(err.message==="notcfg"?"Claude isn't configured on the server yet (set ANTHROPIC_API_KEY or BEDROCK_MODEL_ID)":"Analysis failed","err");});
+   .catch(function(err){toast(err.message==="notcfg"?"Claude isn't configured on the server yet":"Analysis failed","err");});
 }
 function renderWoundAnalysis(woundId,a,imgs){
   window._lastAnalysis={id:woundId,a:a};
@@ -2209,13 +2464,12 @@ function computeBilling(){
   document.getElementById("bk-audit").innerHTML='<div class="st" style="margin-bottom:5px">Self-audit ('+flags.length+')</div>'+(flags.length?flags.map(function(x){var c=x.lvl==="warn"?"#b3433a":"#356b64";return'<div style="font-size:11.5px;color:'+c+';margin-bottom:3px">'+(x.lvl==="warn"?"⚠ ":"• ")+e(x.t)+'</div>';}).join(""):'<div style="font-size:12px;color:var(--gn)">✓ No issues detected.</div>');
 }
 function aiAuditBilling(){
-  if(!cloudOn()){toast("AI self-audit needs the cloud server + Claude — connect in Settings","err");return;}
-  var b=window._bill;if(!b)return;var g=cloudGet();
+  if(!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
+  var b=window._bill;if(!b)return;
   var codes=b.cpt.codes.map(function(c){return c.code+(c.units>1?" x"+c.units:"")+(c.mods.length?" -"+c.mods.join(" -"):"")+" "+c.desc;}).concat(b.icd.codes.map(function(c){return c.code+" "+c.desc;}));
   var ctx=clinContext(b.w);delete ctx.name;
   document.getElementById("bk-ai").innerHTML='<div style="font-size:12px;color:var(--mu)">🤖 Claude is auditing the note & charges…</div>';
-  fetch(g.api+"/api/ai/audit-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify({note:gv("bk-note"),codes:codes,context:ctx})})
-   .then(function(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();})
+  aiAuditReq({note:gv("bk-note"),codes:codes,context:ctx})
    .then(function(d){renderBillingAudit(d.audit||{});})
    .catch(function(err){document.getElementById("bk-ai").innerHTML='';toast(err.message==="notcfg"?"Claude isn't configured on the server yet":"AI audit failed","err");});
 }
@@ -3853,7 +4107,19 @@ var HELP=[
   intro:"By default data is local to your browser. If your organization runs the Clinilytics server, connect to it so your team shares one synced, durable, encrypted copy — and the app still works offline, syncing when it reconnects.",
   fig:["Settings",[{label:"⚙ Settings → Cloud sync",n:1},{label:"Connect to server (URL + login)",n:2},{label:"Status: Connected · Sync now",n:3}]],
   steps:["Open <span class='help-pill'>⚙ Settings → Cloud sync</span> (1).","Click <span class='help-pill'>Connect to server</span>, enter the server URL and your username/password (2).","Once connected, changes sync automatically; use <span class='help-pill'>Sync now</span> any time, and <span class='help-pill'>Disconnect</span> to go local-only (3)."],
-  tips:["Ask your administrator/IT for the server URL and your login.","AI photo analysis and draft-note require the cloud connection."]}
+  tips:["Ask your administrator/IT for the server URL and your login.","AI features work either via this server (BAA route) or a pasted Claude key (Settings → AI)."]},
+
+ {id:"aikey",cat:"AI & knowledge base",title:"Turn on the AI (Claude API key)",sub:"Paste a key — no server needed",
+  intro:"The fastest way to enable the AI features (photo analysis, draft notes, billing self-audit) is to paste your Claude API key in Settings. The app then talks to Claude directly — nothing to deploy.",
+  fig:["Settings",[{label:"⚙ Settings → AI (Claude)",n:1},{label:"Paste your key + Test & Connect",n:2},{label:"AI buttons light up everywhere",n:3}]],
+  steps:["Get a key at <b>console.anthropic.com → API Keys</b>.","Open <span class='help-pill'>⚙ Settings → AI (Claude) → Connect Claude API key…</span> (1).","Paste the key and click <span class='help-pill'>Test &amp; Connect</span> — it verifies the key, then turns on 🔬 Analyze photo, ✨ Draft note and the 🤖 billing self-audit (2,3)."],
+  tips:["The key is stored only in this browser and sent straight to Claude.","For real patient photos (PHI): use the server route (Cloud sync) with a signed BAA instead of paste-key mode.","Both routes work — if a server is connected and a key is set, the pasted key is used."]},
+
+ {id:"email",cat:"Power features",title:"Email automation: scheduled reports & alerts",sub:"Set rules; the server sends them",
+  intro:"Connect your email server once, then create rules that send reports on a schedule (daily/weekly/monthly) or fire alerts when something needs attention (overdue assessments, new infections, high-risk wounds). Your server sends them automatically — even when no one is logged in. Requires Cloud sync.",
+  fig:["Settings",[{label:"⚙ Settings → Email & automation",n:1},{label:"Save SMTP + send a test",n:2},{label:"＋ New rule: schedule or trigger",n:3},{label:"Pick report, recipients, timing",n:4}]],
+  steps:["Open <span class='help-pill'>⚙ Settings → Email &amp; automation</span> (needs Cloud sync connected) (1).","Enter your <b>SMTP</b> host/port/login and From address, click <span class='help-pill'>Send test</span> to confirm, then <span class='help-pill'>Save settings</span> (2).","Click <span class='help-pill'>＋ New rule</span> (3). Choose <b>Schedule</b> (e.g. Weekly · Monday 8:00) or <b>Trigger</b> (e.g. overdue assessments), pick the <b>report</b>, add <b>recipients</b>, optionally limit to a facility/provider, and Save (4).","Use <span class='help-pill'>▶ Run</span> to send now, the checkbox to pause/resume, and watch <b>Recent deliveries</b> for status."],
+  tips:["Reports go out as a formatted email with a CSV attachment for billers/QA.","Schedule times use the server's timezone.","Triggers re-check continuously and email at most once per cooldown while the condition holds.","Recipient emails are your responsibility — only send PHI to addresses covered by your policy/BAA."]}
 ];
 var helpCur="overview";
 function helpGo(id){helpCur=id;renderHelp();var b=document.getElementById("help-body");if(b)b.scrollTop=0;}

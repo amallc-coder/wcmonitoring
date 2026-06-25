@@ -32,6 +32,42 @@ CREATE TABLE IF NOT EXISTS records (
 );
 CREATE INDEX IF NOT EXISTS records_org_kind_idx ON records (org_id, kind);
 
+-- ── Email & automation ──
+-- SMTP config per org (encrypted; holds the SMTP password). One row per org.
+CREATE TABLE IF NOT EXISTS email_settings (
+  org_id      BIGINT PRIMARY KEY REFERENCES orgs(id) ON DELETE CASCADE,
+  config_enc  TEXT NOT NULL,             -- AES-256-GCM { host, port, secure, user, pass, from, fromName }
+  updated_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_by  TEXT
+);
+
+-- Automation rules: scheduled reports + condition-triggered digests.
+CREATE TABLE IF NOT EXISTS email_rules (
+  id          BIGSERIAL PRIMARY KEY,
+  org_id      BIGINT NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  name        TEXT NOT NULL,
+  enabled     BOOLEAN NOT NULL DEFAULT true,
+  config_enc  TEXT NOT NULL,             -- AES-256-GCM { mode, report, recipients[], cc[], format, filters{}, schedule{}, trigger{} }
+  last_run    TIMESTAMPTZ,
+  next_run    TIMESTAMPTZ,
+  created_by  TEXT,
+  created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS email_rules_org_idx ON email_rules (org_id, enabled);
+
+-- Delivery log (no PHI; subjects/recipients only).
+CREATE TABLE IF NOT EXISTS email_log (
+  id          BIGSERIAL PRIMARY KEY,
+  org_id      BIGINT,
+  rule_id     BIGINT,
+  to_addrs    TEXT,
+  subject     TEXT,
+  status      TEXT,                       -- sent | error | skipped
+  detail      TEXT,
+  at          TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS email_log_org_at_idx ON email_log (org_id, at DESC);
+
 -- Append-only audit trail (no PHI in the action text).
 CREATE TABLE IF NOT EXISTS audit_log (
   id          BIGSERIAL PRIMARY KEY,
