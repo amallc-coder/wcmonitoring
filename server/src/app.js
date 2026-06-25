@@ -6,6 +6,9 @@ const rateLimit = require("express-rate-limit");
 
 const db = require("./db");
 const anthropic = require("./anthropic");
+const mailer = require("./mailer");
+const reports = require("./reports");
+const scheduler = require("./scheduler");
 const { encrypt, decrypt } = require("./crypto");
 const { hashPassword, verifyPassword, signToken, authRequired, requireRole } = require("./auth");
 
@@ -240,6 +243,125 @@ function buildApp() {
       await audit(req, "ai.analyze", "img=" + (image ? "y" : "n") + (prevImage ? " compare" : ""));
       res.json({ analysis: analysis });
     } catch (e) { res.status(502).json({ error: "AI analysis failed" }); }
+  }));
+
+  // ── AI billing self-audit (Claude) ──
+  app.post("/api/ai/audit-note", authed, requireRole("Admin", "Wound Provider"), wrap(async (req, res) => {
+    if (!anthropic.configured()) return res.status(501).json({ error: "Claude not configured" });
+    const body = req.body || {};
+    try {
+      const a = await anthropic.auditNote({
+        note: typeof body.note === "string" ? body.note.slice(0, 12000) : "",
+        codes: Array.isArray(body.codes) ? body.codes.slice(0, 60) : [],
+        context: body.context || {}
+      });
+      await audit(req, "ai.audit-note", null);
+      res.json({ audit: a });
+    } catch (e) { res.status(502).json({ error: "AI audit failed" }); }
+  }));
+
+  // ── Email & automation (admin) ──
+  function cleanEmails(v) {
+    const arr = Array.isArray(v) ? v : String(v || "").split(/[,;\s]+/);
+    return arr.map(s => String(s).trim()).filter(s => /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(s)).slice(0, 50);
+  }
+
+  app.get("/api/email/settings", authed, requireRole("Admin"), wrap(async (req, res) => {
+    const c = await mailer.getSettings(req.user.org);
+    if (!c) return res.json({ configured: false });
+    res.json({ configured: true, host: c.host || "", port: c.port || 587, secure: !!c.secure, user: c.user || "", from: c.from || "", fromName: c.fromName || "", hasPass: !!c.pass });
+  }));
+
+  app.put("/api/email/settings", authed, requireRole("Admin"), wrap(async (req, res) => {
+    const b = req.body || {};
+    if (!b.host || !b.from) return res.status(400).json({ error: "host and from address are required" });
+    const existing = await mailer.getSettings(req.user.org) || {};
+    const cfg = {
+      host: String(b.host).trim(),
+      port: parseInt(b.port, 10) || 587,
+      secure: b.secure === true || b.secure === "true",
+      user: String(b.user || "").trim(),
+      // keep the saved password when the field is left blank (so it isn't wiped on edit)
+      pass: (b.pass != null && b.pass !== "") ? String(b.pass) : (existing.pass || ""),
+      from: String(b.from).trim(),
+      fromName: String(b.fromName || "").trim()
+    };
+    await mailer.saveSettings(req.user.org, cfg, req.user.username);
+    await audit(req, "email.settings.save", cfg.host);
+    res.json({ ok: true });
+  }));
+
+  app.post("/api/email/test", authed, requireRole("Admin"), wrap(async (req, res) => {
+    const to = cleanEmails((req.body && req.body.to) || req.user.username);
+    if (!to.length) return res.status(400).json({ error: "a valid recipient is required" });
+    const cfg = await mailer.getSettings(req.user.org);
+    if (!mailer.configured(cfg)) return res.status(400).json({ error: "Save SMTP settings first" });
+    try { await mailer.sendTest(cfg, to); await audit(req, "email.test", to.join(",")); res.json({ ok: true }); }
+    catch (e) { res.status(502).json({ error: "Send failed: " + ((e && e.message) || "SMTP error") }); }
+  }));
+
+  app.get("/api/email/reports", authed, requireRole("Admin"), (req, res) => res.json({ types: reports.REPORT_TYPES }));
+
+  app.get("/api/email/rules", authed, requireRole("Admin"), wrap(async (req, res) => {
+    const r = await db.query("SELECT id,name,enabled,config_enc,last_run,next_run FROM email_rules WHERE org_id=$1 ORDER BY id", [req.user.org]);
+    const out = r.rows.map(row => {
+      let cfg = {}; try { cfg = decrypt(row.config_enc) || {}; } catch (e) {}
+      return { id: row.id, name: row.name, enabled: row.enabled, last_run: row.last_run, next_run: row.next_run, config: cfg };
+    });
+    res.json(out);
+  }));
+
+  function ruleConfigFromBody(b) {
+    return {
+      mode: b.mode === "trigger" ? "trigger" : "schedule",
+      report: String(b.report || "weekly-wound"),
+      recipients: cleanEmails(b.recipients),
+      cc: cleanEmails(b.cc),
+      format: ["html+csv", "html", "csv"].indexOf(b.format) >= 0 ? b.format : "html+csv",
+      skipIfEmpty: b.skipIfEmpty !== false,
+      filters: { facility: String((b.filters && b.filters.facility) || "").trim(), provider: String((b.filters && b.filters.provider) || "").trim() },
+      schedule: { freq: String((b.schedule && b.schedule.freq) || "weekly"), dow: (b.schedule && b.schedule.dow), dom: (b.schedule && b.schedule.dom), hour: (b.schedule && b.schedule.hour), minute: (b.schedule && b.schedule.minute) },
+      trigger: { report: String((b.trigger && b.trigger.report) || b.report || "stale-wounds"), cooldownHours: (b.trigger && b.trigger.cooldownHours) || 24 }
+    };
+  }
+
+  app.post("/api/email/rules", authed, requireRole("Admin"), wrap(async (req, res) => {
+    const b = req.body || {};
+    const name = String(b.name || "").trim();
+    if (!name) return res.status(400).json({ error: "rule name required" });
+    const cfg = ruleConfigFromBody(b);
+    if (!cfg.recipients.length) return res.status(400).json({ error: "at least one valid recipient is required" });
+    const enabled = b.enabled !== false;
+    const next = scheduler.computeNextRun(cfg, new Date());
+    if (b.id) {
+      const r = await db.query("UPDATE email_rules SET name=$1,enabled=$2,config_enc=$3,next_run=$4 WHERE id=$5 AND org_id=$6 RETURNING id",
+        [name, enabled, encrypt(cfg), next, b.id, req.user.org]);
+      if (!r.rows[0]) return res.status(404).json({ error: "rule not found" });
+      await audit(req, "email.rule.update", name);
+      return res.json({ ok: true, id: r.rows[0].id });
+    }
+    const r = await db.query("INSERT INTO email_rules (org_id,name,enabled,config_enc,next_run,created_by) VALUES ($1,$2,$3,$4,$5,$6) RETURNING id",
+      [req.user.org, name, enabled, encrypt(cfg), next, req.user.username]);
+    await audit(req, "email.rule.create", name);
+    res.json({ ok: true, id: r.rows[0].id });
+  }));
+
+  app.delete("/api/email/rules/:id", authed, requireRole("Admin"), wrap(async (req, res) => {
+    await db.query("DELETE FROM email_rules WHERE id=$1 AND org_id=$2", [req.params.id, req.user.org]);
+    await audit(req, "email.rule.delete", req.params.id);
+    res.json({ ok: true });
+  }));
+
+  app.post("/api/email/rules/:id/run", authed, requireRole("Admin"), wrap(async (req, res) => {
+    const status = await scheduler.runRuleNow(req.params.id, req.user.org);
+    await audit(req, "email.rule.run", req.params.id + ":" + status);
+    if (status === "not-found") return res.status(404).json({ error: "rule not found" });
+    res.json({ ok: status === "sent", status: status });
+  }));
+
+  app.get("/api/email/log", authed, requireRole("Admin"), wrap(async (req, res) => {
+    const r = await db.query("SELECT rule_id,to_addrs,subject,status,detail,at FROM email_log WHERE org_id=$1 ORDER BY at DESC LIMIT 200", [req.user.org]);
+    res.json(r.rows);
   }));
 
   // ── audit log (admin) ──

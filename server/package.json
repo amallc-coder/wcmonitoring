@@ -9,7 +9,7 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
-    "check": "node --check src/server.js && node --check src/app.js && node --check src/db.js && node --check src/auth.js && node --check src/crypto.js"
+    "check": "node --check src/server.js && node --check src/app.js && node --check src/db.js && node --check src/auth.js && node --check src/crypto.js && node --check src/mailer.js && node --check src/reports.js && node --check src/scheduler.js"
   },
   "engines": { "node": ">=18" },
   "dependencies": {
@@ -19,6 +19,7 @@
     "express-rate-limit": "^7.4.0",
     "helmet": "^7.1.0",
     "jsonwebtoken": "^9.0.2",
+    "nodemailer": "^9.0.1",
     "pg": "^8.12.0"
   }
 }

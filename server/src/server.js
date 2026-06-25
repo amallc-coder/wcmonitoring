@@ -40,6 +40,8 @@ async function main() {
   const app = buildApp();
   const port = parseInt(process.env.PORT || "8080", 10);
   app.listen(port, () => console.log("Clinilytics Wound-Care API listening on :" + port));
+  // Start the email-automation scheduler (scheduled reports + triggered digests).
+  try { require("./scheduler").start(); } catch (e) { console.error("Scheduler not started:", e.message); }
 }
 
 main();

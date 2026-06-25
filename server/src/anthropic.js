@@ -95,4 +95,18 @@ async function draftNote({ context, suggestions }) {
   return (text || "").trim();
 }
 
-module.exports = { configured, provider, analyzeWound, draftNote };
+async function auditNote({ note, codes, context }) {
+  const text = await callModel([{ role: "user", content: [{ type: "text", text:
+    "You are auditing a wound-care visit note and its proposed charges for COMPLIANT, fully-captured reimbursement (avoid under-coding AND over-coding). Identify: " +
+    "(1) documentation GAPS / missing verbiage required to SUPPORT the billed codes (e.g., tissue depth & total sq cm for debridement, failed-conservative-care for NPWT/CTP, medical necessity, progress or rationale); " +
+    "(2) UNDER-CODING — services that were done but not captured, add-on units missed, or a justified higher level; " +
+    "(3) the recommended ICD-10 / CPT / MODIFIER combination (incl. 25, 59/XU, KX, LT/RT) for this work; " +
+    "(4) COMPLIANCE flags (LCD application caps, modifier necessity, laterality/depth specificity, bundling rules). " +
+    "Recommend only what the documented work supports — NEVER invent clinical facts; if support is missing, state exactly what must be documented to bill it. Cite the rule briefly. " +
+    "Return STRICT JSON only: {\"gaps\":[string],\"verbiage\":[string],\"underCoding\":[string],\"recommendedCodes\":[string],\"complianceFlags\":[string],\"summary\":string}.\n\n" +
+    "NOTE:\n" + (note || "") + "\n\nPROPOSED CHARGES:\n" + ((codes || []).join("\n") || "(none)") +
+    "\n\nDE-IDENTIFIED CONTEXT:\n" + JSON.stringify(context || {}) }] }], 1300);
+  return extractJson(text);
+}
+
+module.exports = { configured, provider, analyzeWound, draftNote, auditNote };

@@ -241,11 +241,16 @@ img,canvas,svg{max-width:100%}
       <div class="mi" onclick="prefToggle('dense')">Compact density <small id="pf-dense">Off</small></div>
       <div class="mi" onclick="prefToggle('theme')">Dark theme <small id="pf-theme">Off</small></div>
       <div class="mi" onclick="prefToggle('reduce')">Reduce motion <small id="pf-reduce">Off</small></div>
+      <h4>AI (Claude)</h4>
+      <div class="mi" style="cursor:default"><span>Status</span><small id="ai-stat">Not set</small></div>
+      <div class="mi" onclick="openAI()">Connect Claude API key… <small>🤖</small></div>
       <h4>Cloud sync (self-hosted server)</h4>
       <div class="mi" style="cursor:default"><span>Status</span><small id="cloud-stat">Local only</small></div>
       <div class="mi" onclick="cloudConnect()">Connect to server… <small>🔗</small></div>
       <div class="mi" onclick="cloudSyncNow()">Sync now <small>⟳</small></div>
       <div class="mi" onclick="cloudDisconnect()">Disconnect <small>⏏</small></div>
+      <h4>Email &amp; automation</h4>
+      <div class="mi" onclick="openMail()">Reports, schedules &amp; alerts… <small>✉️</small></div>
       <h4>Data (this browser)</h4>
       <div class="mi" onclick="exportData()">Export all data <small>⬇ .json</small></div>
       <div class="mi" onclick="document.getElementById('import-file').click()">Import data <small>⬆ .json</small></div>
@@ -694,6 +699,164 @@ img,canvas,svg{max-width:100%}
 </div>
 </div>
 
+<!-- AI (CLAUDE) CONNECT -->
+<div id="m-ai" class="mo h">
+<div class="mb">
+  <div class="mh"><div class="mtt">🤖 Connect Claude AI</div><button class="xb" onclick="cM('m-ai')">✕</button></div>
+  <div class="mbd">
+    <div style="padding:9px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:13px;font-size:11.5px;color:var(--mu)">
+      Paste your Claude API key and the AI features turn on instantly — <b>photo analysis, draft notes, and the billing self-audit</b>. No server to set up; the system handles the rest.
+    </div>
+    <div style="display:grid;gap:10px">
+      <div><label class="fl">Claude API key</label><input id="ai-key" type="password" autocomplete="off" spellcheck="false" placeholder="sk-ant-…"><div id="ai-key-show" style="font-size:10.5px;color:var(--mu);margin-top:3px"></div></div>
+      <div><label class="fl">Model <span style="color:var(--mu);font-weight:400">(default is best)</span></label><input id="ai-model" placeholder="claude-opus-4-8"></div>
+      <div id="ai-test-stat" style="font-size:12px;min-height:16px"></div>
+    </div>
+    <div style="margin-top:12px;font-size:10.5px;color:var(--mu);line-height:1.5">
+      Get a key at <b>console.anthropic.com → API Keys</b>. Your key is stored only in <b>this browser</b> and is sent directly to Claude.<br>
+      <b>For real patient photos (PHI):</b> use a server with a signed BAA (Settings → Cloud sync) instead of paste-key mode — paste-key is best for testing &amp; non-PHI use.
+    </div>
+  </div>
+  <div class="mft"><button class="btn br2" onclick="aiClearKey()">Remove key</button><div style="display:flex;gap:7px"><button class="btn bg3" onclick="cM('m-ai')">Cancel</button><button class="btn bt" onclick="aiSaveKey()">Test &amp; Connect</button></div></div>
+</div>
+</div>
+
+<!-- EMAIL & AUTOMATION -->
+<div id="m-mail" class="mo h">
+<div class="mb xl">
+  <div class="mh"><div class="mtt">✉️ Email &amp; Automation <span class="pill pt" style="font-weight:600">scheduled &amp; triggered</span></div><button class="xb" onclick="cM('m-mail')">✕</button></div>
+  <div class="mbd" style="max-height:74vh;overflow-y:auto">
+    <div style="padding:8px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:14px;font-size:11px;color:var(--mu)">
+      Set up your email server once, then create rules: <b>schedule</b> a report to send daily/weekly/monthly, or <b>trigger</b> an alert when wounds go overdue, get infected, or turn high-risk. Your server does the rest automatically — even when no one is logged in.
+    </div>
+
+    <div class="st" style="margin-bottom:6px">1 · Email server (SMTP)</div>
+    <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:9px">
+      <div><label class="fl">SMTP host *</label><input id="ml-host" placeholder="smtp.yourprovider.com"></div>
+      <div><label class="fl">Port</label><input id="ml-port" placeholder="587"></div>
+      <div><label class="fl">SSL/TLS (port 465)</label><select id="ml-secure"><option>No</option><option>Yes</option></select></div>
+      <div><label class="fl">Username</label><input id="ml-user" autocomplete="off" placeholder="login / API user"></div>
+      <div><label class="fl">Password</label><input id="ml-pass" type="password" autocomplete="off" placeholder="SMTP password"></div>
+      <div><label class="fl">From name</label><input id="ml-fromname" placeholder="Clinilytics Wound Care"></div>
+      <div style="grid-column:1/-1"><label class="fl">From address *</label><input id="ml-from" placeholder="woundcare@yourfacility.com"></div>
+    </div>
+    <div style="margin-top:9px;display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <input id="ml-test-to" placeholder="send a test to…" style="flex:1;min-width:160px">
+      <button class="btn bg3 bsm" onclick="mailTest()">Send test</button>
+      <button class="btn bt bsm" onclick="mailSaveSettings()">Save settings</button>
+      <span id="ml-smtp-stat" style="font-size:11px;color:var(--mu)"></span>
+    </div>
+    <div style="font-size:10px;color:var(--mu);margin-top:6px">Tip: most providers use host <b>smtp.…</b>, port <b>587</b>, SSL <b>No</b> (STARTTLS). The password is stored encrypted on your server.</div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;margin:18px 0 6px"><div class="st">2 · Automation rules</div><button class="btn bt bsm" onclick="mailNewRule()">＋ New rule</button></div>
+    <div id="mail-rules"></div>
+
+    <div id="mail-rule-form" style="display:none;margin-top:12px;padding:12px;border:1px solid var(--bd);border-radius:8px;background:var(--in)">
+      <div class="st" id="mail-rule-title" style="margin-bottom:8px">New automation rule</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+        <div style="grid-column:1/-1"><label class="fl">Rule name *</label><input id="rl-name" placeholder="e.g. Weekly wound summary to DON"></div>
+        <div><label class="fl">Mode</label><select id="rl-mode" onchange="mailSchedUI()"><option value="schedule">Schedule (send on a timetable)</option><option value="trigger">Trigger (send when a condition is met)</option></select></div>
+        <div><label class="fl">Report</label><select id="rl-report"></select></div>
+        <div><label class="fl">Format</label><select id="rl-format"><option value="html+csv">Email + CSV attachment</option><option value="html">Email only</option><option value="csv">CSV attachment only</option></select></div>
+        <div style="grid-column:1/-1"><label class="fl">Recipients * <span style="color:var(--mu);font-weight:400">(comma-separated)</span></label><input id="rl-recip" placeholder="don@facility.com, admin@facility.com"></div>
+        <div style="grid-column:1/-1"><label class="fl">CC <span style="color:var(--mu);font-weight:400">(optional)</span></label><input id="rl-cc" placeholder="optional"></div>
+        <div><label class="fl">Limit to facility</label><select id="rl-fac"></select></div>
+        <div><label class="fl">Limit to provider</label><select id="rl-prov"></select></div>
+        <div style="display:flex;align-items:flex-end"><label class="fl" style="display:flex;gap:6px;align-items:center;cursor:pointer"><input type="checkbox" id="rl-skipempty" checked> Skip sending when there's nothing to report</label></div>
+      </div>
+      <div id="rl-sched-wrap" style="margin-top:9px">
+        <div class="fl" style="margin-bottom:4px">Schedule</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:9px">
+          <div><label class="fl">Frequency</label><select id="rl-freq" onchange="mailSchedUI()"><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option><option value="hourly">Hourly</option></select></div>
+          <div id="rl-dow-wrap"><label class="fl">Day of week</label><select id="rl-dow"><option value="0">Sunday</option><option value="1">Monday</option><option value="2">Tuesday</option><option value="3">Wednesday</option><option value="4">Thursday</option><option value="5">Friday</option><option value="6">Saturday</option></select></div>
+          <div id="rl-dom-wrap"><label class="fl">Day of month (1–28)</label><input id="rl-dom" placeholder="1"></div>
+          <div id="rl-time-wrap"><label class="fl">Time (24h)</label><div style="display:flex;gap:5px;align-items:center"><input id="rl-hour" style="width:50px" placeholder="08"> : <input id="rl-min" style="width:50px" placeholder="00"></div></div>
+          <div id="rl-min-wrap" style="display:none"><label class="fl">Minute</label><input id="rl-min2" placeholder="(uses Minute field)" disabled></div>
+        </div>
+        <div style="font-size:10px;color:var(--mu);margin-top:5px">Times use the server's timezone.</div>
+      </div>
+      <div id="rl-trig-wrap" style="display:none;margin-top:9px">
+        <div class="fl" style="margin-bottom:4px">Trigger</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+          <div><label class="fl">Send this alert</label><select id="rl-trep"></select></div>
+          <div><label class="fl">Don't resend within (hours)</label><input id="rl-cooldown" placeholder="24"></div>
+        </div>
+        <div style="font-size:10px;color:var(--mu);margin-top:5px">The server checks continuously and emails when matching wounds exist, then waits the cooldown before it can fire again.</div>
+      </div>
+      <div style="margin-top:11px;display:flex;justify-content:flex-end;gap:7px"><button class="btn bg3" onclick="mailCancelRule()">Cancel</button><button class="btn bt" onclick="mailSaveRule()">Save rule</button></div>
+    </div>
+
+    <div class="st" style="margin:18px 0 6px">3 · Recent deliveries</div>
+    <div id="mail-log"></div>
+  </div>
+  <div class="mft"><button class="btn bg3" onclick="cM('m-mail')">Close</button></div>
+</div>
+</div>
+
+<!-- VISIT NOTE & CHARGE BUILDER -->
+<div id="m-billing" class="mo h">
+<div class="mb xl">
+  <div class="mh"><div class="mtt">🧾 Visit Note &amp; Charge Builder <span class="pill pt" style="font-weight:600">SOAP · CPT · ICD-10</span></div><button class="xb" onclick="cM('m-billing')">✕</button></div>
+  <div class="mbd" style="max-height:74vh;overflow-y:auto">
+    <div style="padding:8px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:12px;font-size:11px;color:var(--mu)">
+      Builds a reimbursement-ready SOAP note with the suggested CPT/HCPCS, modifiers and ICD-10 from the latest assessment. Edit the fields below — the note, charges and self-audit refresh automatically. Run the <b>🤖 AI self-audit</b> before finalizing to catch documentation gaps and under-coding.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+      <div><label class="fl">Rendering Provider</label><input id="bk-provider" onchange="computeBilling()" placeholder="name"></div>
+      <div><label class="fl">NPI</label><input id="bk-npi" onchange="computeBilling()" placeholder="10-digit"></div>
+      <div><label class="fl">Place of Service</label><select id="bk-pos" onchange="computeBilling()"><option value="31">31 · SNF</option><option value="32">32 · Nursing facility</option><option value="11">11 · Office</option><option value="12">12 · Home</option><option value="13">13 · Assisted living</option></select></div>
+      <div><label class="fl">Payer</label><input id="bk-payer" onchange="computeBilling()" placeholder="e.g. Medicare A"></div>
+      <div><label class="fl">E/M Level</label><select id="bk-em" onchange="computeBilling()"><option value="None">None</option><option value="99212">99212 · est, straightforward</option><option value="99213">99213 · est, low</option><option value="99214">99214 · est, moderate</option><option value="99215">99215 · est, high</option><option value="99202">99202 · new, straightforward</option><option value="99203">99203 · new, low</option><option value="99204">99204 · new, moderate</option></select></div>
+      <div><label class="fl">≥4 wks standard care failed</label><select id="bk-cons" onchange="computeBilling()"><option>No</option><option>Yes</option></select></div>
+      <div><label class="fl">Weeks of conservative care</label><input id="bk-consdur" onchange="computeBilling()" placeholder="e.g. 4"></div>
+    </div>
+    <div class="st" style="margin-top:14px;margin-bottom:6px">Debridement</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+      <div><label class="fl">Type</label><select id="bk-deb" onchange="computeBilling()"><option>No</option><option>Selective</option><option>Surgical</option></select></div>
+      <div><label class="fl">Deepest tissue level</label><select id="bk-deblevel" onchange="computeBilling()"><option>Subcutaneous</option><option>Muscle / Fascia</option><option>Bone</option></select></div>
+      <div><label class="fl">Total area debrided (cm²)</label><input id="bk-debsq" onchange="computeBilling()" placeholder="drives add-on units"></div>
+      <div style="grid-column:1/-1"><label class="fl">Instrument / technique</label><input id="bk-debinstr" onchange="computeBilling()" placeholder="e.g. curette, scalpel, hydrosurgery"></div>
+    </div>
+    <div class="st" style="margin-top:14px;margin-bottom:6px">Skin substitute / CTP</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">
+      <div><label class="fl">Applied</label><select id="bk-ctp" onchange="computeBilling()"><option>No</option><option>Yes</option></select></div>
+      <div><label class="fl">Product</label><input id="bk-ctpprod" onchange="computeBilling()" placeholder="e.g. Apligraf"></div>
+      <div><label class="fl">HCPCS Q-code</label><input id="bk-ctpq" onchange="computeBilling()" placeholder="e.g. Q4101"></div>
+      <div><label class="fl">Graft area (cm²)</label><input id="bk-ctpunits" onchange="computeBilling()" placeholder="sq cm applied"></div>
+      <div><label class="fl">Application #</label><input id="bk-ctpapps" onchange="computeBilling()" placeholder="1"></div>
+      <div><label class="fl">NPWT</label><select id="bk-npwt" onchange="computeBilling()"><option>No</option><option>Durable</option><option>Disposable</option></select></div>
+    </div>
+    <div class="st" style="margin-top:14px;margin-bottom:6px">Narrative &amp; attestation</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+      <div><label class="fl">Subjective (S)</label><textarea id="bk-subj" rows="2" onchange="computeBilling()" placeholder="patient-reported / interval history (blank = auto)"></textarea></div>
+      <div><label class="fl">Plan (P)</label><textarea id="bk-plan" rows="2" onchange="computeBilling()" placeholder="leave blank to auto-generate"></textarea></div>
+      <div><label class="fl">Attestation</label><select id="bk-attest" onchange="computeBilling()"><option>No</option><option>Yes</option></select></div>
+      <div><label class="fl">Co-signing provider</label><input id="bk-cosign" onchange="computeBilling()" placeholder="if required"></div>
+    </div>
+    <div style="margin:12px 0;display:flex;justify-content:flex-end"><button class="btn bg3 bsm" style="font-weight:600" onclick="computeBilling()">↻ Recompute</button></div>
+    <div style="display:grid;grid-template-columns:1.15fr 1fr;gap:13px">
+      <div><div class="st" style="margin-bottom:5px">SOAP / Billing note <span style="font-size:10px;color:var(--mu);font-weight:400">— editable; copies into eCW</span></div><textarea id="bk-note" rows="18" style="width:100%;font-family:var(--mono);font-size:11px;line-height:1.45"></textarea></div>
+      <div>
+        <div class="st" style="margin-bottom:5px">Suggested charges</div>
+        <div id="bk-charges"></div>
+        <div id="bk-audit" style="margin-top:12px"></div>
+      </div>
+    </div>
+    <div id="bk-ai"></div>
+  </div>
+  <div class="mft" style="flex-wrap:wrap;gap:7px">
+    <button class="btn bg3" onclick="cM('m-billing')">Close</button>
+    <div style="display:flex;gap:7px;flex-wrap:wrap">
+      <button class="btn bg3" onclick="copyBillingNote()">📋 Copy note</button>
+      <button class="btn bg3" onclick="billingPDF()">📄 PDF</button>
+      <button class="btn bg3" onclick="billingSuperbill()">📊 Superbill CSV</button>
+      <button class="btn bg3" style="font-weight:600" onclick="aiAuditBilling()">🤖 AI self-audit</button>
+      <button class="btn bt" onclick="finalizeBilling()">✓ Finalize &amp; save</button>
+    </div>
+  </div>
+</div>
+</div>
+
 <!-- ADMIN / USER MANAGEMENT -->
 <div id="m-admin" class="mo h">
 <div class="mb">
@@ -918,7 +1081,7 @@ function saveUI(o){try{var u=JSON.parse(localStorage.getItem("cc_ui")||"{}");for
 function loadUI(){try{return JSON.parse(localStorage.getItem("cc_ui")||"{}");}catch(e){return {};}}
 
 /* Menus */
-function toggleMenu(id){var m=document.getElementById(id);if(!m)return;var open=m.classList.contains("show");closeMenus();if(!open){if(id==="notif-menu")renderNotif();if(id==="settings-menu")updateCloudStat();m.classList.add("show");}}
+function toggleMenu(id){var m=document.getElementById(id);if(!m)return;var open=m.classList.contains("show");closeMenus();if(!open){if(id==="notif-menu")renderNotif();if(id==="settings-menu"){updateCloudStat();updateAIStat();}m.classList.add("show");}}
 function closeMenus(){var ms=document.querySelectorAll(".menu.show");for(var i=0;i<ms.length;i++)ms[i].classList.remove("show");}
 
 /* Notifications / worklist bell */
@@ -977,6 +1140,19 @@ document.addEventListener("click",function(ev){var th=ev.target.closest&&ev.targ
 
 /* Note macros + voice dictation */
 function insertMacro(id,txt){var el=document.getElementById(id);if(el){el.value=(el.value?el.value.replace(/\s*$/,"")+" ":"")+txt;el.focus();}}
+/* Opt-out AI input: auto-insert AI/suggested text as a clearly-marked, easily-deleted
+   block in a textarea. Re-running replaces the same-tagged block (no duplicates).
+   The provider deletes any line they don't agree with before saving/finalizing. */
+function _aiBlockMarkers(tag){return {s:"━━ AI-SUGGESTED ["+tag+"] — delete anything you don't agree with ━━",e:"━━ end AI-suggested ["+tag+"] ━━"};}
+function setAIBlock(id,tag,text){
+  var el=document.getElementById(id);if(!el)return;
+  var m=_aiBlockMarkers(tag);
+  function esc(s){return s.replace(/[.*+?^${}()|[\]\\]/g,"\\$&");}
+  var re=new RegExp("\\n*"+esc(m.s)+"[\\s\\S]*?"+esc(m.e),"g");
+  var v=(el.value||"").replace(re,"");
+  if(text&&text.trim()){v=v.replace(/\s*$/,"");v+=(v?"\n\n":"")+m.s+"\n"+text.trim()+"\n"+m.e;}
+  el.value=v;return el;
+}
 function dictate(id){var SR=window.SpeechRecognition||window.webkitSpeechRecognition;if(!SR){toast("Dictation isn't supported in this browser","err");return;}var r=new SR();r.lang="en-US";r.interimResults=false;r.maxAlternatives=1;r.onresult=function(ev){var t=ev.results[0][0].transcript;insertMacro(id,t);toast("Added dictation");};r.onerror=function(){toast("Dictation error / mic blocked","err");};r.start();toast("🎤 Listening — speak now…");}
 
 /* Draft autosave for the wound note (never lose a half-finished assessment) */
@@ -995,6 +1171,167 @@ document.addEventListener("input",function(ev){if(_ctx&&_ctx.tp==="wound"&&ev.ta
 function cloudGet(){return {api:(localStorage.getItem("cc_api")||"").replace(/\/+$/,""),token:sessionStorage.getItem("cc_token")||""};}
 function cloudOn(){var c=cloudGet();return !!(c.api&&c.token);}
 function updateCloudStat(){var el=document.getElementById("cloud-stat");if(!el)return;el.textContent=cloudOn()?("Connected"+(loadUI().lastSync?" · "+loadUI().lastSync:"")):(localStorage.getItem("cc_api")?"Configured (signed out)":"Local only");}
+/* ── AI (Claude) connection ──────────────────────────────────────────────
+   Two ways to power the AI features:
+   (A) DIRECT — paste a Claude API key in Settings; the browser calls Claude
+       directly (no server). Best for testing / non-PHI. Key lives only in
+       this browser's localStorage.
+   (B) SERVER — connect to the self-hosted backend (Cloud sync); the key/BAA
+       live on the server (recommended for real patient photos / PHI).
+   aiAvailable() = either is set; direct takes priority when both exist. */
+var AI_SKILL=[
+"You are a wound-care clinical decision-support assistant for licensed clinicians in skilled-nursing settings.",
+"Ground every recommendation in standard guidelines and name them: NPIAP 2019, IWGDF/IDSA 2023, WOCN, TIME, ISTAP.",
+"You receive de-identified structured context and may receive one or two wound photographs.",
+"With one photo: describe only what is visibly supported — wound-bed tissue (granulation/slough/eschar/epithelial, approx %), exudate, periwound skin, edges, signs suggestive of infection. State uncertainty; never invent measurements or identifiers.",
+"With two photos (PREVIOUS then CURRENT): also compare them — interval change in size, tissue quality, granulation, exudate — and state the healing trajectory.",
+"Give concrete, prioritized suggestions where relevant: imaging, medications (classes/considerations — not exact prescriptions), advanced therapy (CTP / skin grafts, NPWT), labs & wound-care PCR / cultures, debridement, dressings & offloading/compression, nutrition, and referrals.",
+"Flag red flags for urgent escalation (spreading infection/sepsis, critical limb ischemia, exposed bone).",
+"This is decision support requiring clinician confirmation; recommend, do not diagnose or order. Note photo-assessment limitations.",
+"When asked for a wound analysis, respond with STRICT JSON ONLY (no prose, no markdown fences) matching: {\"assessment\":string,\"tissue\":string,\"infectionSigns\":string,\"comparison\":string,\"trajectory\":string,\"imaging\":[string],\"medications\":[string],\"advancedTherapy\":[string],\"labs\":[string],\"debridement\":[string],\"dressings\":[string],\"referrals\":[string],\"redFlags\":[string],\"confidence\":string,\"disclaimer\":string}. Use [] for empty arrays and \"\" for comparison/trajectory when only one photo is given."
+].join("\n");
+function aiCfg(){return {key:(localStorage.getItem("cc_ai_key")||"").trim(),model:(localStorage.getItem("cc_ai_model")||"claude-opus-4-8").trim()};}
+function aiDirectOn(){return !!aiCfg().key;}
+function aiAvailable(){return aiDirectOn()||cloudOn();}
+function aiSourceLabel(){return aiDirectOn()?"Claude (direct key)":cloudOn()?"server":"";}
+function updateAIStat(){var el=document.getElementById("ai-stat");if(!el)return;el.textContent=aiDirectOn()?("Connected · "+aiCfg().model):(cloudOn()?"Via server":"Not set");}
+function _aiImg(data,mime){return {type:"image",source:{type:"base64",media_type:mime||"image/jpeg",data:data}};}
+function _aiExtractJson(text){if(!text)return null;var t=String(text).trim().replace(/^```json\s*/i,"").replace(/^```\s*/i,"").replace(/```$/,"").trim();try{return JSON.parse(t);}catch(e){}var a=t.indexOf("{"),b=t.lastIndexOf("}");if(a>=0&&b>a){try{return JSON.parse(t.slice(a,b+1));}catch(e){}}return {assessment:t,disclaimer:"AI-generated — clinician to verify."};}
+function _aiDirectCall(messages,maxTokens){var cfg=aiCfg();
+  return fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":cfg.key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:cfg.model||"claude-opus-4-8",max_tokens:maxTokens,system:AI_SKILL,messages:messages})})
+   .then(function(r){if(!r.ok){var e=new Error("anthropic "+r.status);e.status=r.status;throw e;}return r.json();})
+   .then(function(d){return (d&&d.content&&d.content[0]&&d.content[0].text)||"";});
+}
+// Unified requests — resolve to the SAME shapes the server returns ({analysis}/{text}/{audit}).
+function aiAnalyzeReq(p){
+  if(aiDirectOn()){
+    var content=[{type:"text",text:"De-identified wound/patient context:\n"+JSON.stringify(p.context||{})+"\n\nDeterministic guideline prompts already surfaced by the app:\n"+((p.suggestions||[]).map(function(s){return "- "+s;}).join("\n")||"(none)")+(p.prevImage?"\n\nTwo photos follow — the FIRST is the PREVIOUS visit, the SECOND is the CURRENT visit. Compare them and fill 'comparison' and 'trajectory'.":"\n\nAnalyze the wound"+(p.image?" photograph":"")+".")+" Return the JSON described in your instructions."}];
+    if(p.prevImage){content.push({type:"text",text:"PREVIOUS visit photo:"});content.push(_aiImg(p.prevImage,p.prevMime));content.push({type:"text",text:"CURRENT visit photo:"});}
+    if(p.image)content.push(_aiImg(p.image,p.mime));
+    return _aiDirectCall([{role:"user",content:content}],1600).then(function(t){return {analysis:_aiExtractJson(t)};});
+  }
+  var g=cloudGet();return fetch(g.api+"/api/ai/analyze-wound",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
+}
+function aiDraftReq(p){
+  if(aiDirectOn()){
+    var txt="Write ONE concise progress note (brief assessment + plan) from this de-identified context. Use only provided facts; cite guidelines in parentheses; end with 'AI-drafted — clinician to verify.'\n\nContext:\n"+JSON.stringify(p.context||{})+"\n\nGuideline suggestions:\n"+((p.suggestions||[]).map(function(s){return "- "+s;}).join("\n")||"(none)");
+    return _aiDirectCall([{role:"user",content:[{type:"text",text:txt}]}],500).then(function(t){return {text:(t||"").trim()};});
+  }
+  var g=cloudGet();return fetch(g.api+"/api/ai/draft-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
+}
+function aiAuditReq(p){
+  if(aiDirectOn()){
+    var txt="You are auditing a wound-care visit note and its proposed charges for COMPLIANT, fully-captured reimbursement (avoid under-coding AND over-coding). Identify: (1) documentation GAPS / missing verbiage required to SUPPORT the billed codes (tissue depth & total sq cm for debridement, failed-conservative-care for NPWT/CTP, medical necessity, progress/rationale); (2) UNDER-CODING — services done but not captured, add-on units missed, or a justified higher level; (3) the recommended ICD-10 / CPT / MODIFIER combination (incl. 25, 59/XU, KX, LT/RT) for this work; (4) COMPLIANCE flags (LCD caps, modifier necessity, laterality/depth specificity, bundling). Recommend only what the documented work supports — NEVER invent clinical facts; if support is missing, state exactly what must be documented. Cite the rule briefly. Return STRICT JSON only: {\"gaps\":[string],\"verbiage\":[string],\"underCoding\":[string],\"recommendedCodes\":[string],\"complianceFlags\":[string],\"summary\":string}.\n\nNOTE:\n"+(p.note||"")+"\n\nPROPOSED CHARGES:\n"+((p.codes||[]).join("\n")||"(none)")+"\n\nDE-IDENTIFIED CONTEXT:\n"+JSON.stringify(p.context||{});
+    return _aiDirectCall([{role:"user",content:[{type:"text",text:txt}]}],1300).then(function(t){return {audit:_aiExtractJson(t)};});
+  }
+  var g=cloudGet();return fetch(g.api+"/api/ai/audit-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify(p)}).then(_aiSrvJson);
+}
+function _aiSrvJson(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();}
+function openAI(){closeMenus();sv("ai-key","");sv("ai-key-show",aiCfg().key?"•••••••• (saved)":"");sv("ai-model",aiCfg().model);var s=document.getElementById("ai-test-stat");if(s)s.textContent="";oM("m-ai");}
+function aiSaveKey(){
+  var k=gv("ai-key").trim(),m=gv("ai-model").trim()||"claude-opus-4-8";
+  if(!k){toast("Paste your Claude API key first","err");return;}
+  localStorage.setItem("cc_ai_model",m);
+  var s=document.getElementById("ai-test-stat");if(s){s.style.color="var(--mu)";s.textContent="Testing key…";}
+  fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"content-type":"application/json","x-api-key":k,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true"},body:JSON.stringify({model:m,max_tokens:8,messages:[{role:"user",content:"Reply with the single word OK."}]})})
+   .then(function(r){if(r.status===401||r.status===403)throw new Error("key");if(!r.ok)throw new Error("http "+r.status);return r.json();})
+   .then(function(){localStorage.setItem("cc_ai_key",k);if(s){s.style.color="var(--gn)";s.textContent="✓ Connected — AI features are now live.";}updateAIStat();toast("Claude connected — AI is ready","ok");setTimeout(function(){cM("m-ai");},900);})
+   .catch(function(err){if(s){s.style.color="var(--rd)";s.textContent=err.message==="key"?"✕ Key rejected — check it and try again.":"✕ Couldn't reach Claude ("+err.message+"). Check the key/model.";}toast("AI connection failed","err");});
+}
+function aiClearKey(){localStorage.removeItem("cc_ai_key");updateAIStat();var s=document.getElementById("ai-test-stat");if(s){s.style.color="var(--mu)";s.textContent="Key removed.";}sv("ai-key-show","");toast("Claude key removed");}
+/* ── Email & automation (server-backed) ─────────────────────────────────────
+   The always-on backend sends scheduled reports and triggered alerts; this UI
+   just configures SMTP and the rules. Requires Cloud sync to be connected. */
+function cloudFetch(path,opts){var g=cloudGet();opts=opts||{};opts.headers=Object.assign({"Content-Type":"application/json",Authorization:"Bearer "+g.token},opts.headers||{});
+  return fetch(g.api+path,opts).then(function(r){return r.json().catch(function(){return {};}).then(function(j){if(r.status===401){toast("Session expired — reconnect","err");throw new Error("401");}if(!r.ok)throw new Error(j.error||("HTTP "+r.status));return j;});});}
+function _provList(){var s={};WOUNDS.forEach(function(w){if(w.pv)s[w.pv]=1;});PATIENTS.forEach(function(p){if(p.pv)s[p.pv]=1;});return Object.keys(s).sort();}
+function _optList(arr,sel,blank){return '<option value="">'+(blank||"— Any —")+'</option>'+arr.map(function(x){return '<option'+(x===sel?' selected':'')+'>'+e(x)+'</option>';}).join("");}
+function openMail(){
+  if(!cloudOn()){toast("Email automation runs on your server — connect Cloud sync first (Settings)","err");return;}
+  closeMenus();
+  // facility + provider filter options
+  var fac=FACS.map(function(f){return f.name;}).sort();
+  document.getElementById("rl-fac").innerHTML=_optList(fac,"","— All facilities —");
+  document.getElementById("rl-prov").innerHTML=_optList(_provList(),"","— All providers —");
+  document.getElementById("mail-rule-form").style.display="none";
+  mailLoadReports();mailLoadSettings();mailLoadRules();mailLoadLog();
+  oM("m-mail");
+}
+function mailLoadReports(){
+  cloudFetch("/api/email/reports").then(function(d){window._mailReports=d.types||[];
+    var html=(window._mailReports).map(function(t){return '<option value="'+e(t.key)+'">'+e(t.label)+'</option>';}).join("");
+    document.getElementById("rl-report").innerHTML=html;document.getElementById("rl-trep").innerHTML=html;
+  }).catch(function(){});
+}
+function mailLoadSettings(){
+  cloudFetch("/api/email/settings").then(function(c){
+    if(c&&c.configured){sv("ml-host",c.host);sv("ml-port",c.port);sv("ml-secure",c.secure?"Yes":"No");sv("ml-user",c.user);sv("ml-from",c.from);sv("ml-fromname",c.fromName);
+      var p=document.getElementById("ml-pass");if(p)p.placeholder=c.hasPass?"•••••••• (saved — leave blank to keep)":"SMTP password";
+      document.getElementById("ml-smtp-stat").textContent=c.host?("Configured · "+c.host):"";}
+    else{document.getElementById("ml-smtp-stat").textContent="Not configured yet";}
+  }).catch(function(){});
+}
+function mailSaveSettings(){
+  var body={host:gv("ml-host").trim(),port:parseInt(gv("ml-port"))||587,secure:gv("ml-secure")==="Yes",user:gv("ml-user").trim(),pass:gv("ml-pass"),from:gv("ml-from").trim(),fromName:gv("ml-fromname").trim()};
+  if(!body.host||!body.from){toast("Enter at least the SMTP host and From address","err");return;}
+  var s=document.getElementById("ml-smtp-stat");if(s){s.style.color="var(--mu)";s.textContent="Saving…";}
+  cloudFetch("/api/email/settings",{method:"PUT",body:JSON.stringify(body)}).then(function(){if(s){s.style.color="var(--gn)";s.textContent="✓ Saved";}sv("ml-pass","");toast("SMTP settings saved","ok");mailLoadSettings();})
+   .catch(function(err){if(s){s.style.color="var(--rd)";s.textContent="✕ "+err.message;}toast("Save failed","err");});
+}
+function mailTest(){
+  var to=gv("ml-test-to").trim();if(!to){toast("Enter an email to send the test to","err");return;}
+  var s=document.getElementById("ml-smtp-stat");if(s){s.style.color="var(--mu)";s.textContent="Sending test…";}
+  cloudFetch("/api/email/test",{method:"POST",body:JSON.stringify({to:to})}).then(function(){if(s){s.style.color="var(--gn)";s.textContent="✓ Test sent to "+to;}toast("Test email sent — check the inbox","ok");})
+   .catch(function(err){if(s){s.style.color="var(--rd)";s.textContent="✕ "+err.message;}toast("Test failed","err");});
+}
+function _freqSummary(c){var s=c.schedule||{};var dn=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var t=(("0"+(parseInt(s.hour)||8)).slice(-2))+":"+(("0"+(parseInt(s.minute)||0)).slice(-2));
+  if(c.mode==="trigger")return "When triggered · checks continuously (cooldown "+((c.trigger&&c.trigger.cooldownHours)||24)+"h)";
+  if(s.freq==="hourly")return "Hourly at :"+(("0"+(parseInt(s.minute)||0)).slice(-2));
+  if(s.freq==="weekly")return "Weekly · "+dn[parseInt(s.dow)||1]+" "+t;
+  if(s.freq==="monthly")return "Monthly · day "+(parseInt(s.dom)||1)+" "+t;
+  return "Daily · "+t;}
+function _repLabel(k){var r=(window._mailReports||[]).find(function(x){return x.key===k;});return r?r.label:k;}
+function mailLoadRules(){
+  cloudFetch("/api/email/rules").then(function(rules){window._mailRules=rules||[];
+    var el=document.getElementById("mail-rules");
+    if(!rules.length){el.innerHTML='<div style="font-size:12px;color:var(--mu);padding:6px 0">No automation rules yet. Click <b>＋ New rule</b> to schedule a report or set up a triggered alert.</div>';return;}
+    el.innerHTML='<table class="tbl" style="font-size:11.5px;width:100%"><thead><tr><th>On</th><th>Name</th><th>Report</th><th>When</th><th>To</th><th>Next</th><th></th></tr></thead><tbody>'+rules.map(function(r){var c=r.config||{};
+      return '<tr><td><input type="checkbox" '+(r.enabled?"checked":"")+' onchange="mailToggleRule('+r.id+',this.checked)"></td><td class="b">'+e(r.name)+'</td><td>'+e(_repLabel(c.mode==="trigger"?(c.trigger&&c.trigger.report):c.report))+'</td><td>'+e(_freqSummary(c))+'</td><td>'+((c.recipients||[]).length)+'</td><td style="white-space:nowrap">'+(r.next_run?e(new Date(r.next_run).toLocaleString()):"—")+'</td>'+
+      '<td style="white-space:nowrap"><button class="btn bg3 bsm" onclick="mailRunRule('+r.id+')">▶ Run</button> <button class="btn bg3 bsm" onclick="mailEditRule('+r.id+')">✎</button> <button class="btn br2 bsm" onclick="mailDeleteRule('+r.id+')">🗑</button></td></tr>';
+    }).join("")+'</tbody></table>';
+  }).catch(function(err){toast("Couldn't load rules: "+err.message,"err");});
+}
+function mailLoadLog(){
+  cloudFetch("/api/email/log").then(function(log){var el=document.getElementById("mail-log");
+    if(!log.length){el.innerHTML='<div style="font-size:11.5px;color:var(--mu)">No deliveries yet.</div>';return;}
+    el.innerHTML=log.slice(0,30).map(function(x){var c=x.status==="sent"?"var(--gn)":x.status==="error"?"var(--rd)":"var(--mu)";return '<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--bd)"><span style="color:'+c+'">'+(x.status==="sent"?"✓":x.status==="error"?"✕":"•")+' '+e(x.status)+'</span> · '+e(x.subject||"")+' <span style="color:var(--mu)">→ '+e(x.to_addrs||"")+' · '+e(new Date(x.at).toLocaleString())+(x.detail?" · "+e(x.detail):"")+'</span></div>';}).join("");
+  }).catch(function(){});
+}
+function mailSchedUI(){var mode=gv("rl-mode");document.getElementById("rl-sched-wrap").style.display=mode==="schedule"?"":"none";document.getElementById("rl-trig-wrap").style.display=mode==="trigger"?"":"none";
+  var f=gv("rl-freq");document.getElementById("rl-dow-wrap").style.display=f==="weekly"?"":"none";document.getElementById("rl-dom-wrap").style.display=f==="monthly"?"":"none";
+  var tw=document.getElementById("rl-time-wrap");var hr=document.getElementById("rl-hour");if(hr)hr.style.display=(f==="hourly")?"none":"";var lbl=tw?tw.querySelector("label"):null;if(lbl)lbl.textContent=(f==="hourly")?"Minute of each hour":"Time (24h)";}
+function mailNewRule(){window._editRuleId=null;sv("rl-name","");sv("rl-mode","schedule");sv("rl-report",(window._mailReports[0]||{}).key||"weekly-wound");sv("rl-recip","");sv("rl-cc","");sv("rl-format","html+csv");sv("rl-fac","");sv("rl-prov","");sv("rl-freq","weekly");sv("rl-dow","1");sv("rl-dom","1");sv("rl-hour","8");sv("rl-min","0");sv("rl-trep","stale-wounds");sv("rl-cooldown","24");document.getElementById("rl-skipempty").checked=true;mailSchedUI();document.getElementById("mail-rule-title").textContent="New automation rule";document.getElementById("mail-rule-form").style.display="";document.getElementById("mail-rule-form").scrollIntoView({behavior:"smooth",block:"nearest"});}
+function mailEditRule(id){var r=(window._mailRules||[]).find(function(x){return x.id===id;});if(!r)return;var c=r.config||{};var s=c.schedule||{};var tg=c.trigger||{};
+  window._editRuleId=id;sv("rl-name",r.name);sv("rl-mode",c.mode||"schedule");sv("rl-report",c.report||"weekly-wound");sv("rl-recip",(c.recipients||[]).join(", "));sv("rl-cc",(c.cc||[]).join(", "));sv("rl-format",c.format||"html+csv");
+  sv("rl-fac",(c.filters&&c.filters.facility)||"");sv("rl-prov",(c.filters&&c.filters.provider)||"");sv("rl-freq",s.freq||"weekly");sv("rl-dow",String(s.dow!=null?s.dow:1));sv("rl-dom",String(s.dom||1));sv("rl-hour",String(s.hour!=null?s.hour:8));sv("rl-min",String(s.minute||0));
+  sv("rl-trep",tg.report||"stale-wounds");sv("rl-cooldown",String(tg.cooldownHours||24));document.getElementById("rl-skipempty").checked=c.skipIfEmpty!==false;
+  mailSchedUI();document.getElementById("mail-rule-title").textContent="Edit rule";document.getElementById("mail-rule-form").style.display="";document.getElementById("mail-rule-form").scrollIntoView({behavior:"smooth",block:"nearest"});}
+function mailCancelRule(){document.getElementById("mail-rule-form").style.display="none";}
+function mailSaveRule(){
+  var body={id:window._editRuleId||undefined,name:gv("rl-name").trim(),enabled:true,mode:gv("rl-mode"),report:gv("rl-report"),recipients:gv("rl-recip"),cc:gv("rl-cc"),format:gv("rl-format"),skipIfEmpty:document.getElementById("rl-skipempty").checked,
+    filters:{facility:gv("rl-fac"),provider:gv("rl-prov")},
+    schedule:{freq:gv("rl-freq"),dow:parseInt(gv("rl-dow")),dom:parseInt(gv("rl-dom")),hour:parseInt(gv("rl-hour")),minute:parseInt(gv("rl-min"))},
+    trigger:{report:gv("rl-trep"),cooldownHours:parseInt(gv("rl-cooldown"))||24}};
+  if(!body.name){toast("Give the rule a name","err");return;}
+  if(!gv("rl-recip").trim()){toast("Add at least one recipient email","err");return;}
+  cloudFetch("/api/email/rules",{method:"POST",body:JSON.stringify(body)}).then(function(){toast("Rule saved","ok");document.getElementById("mail-rule-form").style.display="none";mailLoadRules();})
+   .catch(function(err){toast("Save failed: "+err.message,"err");});
+}
+function mailToggleRule(id,on){var r=(window._mailRules||[]).find(function(x){return x.id===id;});if(!r)return;var c=r.config||{};
+  var body=Object.assign({id:id,name:r.name,enabled:on},c);
+  cloudFetch("/api/email/rules",{method:"POST",body:JSON.stringify(body)}).then(function(){toast(on?"Rule enabled":"Rule paused","ok");mailLoadRules();}).catch(function(err){toast("Failed: "+err.message,"err");mailLoadRules();});}
+function mailRunRule(id){toast("Running rule…");cloudFetch("/api/email/rules/"+id+"/run",{method:"POST",body:"{}"}).then(function(d){toast(d.status==="sent"?"Sent ✓":d.status==="no-condition"?"No matching items — nothing sent":d.status==="no-smtp"?"Configure SMTP first":"Status: "+d.status,d.status==="sent"?"ok":"err");mailLoadLog();}).catch(function(err){toast("Run failed: "+err.message,"err");});}
+function mailDeleteRule(id){if(!confirm("Delete this automation rule?"))return;cloudFetch("/api/email/rules/"+id,{method:"DELETE"}).then(function(){toast("Rule deleted");mailLoadRules();}).catch(function(err){toast("Delete failed: "+err.message,"err");});}
 function cloudConnect(){closeMenus();
   var api=prompt("Server API base URL (e.g. https://your-host.com):",localStorage.getItem("cc_api")||"");if(!api)return;api=api.replace(/\/+$/,"");
   var u=prompt("Username:");if(!u)return;var p=prompt("Password:");if(p==null)return;
@@ -1482,7 +1819,7 @@ function buildFields(){
       {id:"wf-date",l:"Visit Date",v:TDS()},{id:"wf-by",l:"Updated By",v:(currentUser&&currentUser.name)||"",ph:"Clinician name"},
       {id:"wf-attest",l:"Attestation: accurate & complete",v:"No",sel:bsel},{id:"wf-cosign",l:"Co-sign (MD/DO if NP/PA)",v:lv("cosign",""),ph:"co-signing physician"}
     ];
-    el.innerHTML=staleAlert+ltAlert+triggerPanelHtml(rec)+suggestionsPanelHtml(rec)+'<div class="st" style="margin-bottom:10px">Wound Assessment &amp; Care Note</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+mathLine+flds.map(fldCell).join("")+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:space-between"><button class="btn br2 bsm" onclick="deleteWound(\''+rec.id+'\')">🗑 Delete</button><div style="display:flex;gap:7px"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div></div>';setTimeout(function(){restoreDraft(rec.id);},10);
+    el.innerHTML=staleAlert+ltAlert+triggerPanelHtml(rec)+suggestionsPanelHtml(rec)+'<div class="st" style="margin-bottom:10px">Wound Assessment &amp; Care Note</div><div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px">'+mathLine+flds.map(fldCell).join("")+'</div><div style="margin-top:12px;display:flex;gap:7px;justify-content:space-between"><button class="btn br2 bsm" onclick="deleteWound(\''+rec.id+'\')">🗑 Delete</button><div style="display:flex;gap:7px"><button class="btn bg3" onclick="cM(\'m-chart\')">Cancel</button><button class="btn ba2" onclick="saveWoundEntry()">Save &amp; Clear Alert</button></div></div>';setTimeout(function(){restoreDraft(rec.id);autoInsertSmartNotes(rec);},10);
     return;
   } else if(tp==="psych"){
     flds=[{id:"pf-ev",l:"Visit Type",v:"Follow-up Visit",sel:["Follow-up Visit","Initial Assessment","Medication Review","GDR Review","GDR Attempt","Telehealth Visit","Acute Hospitalization","Post-Discharge Follow-up","Behavioral Assessment"]},{id:"pf-date",l:"Visit Date",v:TDS()},{id:"pf-th",l:"Telehealth",v:rec.th?"Yes":"No",sel:["No","Yes"]},{id:"pf-apy",l:"Antipsychotic",v:rec.apy?"Yes":"No",sel:["No","Yes"]},{id:"pf-gdr",l:"GDR Status",v:rec.gdr},{id:"pf-lastH",l:"Last Acute Hosp.",v:rec.lastH},{id:"pf-dx",l:"Diagnoses",v:rec.dx.join(", "),full:true},{id:"pf-meds",l:"Medications (one per line)",v:rec.meds.join("\n"),ta:true,full:true},{id:"pf-notes",l:"Clinical Notes",v:"",ta:true,full:true,ph:"Mood, SI screening, plan…"},{id:"pf-by",l:"Updated By",v:"",ph:"Clinician name"}];
@@ -1902,8 +2239,8 @@ function woundSuggestions(w){var c=clinContext(w);var out=[];WOUND_KB.forEach(fu
 function suggestionsPanelHtml(w){
   var list=woundSuggestions(w);window._sugCache={id:w.id,list:list};
   var h='<div style="background:rgba(63,125,118,.07);border:1px solid rgba(63,125,118,.22);border-radius:8px;padding:11px 13px;margin-bottom:13px">';
-  h+='<div class="st" style="color:#356b64;margin-bottom:3px">💡 Suggested Care &amp; Smart Notes <span class="pill pt">'+list.length+'</span> <span style="float:right"><button class="btn bg3 bsm" style="font-weight:600" onclick="analyzeWoundPhoto(\''+w.id+'\')">🔬 Analyze photo</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="compareWoundPhotos(\''+w.id+'\')">📊 Compare to last</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="draftAINote(\''+w.id+'\')">✨ Draft note</button></span></div>';
-  h+='<div style="font-size:10px;color:var(--mu);margin-bottom:8px">Guideline-based decision support — review &amp; confirm before use.</div>';
+  h+='<div class="st" style="color:#356b64;margin-bottom:3px">💡 Suggested Care &amp; Smart Notes <span class="pill pt">'+list.length+'</span> <span style="float:right"><button class="btn bg3 bsm" style="font-weight:600" onclick="analyzeWoundPhoto(\''+w.id+'\')">🔬 Analyze photo</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="compareWoundPhotos(\''+w.id+'\')">📊 Compare to last</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="draftAINote(\''+w.id+'\')">✨ Draft note</button> <button class="btn bt bsm" style="font-weight:600" onclick="openBilling(\''+w.id+'\')">🧾 Note &amp; Charges</button></span></div>';
+  h+='<div style="font-size:10px;color:var(--mu);margin-bottom:8px">These smart notes are <b>auto-added to the note below</b> — review and delete anything you don\'t agree with before saving.</div>';
   if(!list.length){h+='<div style="font-size:12px;color:var(--mu)">No specific guideline prompts for the current data.</div>';}
   list.forEach(function(s,i){
     h+='<div style="border-left:3px solid var(--ac);background:var(--sf);border:1px solid var(--bd);border-radius:5px;padding:7px 9px;margin-bottom:6px"><div style="display:flex;justify-content:space-between;gap:8px"><span style="font-size:12px;color:var(--tx)"><b>'+e(s.cat)+':</b> '+e(s.sug)+'</span><button class="btn bg3 bsm" style="flex-shrink:0" onclick="insertSuggestion('+i+')">＋ Note</button></div><div style="font-size:10px;color:var(--mu);margin-top:3px;font-family:var(--mono)">'+e(s.cite)+'</div></div>';
@@ -1911,22 +2248,27 @@ function suggestionsPanelHtml(w){
   h+='</div>';return h;
 }
 function insertSuggestion(i){var c=window._sugCache;if(!c||!c.list[i])return;insertMacro("wf-notes",c.list[i].note);toast("Smart note inserted — review before saving");}
+function autoInsertSmartNotes(w){
+  // Opt-out: drop all guideline smart notes into the note as a deletable block on open.
+  if(!w||!document.getElementById("wf-notes"))return;
+  var list=(window._sugCache&&window._sugCache.id===w.id)?window._sugCache.list:woundSuggestions(w);
+  var txt=(list||[]).map(function(s){return "• "+s.note;}).join("\n");
+  setAIBlock("wf-notes","guideline smart notes",txt);
+}
 function draftAINote(woundId){
-  if(!cloudOn()){toast("AI drafting needs the cloud server — connect in Settings","err");return;}
+  if(!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
   var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;
   var c=clinContext(w);delete c.name; // de-identify: send minimum-necessary context only
   var sugs=woundSuggestions(w).map(function(s){return s.cat+": "+s.sug+" ["+s.cite+"]";});
-  var g=cloudGet();
   toast("Drafting note…");
-  fetch(g.api+"/api/ai/draft-note",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},body:JSON.stringify({context:c,suggestions:sugs})})
-   .then(function(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();})
-   .then(function(d){if(d.text){insertMacro("wf-notes",d.text);toast("AI draft inserted — review & verify before saving","ok");}})
-   .catch(function(err){toast(err.message==="notcfg"?"AI drafting isn't configured on the server yet":"AI draft failed","err");});
+  aiDraftReq({context:c,suggestions:sugs})
+   .then(function(d){if(d.text){setAIBlock("wf-notes","AI draft note",d.text);toast("AI draft added — delete anything you don't agree with before saving","ok");}})
+   .catch(function(err){toast(err.message==="notcfg"?"AI isn't configured on the server yet":"AI draft failed","err");});
 }
 function _woundPhotoURL(file,cb){var fr=new FileReader();fr.onload=function(){cb(fr.result);};fr.readAsDataURL(file);}
 function _chartPhotos(w){return (w.chart||[]).filter(function(h){return h.photo;}).map(function(h){return {dt:h.dt,url:h.photo};});}
 function analyzeWoundPhoto(woundId){
-  if(!cloudOn()){toast("Photo analysis needs the cloud server — connect in Settings","err");return;}
+  if(!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
   var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;
   var pin=document.getElementById("wf-photo");
   if(pin&&pin.files&&pin.files[0]){_woundPhotoURL(pin.files[0],function(u){_sendAnalyze(w,u,null);});return;}
@@ -1935,7 +2277,7 @@ function analyzeWoundPhoto(woundId){
   toast("Add a wound photo first (in this note or a prior visit)","err");
 }
 function compareWoundPhotos(woundId){
-  if(!cloudOn()){toast("Photo analysis needs the cloud server — connect in Settings","err");return;}
+  if(!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
   var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;
   var ph=_chartPhotos(w);var pin=document.getElementById("wf-photo");
   if(pin&&pin.files&&pin.files[0]){ // selected = current, latest chart photo = previous
@@ -1950,13 +2292,10 @@ function _sendAnalyze(w,curURL,prevURL){
   var pm=prevURL?(""+prevURL).match(/^data:([^;]+);base64,(.*)$/):null;
   var c=clinContext(w);delete c.name; // de-identify
   var sugs=woundSuggestions(w).map(function(s){return s.cat+": "+s.sug+" ["+s.cite+"]";});
-  var g=cloudGet();
   toast(prevURL?"Comparing photos with Claude…":"Analyzing photo with Claude…");
-  fetch(g.api+"/api/ai/analyze-wound",{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+g.token},
-    body:JSON.stringify({context:c,suggestions:sugs,image:cm?cm[2]:null,mime:cm?cm[1]:null,prevImage:pm?pm[2]:null,prevMime:pm?pm[1]:null})})
-   .then(function(r){if(r.status===501)throw new Error("notcfg");if(!r.ok)throw new Error("ai");return r.json();})
+  aiAnalyzeReq({context:c,suggestions:sugs,image:cm?cm[2]:null,mime:cm?cm[1]:null,prevImage:pm?pm[2]:null,prevMime:pm?pm[1]:null})
    .then(function(d){renderWoundAnalysis(w.id,d.analysis||{},{cur:curURL,prev:prevURL});})
-   .catch(function(err){toast(err.message==="notcfg"?"Claude isn't configured on the server yet (set ANTHROPIC_API_KEY or BEDROCK_MODEL_ID)":"Analysis failed","err");});
+   .catch(function(err){toast(err.message==="notcfg"?"Claude isn't configured on the server yet":"Analysis failed","err");});
 }
 function renderWoundAnalysis(woundId,a,imgs){
   window._lastAnalysis={id:woundId,a:a};
@@ -1974,14 +2313,205 @@ function renderWoundAnalysis(woundId,a,imgs){
     +'<div style="font-size:11px;color:var(--mu);margin-top:6px;border-top:1px solid var(--bd);padding-top:7px">'+e(a.confidence?("Confidence: "+a.confidence+" · "):"")+e(a.disclaimer||"AI-generated decision support — a licensed clinician must review and confirm.")+'</div>';
   document.getElementById("m-aiwound-body").innerHTML=body;
   oM("m-aiwound");
+  // Opt-out: auto-input the photo analysis into the wound note as a deletable block.
+  if(document.getElementById("wf-notes")){setAIBlock("wf-notes","photo analysis",_analysisNoteText(a));toast("Photo analysis added to the note — delete anything you don't agree with","ok");}
 }
-function insertAnalysisIntoNote(){
-  var x=window._lastAnalysis;if(!x)return;var a=x.a;var parts=[];
+function _analysisNoteText(a){
+  var parts=[];
   if(a.assessment)parts.push(a.assessment);
+  if(a.redFlags&&a.redFlags.length)parts.push("RED FLAGS: "+a.redFlags.join("; "));
+  if(a.comparison)parts.push("Interval: "+a.comparison+(a.trajectory?" ("+a.trajectory+")":""));
   ["imaging","medications","advancedTherapy","labs","debridement","dressings","referrals"].forEach(function(k){if(a[k]&&a[k].length)parts.push(({imaging:"Imaging",medications:"Meds",advancedTherapy:"Advanced therapy",labs:"Labs/PCR",debridement:"Debridement",dressings:"Dressings",referrals:"Referrals"}[k])+": "+a[k].join("; "));});
   parts.push("(AI photo analysis — clinician to verify.)");
+  return parts.join("\n");
+}
+function insertAnalysisIntoNote(){
+  var x=window._lastAnalysis;if(!x)return;
   cM("m-aiwound");
-  var el=document.getElementById("wf-notes");if(el){insertMacro("wf-notes",parts.join(" "));toast("Analysis added to note — review before saving","ok");}else{toast("Open the wound note to insert");}
+  if(document.getElementById("wf-notes")){setAIBlock("wf-notes","photo analysis",_analysisNoteText(x.a));toast("Analysis re-added to note — review before saving","ok");}else{toast("Open the wound note to insert");}
+}
+
+/* ════ VISIT NOTE & CHARGE BUILDER (SOAP + ICD/CPT/modifiers + self-audit) ════
+   Suggests codes from the documented work; a clinician/coder confirms. Not a
+   certified grouper — verify against current CPT/ICD and your MAC LCDs. */
+function woundSite(loc){loc=(loc||"").toLowerCase();
+  var lat=/(^|[^a-z])(l\.|left|lt\b)/.test(loc)?"left":(/(^|[^a-z])(r\.|right|rt\b)/.test(loc)?"right":"unspecified");
+  var site=/sacr|coccy/.test(loc)?"sacrum":/ischi/.test(loc)?"ischium":/trochan|hip/.test(loc)?"hip":/buttock|gluteal/.test(loc)?"buttock":/heel/.test(loc)?"heel":/ankle|malleol/.test(loc)?"ankle":/plantar|sole|toe|forefoot|midfoot|metatars|foot/.test(loc)?"foot":/calf|shin|gaiter|lower\s*leg|\bleg\b/.test(loc)?"lowerleg":/thigh/.test(loc)?"thigh":/elbow/.test(loc)?"elbow":/scalp|occiput|head/.test(loc)?"head":"other";
+  return {lat:lat,site:site};
+}
+function _stageDigit(s){return ({"Stage 1":"1","Stage 2":"2","Stage 3":"3","Stage 4":"4","Unstageable":"0","Deep Tissue Inj.":"6"})[s]||"9";}
+function _latDigit(l){return l==="right"?"1":l==="left"?"2":"0";}
+function _depthDigit(w){var le=woundLastMeasured(w)||{};if((le.tissueE||0)>0||w.stage==="Stage 4")return"4";if(["Stage 3","Unstageable"].indexOf(w.stage)>=0)return"3";if((le.tissueS||0)>0||w.stage==="Stage 2")return"2";return"1";}
+function _l97(st,dd){var reg={thigh:"L97.1",calf:"L97.2",lowerleg:"L97.8",ankle:"L97.3",heel:"L97.4",foot:"L97.5"}[st.site]||"L97.9";var ld=st.lat==="right"?"1":st.lat==="left"?"2":"9";return reg+ld+dd;}
+function icdForWound(w){
+  var st=woundSite(w.loc),out=[],flags=[];
+  var press=(w.etio==="Pressure"||w.tp==="Pressure Injury");
+  var sd=_stageDigit(w.stage),ld=_latDigit(st.lat),dd=_depthDigit(w);
+  function add(c,d){out.push({code:c,desc:d});}
+  if(press){
+    var base={sacrum:"L89.15",ischium:"L89.4"+ld,hip:"L89.2"+ld,buttock:"L89.3"+ld,heel:"L89.6"+ld,ankle:"L89.5"+ld}[st.site];
+    if(base)add(base+sd,"Pressure ulcer, "+st.site+(st.lat!=="unspecified"?" ("+st.lat+")":"")+", "+(w.stage||"unspecified stage"));
+    else {add("L89.89"+sd,"Pressure ulcer, other site, "+(w.stage||"unspecified stage"));flags.push("Confirm pressure-ulcer site code (mapped to ‘other site’).");}
+    if(st.lat==="unspecified"&&["ischium","hip","buttock","heel","ankle"].indexOf(st.site)>=0)flags.push("Specify laterality (L/R) for a precise L89 code.");
+  } else if(w.tp==="Diabetic Ulcer"){add("E11.621","Type 2 diabetes mellitus with foot ulcer (code first)");add(_l97(st,dd),"Non-pressure chronic ulcer, "+st.site+(st.lat!=="unspecified"?" ("+st.lat+")":"")+", depth "+dd);flags.push("Confirm diabetes type/control and ulcer depth/laterality.");}
+  else if(w.tp==="Venous Ulcer"){add("I87.31"+(st.lat==="right"?"1":st.lat==="left"?"2":"9"),"Chronic venous hypertension with ulcer (code first)");add(_l97(st,dd),"Non-pressure chronic ulcer, "+st.site+", depth "+dd);}
+  else if(w.tp==="Arterial Ulcer"){add("I70.23x","Atherosclerosis of native leg artery with ulceration — VERIFY full code/laterality");add(_l97(st,dd),"Non-pressure chronic ulcer, "+st.site+", depth "+dd);flags.push("Arterial: confirm I70.23-/I70.24- complete code.");}
+  else add(_l97(st,dd),"Non-pressure chronic ulcer, "+st.site+", depth "+dd);
+  if(w.inf)add("L08.9","Local skin/subcutaneous infection (if documented; consider cellulitis L03.- / osteomyelitis M86.-)");
+  return {codes:out,flags:flags};
+}
+function _latMods(st){return st.lat==="right"?["RT"]:st.lat==="left"?["LT"]:[];}
+function cptForVisit(w,inp){
+  var st=woundSite(w.loc),le=woundLastMeasured(w)||{},area=woundAreaOf(le)||0,out=[],hasProc=false;
+  function C(code,desc,units,mods,hcpcs){out.push({code:code,desc:desc,units:units||1,mods:mods||[],hcpcs:!!hcpcs});}
+  if(inp.deb==="Surgical"){hasProc=true;var lvl=inp.debLevel||"Subcutaneous";
+    var first=({"Subcutaneous":"11042","Muscle / Fascia":"11043","Bone":"11044"})[lvl]||"11042";
+    var addc=({"Subcutaneous":"11045","Muscle / Fascia":"11046","Bone":"11047"})[lvl]||"11045";
+    var sq=parseFloat(inp.debSqcm)||0,au=Math.max(0,Math.ceil((sq-20)/20));
+    C(first,"Surgical debridement ("+lvl+"), first 20 cm²",1,_latMods(st));if(au>0)C(addc,"…each additional 20 cm²",au,[]);
+  } else if(inp.deb==="Selective"){hasProc=true;var sq2=parseFloat(inp.debSqcm)||0,au2=Math.max(0,Math.ceil((sq2-20)/20));
+    C("97597","Selective debridement, first 20 cm²",1,_latMods(st));if(au2>0)C("97598","…each additional 20 cm²",au2,[]);}
+  if(inp.ctp==="Yes"){hasProc=true;var special=/foot|heel|ankle/.test(st.site);var sq3=parseFloat(inp.ctpUnits)||area||0,big=sq3>=100;
+    var f2=special?"15275":(big?"15273":"15271"),a2=special?"15276":(big?"15274":"15272");
+    var mods=_latMods(st);if((parseInt(inp.ctpApps)||1)>4)mods.push("KX");
+    C(f2,"Skin substitute application"+(special?" (foot/ankle)":"")+", first 25 cm²",1,mods);
+    var au3=Math.max(0,Math.ceil((sq3-25)/25));if(au3>0)C(a2,"…each additional 25 cm²",au3,[]);
+    if(inp.ctpQ)C(inp.ctpQ.toUpperCase(),"CTP product"+(inp.ctpProduct?" — "+inp.ctpProduct:""),Math.round(sq3),[],true);
+  }
+  if(inp.npwt==="Durable"){hasProc=true;C(area>50?"97606":"97605","NPWT (DME pump), "+(area>50?">50":"≤50")+" cm²",1,[]);}
+  else if(inp.npwt==="Disposable"){hasProc=true;C(area>50?"97608":"97607","NPWT (disposable)",1,[]);}
+  if(inp.em&&inp.em!=="None")out.unshift({code:inp.em,desc:"Office/outpatient E/M",units:1,mods:hasProc?["25"]:[],hcpcs:false});
+  return {codes:out,hasProc:hasProc};
+}
+function auditCharges(w,inp,cpt,icd){
+  var f=[],le=woundLastMeasured(w)||{},st=woundSite(w.loc);
+  if(!le.L||!le.W)f.push({lvl:"warn",t:"Latest entry missing L×W measurements — required for medical necessity and debridement units."});
+  if((inp.deb==="Surgical"||inp.deb==="Selective")&&!(parseFloat(inp.debSqcm)>0))f.push({lvl:"warn",t:"Debridement billed but total sq cm not entered — drives add-on units (under-coding risk)."});
+  if(inp.deb==="Surgical"&&!inp.debLevel)f.push({lvl:"warn",t:"Surgical debridement needs deepest tissue level documented (11042 vs 11043 vs 11044)."});
+  if(inp.ctp==="Yes"){if(!inp.ctpQ)f.push({lvl:"warn",t:"Skin substitute applied but no product Q-code/units — claim will deny."});if((parseInt(inp.ctpApps)||1)>4)f.push({lvl:"info",t:"More than 4 applications — KX added; ≥8/episode risks denial (LCD)."});if(inp.consFailed!=="Yes")f.push({lvl:"warn",t:"CTP requires documented failure of ≥4 weeks standard care (medical necessity)."});}
+  if(inp.npwt&&inp.npwt!=="No"&&inp.consFailed!=="Yes")f.push({lvl:"warn",t:"NPWT requires documented failure of standard wound care."});
+  if(cpt.hasProc&&inp.em&&inp.em!=="None")f.push({lvl:"info",t:"E/M with a procedure — modifier 25 applied; the evaluation must be significant & separately identifiable."});
+  if((!inp.em||inp.em==="None")&&!cpt.hasProc)f.push({lvl:"warn",t:"No procedure and no E/M selected — nothing billable on this visit."});
+  if(cpt.hasProc&&(!inp.em||inp.em==="None"))f.push({lvl:"info",t:"Procedure only. If a separate evaluation occurred, an E/M with modifier 25 may be warranted (avoid under-coding)."});
+  if(st.lat==="unspecified"&&/foot|heel|ankle|lowerleg|thigh|calf|ischium|hip|buttock/.test(st.site))f.push({lvl:"warn",t:"Laterality unspecified — add L/R for code specificity and LT/RT."});
+  if(!(w.chart||[]).some(function(h){return h.photo;}))f.push({lvl:"info",t:"No wound photo on file — recommended for chronic-wound documentation."});
+  (icd.flags||[]).forEach(function(x){f.push({lvl:"info",t:x});});
+  return f;
+}
+function buildSoapNote(w,inp,cpt,icd){
+  var p=PATIENTS.find(function(x){return x.id===w.ptId;})||{};
+  var le=woundLastMeasured(w)||(w.chart||[]).slice(-1)[0]||{};
+  var area=woundAreaOf(le),redux=woundAreaReductionPct(w),st=woundSite(w.loc);
+  var dims=[le.L,le.W,le.D].filter(function(x){return x!=null;}).join(" × ");
+  var dx=icd.codes.map(function(c){return c.code;}).join(", ");
+  var L=[];
+  L.push("WOUND CARE VISIT NOTE — "+TD());
+  if(p.name)L.push("Patient: "+p.name+(p.dob?"  DOB: "+p.dob:"")+(p.mrn?"  MRN: "+p.mrn:""));
+  L.push("Facility: "+w.fac+"   POS: "+(inp.pos||"")+"   Provider: "+(inp.provider||w.pv||"")+(inp.npi?"  NPI: "+inp.npi:"")+(inp.payer?"   Payer: "+inp.payer:""));
+  L.push("");
+  L.push("S: "+(inp.subjective||("Pain "+(le.pain!=null?le.pain+"/10":"not reported")+" at the "+w.loc+" wound; interval history reviewed.")));
+  L.push("");
+  L.push("O:");
+  L.push("  Wound: "+w.tp+(w.stage&&w.stage!=="N/A"?" ("+w.stage+")":"")+", "+w.loc+(st.lat!=="unspecified"?" ["+st.lat+"]":"")+"; etiology "+(w.etio||"—")+".");
+  L.push("  Measurements: "+(dims||"—")+" cm"+(area!=null?"  (area "+area+" cm²"+(redux!=null?", "+(redux>=0?"−":"+")+Math.abs(redux)+"% vs baseline":"")+")":"")+(le.push!=null?"  PUSH "+le.push:"")+".");
+  var bed=[le.tissueG?le.tissueG+"% granulation":"",le.tissueS?le.tissueS+"% slough":"",le.tissueE?le.tissueE+"% eschar":"",le.tissueEp?le.tissueEp+"% epithelial":""].filter(Boolean).join(", ");
+  L.push("  Wound bed: "+(bed||"—")+".  Exudate: "+(le.exAmt||"—")+(le.exType?" / "+le.exType:"")+(le.odor?", odor":"")+".  Periwound: "+(le.periwound||"—")+".  Edges: "+(le.edges||"—")+".");
+  if(le.underDepth||le.tunDepth)L.push("  Undermining "+(le.underDepth||0)+" cm "+(le.underLoc||"")+"; tunneling "+(le.tunDepth||0)+" cm "+(le.tunLoc||"")+".");
+  L.push("  Infection: "+(w.inf?("present"+(le.infSev?" — "+le.infSev:"")):"no clinical signs")+(le.culture&&le.culture!=="Not indicated"?"; culture "+le.culture:"")+(le.organism?" ("+le.organism+")":"")+".");
+  if(w.abi!=null)L.push("  Perfusion: ABI "+w.abi+(le.abiDate?" ("+le.abiDate+")":"")+".");
+  if(w.braden!=null)L.push("  Braden: "+w.braden+".");
+  var procs=[];
+  if(inp.deb&&inp.deb!=="No")procs.push(inp.deb+" debridement"+(inp.debLevel?" to "+inp.debLevel:"")+", total "+(inp.debSqcm||"?")+" cm²"+(inp.debInstr?" using "+inp.debInstr:"")+"; hemostasis achieved; tolerated well.");
+  if(inp.ctp==="Yes")procs.push("Applied skin substitute"+(inp.ctpProduct?" "+inp.ctpProduct:"")+(inp.ctpQ?" ("+inp.ctpQ.toUpperCase()+")":"")+", "+(inp.ctpUnits||"?")+" cm², application #"+(inp.ctpApps||1)+".");
+  if(inp.npwt&&inp.npwt!=="No")procs.push("NPWT ("+inp.npwt+") "+(le.vacSetting||"")+" applied.");
+  if(le.tx)procs.push("Dressing/treatment: "+le.tx+".");
+  if(procs.length)L.push("  Procedures: "+procs.join(" "));
+  L.push("");
+  L.push("A:");
+  icd.codes.forEach(function(c){L.push("  • "+c.code+" — "+c.desc);});
+  L.push("  Trajectory: "+(w.heal||"—")+(redux!=null?" ("+(redux>=0?"−":"+")+Math.abs(redux)+"% area)":"")+".  Goal of care: "+(w.goal||"Healable")+".");
+  if(inp.consFailed==="Yes")L.push("  ≥"+(inp.consDur||"4")+" weeks of standard care without adequate progress — advanced therapy medically necessary.");
+  L.push("");
+  L.push("P: "+(inp.plan||((le.tx?le.tx+"; ":"")+"continue current plan; reassess in 1 week; "+(w.goal==="Non-healable / Palliative"?"palliative/comfort-focused care.":"escalate (advanced therapy / specialist) if <40% area reduction by week 4."))));
+  L.push("");
+  L.push("CHARGES:");
+  cpt.codes.forEach(function(c){L.push("  • "+c.code+(c.units>1?" ×"+c.units:"")+(c.mods.length?" -"+c.mods.join(" -"):"")+"  "+c.desc+(c.hcpcs?"  [HCPCS · units = sq cm applied]":"")+"  | Dx: "+dx);});
+  L.push("");
+  L.push("Diagnoses (ICD-10): "+dx);
+  L.push("Attestation: "+(inp.attest==="Yes"?"I attest this note accurately reflects the service personally provided.":"[attestation pending]")+"  Signed: "+(inp.provider||w.pv||"")+(inp.cosign?"  Co-sign: "+inp.cosign:""));
+  L.push("(Suggested codes are clinician/coder-confirmed decision support — verify against current CPT/ICD and your MAC LCDs.)");
+  return L.join("\n");
+}
+function readBillingInputs(){return {provider:gv("bk-provider"),npi:gv("bk-npi"),pos:gv("bk-pos"),payer:gv("bk-payer"),em:gv("bk-em"),consFailed:gv("bk-cons"),consDur:gv("bk-consdur"),deb:gv("bk-deb"),debLevel:gv("bk-deblevel"),debSqcm:gv("bk-debsq"),debInstr:gv("bk-debinstr"),ctp:gv("bk-ctp"),ctpProduct:gv("bk-ctpprod"),ctpQ:gv("bk-ctpq"),ctpUnits:gv("bk-ctpunits"),ctpApps:gv("bk-ctpapps"),npwt:gv("bk-npwt"),attest:gv("bk-attest"),cosign:gv("bk-cosign"),subjective:gv("bk-subj"),plan:gv("bk-plan")};}
+function openBilling(woundId){
+  var w=WOUNDS.find(function(x){return x.id===woundId;});if(!w)return;window._billW=w;
+  var le=woundLastMeasured(w)||(w.chart||[]).slice(-1)[0]||{};var area=woundAreaOf(le)||0;var st=woundSite(w.loc);
+  var debDef=({Sharp:"Surgical",Excisional:"Surgical",Selective:"Selective",Enzymatic:"Selective",Autolytic:"Selective"})[le.debride]||"No";
+  sv("bk-provider",(currentUser&&currentUser.name)||w.pv||"");sv("bk-npi","");sv("bk-pos","31");sv("bk-payer","");
+  sv("bk-em","99213");sv("bk-cons",w.graft||(le.vac)?"Yes":"No");sv("bk-consdur","4");
+  sv("bk-deb",debDef);sv("bk-deblevel","Subcutaneous");sv("bk-debsq",area?String(Math.round(area)):"");sv("bk-debinstr","");
+  sv("bk-ctp",w.graft?"Yes":"No");sv("bk-ctpprod",w.graftType||"");sv("bk-ctpq","");sv("bk-ctpunits",area?String(Math.round(area)):"");sv("bk-ctpapps","1");
+  sv("bk-npwt",le.vac?"Durable":"No");sv("bk-attest","No");sv("bk-cosign","");sv("bk-subj","");sv("bk-plan","");
+  document.getElementById("bk-ai").innerHTML="";
+  computeBilling();oM("m-billing");
+}
+function computeBilling(){
+  var w=window._billW;if(!w)return;var inp=readBillingInputs();
+  var icd=icdForWound(w),cpt=cptForVisit(w,inp),note=buildSoapNote(w,inp,cpt,icd),flags=auditCharges(w,inp,cpt,icd);
+  window._bill={w:w,inp:inp,icd:icd,cpt:cpt};
+  document.getElementById("bk-note").value=note;
+  document.getElementById("bk-charges").innerHTML='<table class="tbl" style="font-size:11px"><thead><tr><th>Code</th><th>Units</th><th>Modifiers</th><th>Description</th></tr></thead><tbody>'+cpt.codes.map(function(c){return'<tr><td class="b">'+e(c.code)+'</td><td>'+c.units+'</td><td>'+(c.mods.join(", ")||"—")+'</td><td>'+e(c.desc)+'</td></tr>';}).join("")+'</tbody></table><div style="font-size:11px;color:var(--mu);margin-top:5px">Dx: '+e(icd.codes.map(function(c){return c.code;}).join(", "))+'</div>';
+  document.getElementById("bk-audit").innerHTML='<div class="st" style="margin-bottom:5px">Self-audit ('+flags.length+')</div>'+(flags.length?flags.map(function(x){var c=x.lvl==="warn"?"#b3433a":"#356b64";return'<div style="font-size:11.5px;color:'+c+';margin-bottom:3px">'+(x.lvl==="warn"?"⚠ ":"• ")+e(x.t)+'</div>';}).join(""):'<div style="font-size:12px;color:var(--gn)">✓ No issues detected.</div>');
+}
+function aiAuditBilling(){
+  if(!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
+  var b=window._bill;if(!b)return;
+  var codes=b.cpt.codes.map(function(c){return c.code+(c.units>1?" x"+c.units:"")+(c.mods.length?" -"+c.mods.join(" -"):"")+" "+c.desc;}).concat(b.icd.codes.map(function(c){return c.code+" "+c.desc;}));
+  var ctx=clinContext(b.w);delete ctx.name;
+  document.getElementById("bk-ai").innerHTML='<div style="font-size:12px;color:var(--mu)">🤖 Claude is auditing the note & charges…</div>';
+  aiAuditReq({note:gv("bk-note"),codes:codes,context:ctx})
+   .then(function(d){renderBillingAudit(d.audit||{});})
+   .catch(function(err){document.getElementById("bk-ai").innerHTML='';toast(err.message==="notcfg"?"Claude isn't configured on the server yet":"AI audit failed","err");});
+}
+function renderBillingAudit(a){
+  function sec(t,arr,clr){if(!arr||!arr.length)return"";return '<div style="margin-bottom:8px"><div class="st" style="margin-bottom:3px;color:'+(clr||"#356b64")+'">'+e(t)+'</div><ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.5;color:#42474d">'+arr.map(function(x){return"<li>"+e(x)+"</li>";}).join("")+'</ul></div>';}
+  var h='<div style="background:rgba(63,125,118,.07);border:1px solid rgba(63,125,118,.22);border-radius:8px;padding:11px 13px;margin-top:10px">';
+  h+='<div class="st" style="margin-bottom:6px">🤖 Claude reimbursement self-audit</div>';
+  if(a.summary)h+='<div style="font-size:12.5px;color:#42474d;margin-bottom:8px">'+e(a.summary)+'</div>';
+  h+=sec("⚠ Documentation gaps",a.gaps,"#b3433a")+sec("Verbiage to add (supports the codes)",a.verbiage)+sec("Under-coding / capture opportunities",a.underCoding,"#946325")+sec("Recommended ICD / CPT / modifiers",a.recommendedCodes)+sec("Compliance flags",a.complianceFlags,"#b3433a");
+  h+='<div style="font-size:10.5px;color:var(--mu);margin-top:4px">AI decision support — auto-added to the note below; a clinician/certified coder must confirm and delete anything not supported before billing.</div></div>';
+  document.getElementById("bk-ai").innerHTML=h;
+  // Opt-out: auto-input the audit's verbiage/under-coding/recommended codes into the editable note.
+  var lines=[];
+  if(a.summary)lines.push("Summary: "+a.summary);
+  (a.verbiage||[]).forEach(function(x){lines.push("• "+x);});
+  (a.underCoding||[]).forEach(function(x){lines.push("• Capture: "+x);});
+  (a.recommendedCodes||[]).forEach(function(x){lines.push("• Code: "+x);});
+  (a.gaps||[]).forEach(function(x){lines.push("• Address gap: "+x);});
+  (a.complianceFlags||[]).forEach(function(x){lines.push("• Compliance: "+x);});
+  if(lines.length){setAIBlock("bk-note","self-audit",lines.join("\n"));toast("AI audit added to the note — delete anything you don't agree with","ok");}
+}
+function finalizeBilling(){
+  var b=window._bill;if(!b)return;var w=b.w;
+  var le=(w.chart&&w.chart.length)?w.chart[w.chart.length-1]:null;
+  var rec={dt:nowStamp(),soap:gv("bk-note"),icd:b.icd.codes,cpt:b.cpt.codes,by:b.inp.provider||(currentUser&&currentUser.name)||"",pos:b.inp.pos,payer:b.inp.payer};
+  if(le){le.billing=rec;le.soap=rec.soap;le.icd=b.icd.codes.map(function(c){return c.code;}).join(", ");le.cpt=b.cpt.codes.map(function(c){return c.code;}).join(", ");}
+  if(!w.audit)w.audit=[];w.audit.push({dt:nowStamp(),by:rec.by,action:"Visit note & charges finalized ("+b.cpt.codes.map(function(c){return c.code;}).join(", ")+")"});
+  persist();updateBell&&updateBell();cM("m-billing");toast("Visit note & charges finalized & saved","ok");
+}
+function copyBillingNote(){var t=gv("bk-note");if(navigator.clipboard){navigator.clipboard.writeText(t).then(function(){toast("Note copied — paste into eCW","ok");},function(){toast("Copy failed","err");});}else toast("Clipboard not available","err");}
+function billingSuperbill(){
+  var b=window._bill;if(!b)return;var w=b.w;var p=PATIENTS.find(function(x){return x.id===w.ptId;})||{};
+  var dx=b.icd.codes.map(function(c){return c.code;}).join("; ");
+  var rows=[["Date","Patient","MRN","Facility","POS","Provider","NPI","Payer","CPT/HCPCS","Units","Modifiers","ICD-10 (pointers)","Description"]];
+  b.cpt.codes.forEach(function(c){rows.push([TD(),p.name||"",p.mrn||"",w.fac,b.inp.pos||"",b.inp.provider||"",b.inp.npi||"",b.inp.payer||"",c.code,c.units,c.mods.join(" "),dx,c.desc]);});
+  var csv=rows.map(function(r){return r.map(function(v){return'"'+String(v).replace(/"/g,'""')+'"';}).join(",");}).join("\n");
+  var blob=new Blob([csv],{type:"text/csv"});var u=URL.createObjectURL(blob);var a=document.createElement("a");a.href=u;a.download="superbill_"+(p.name||"patient").replace(/[^a-z0-9]/gi,"_")+"_"+TDS().replace(/\//g,"-")+".csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);toast("Superbill CSV downloaded for billing","ok");
+}
+function billingPDF(){
+  if(!window.jspdf||!window.jspdf.jsPDF){toast("PDF library not loaded","err");return;}
+  var doc=new window.jspdf.jsPDF({unit:"pt",format:"letter"});doc.setFont("courier","normal");doc.setFontSize(9);
+  var lines=doc.splitTextToSize(gv("bk-note"),532);doc.text(lines,40,48);doc.save("visit_note_"+TDS().replace(/\//g,"-")+".pdf");toast("Note PDF downloaded","ok");
 }
 
 function renderWound(){
@@ -3533,9 +4063,15 @@ var HELP=[
 
  {id:"aiphoto",cat:"AI & knowledge base",title:"Analyze a wound photo (Claude)",sub:"Vision analysis + interval comparison",
   intro:"With the server connected to Claude, the app can analyze a wound photo and compare it to the last one — returning suggestions for imaging, medications, grafts, labs/PCR, dressings and referrals, with urgent red-flags highlighted.",
-  fig:["Wound",[{label:"Attach / select a wound photo",n:1},{label:"🔬 Analyze photo  /  📊 Compare to last",n:2},{label:"Structured analysis + red flags",n:3},{label:"＋ Insert into note",n:4}]],
-  steps:["Add a photo in the wound note (or use one already on the chart) (1).","Click <span class='help-pill'>🔬 Analyze photo</span> for a single image, or <span class='help-pill'>📊 Compare to last</span> to compare this visit with the previous photo (2).","Review the analysis — assessment, imaging, meds, grafts/CTP, labs & wound-care PCR, dressings, referrals, and any 🚩 red flags (3). Compare also shows a healing trajectory.","Click <span class='help-pill'>＋ Insert into note</span> (4) to add a summary, then edit and save."],
-  tips:["Always verify — it’s clinician decision support, never a diagnosis or order.","Photos are PHI; analysis runs through your organization’s BAA-covered Claude connection."]},
+  fig:["Wound",[{label:"Attach / select a wound photo",n:1},{label:"🔬 Analyze photo  /  📊 Compare to last",n:2},{label:"Structured analysis + red flags",n:3},{label:"Auto-added to note — delete to reject",n:4}]],
+  steps:["Add a photo in the wound note (or use one already on the chart) (1).","Click <span class='help-pill'>🔬 Analyze photo</span> for a single image, or <span class='help-pill'>📊 Compare to last</span> to compare this visit with the previous photo (2).","Review the analysis — assessment, imaging, meds, grafts/CTP, labs & wound-care PCR, dressings, referrals, and any 🚩 red flags (3). Compare also shows a healing trajectory.","The summary is <b>automatically added</b> to your wound note inside a clearly-marked AI block (4) — <b>delete any line you don’t agree with</b> before saving."],
+  tips:["Opt-out by design: AI output is dropped into the note for you; you remove what doesn’t apply rather than copying it in.","Always verify — it’s clinician decision support, never a diagnosis or order.","Photos are PHI; analysis runs through your organization’s BAA-covered Claude connection."]},
+
+ {id:"billing",cat:"AI & knowledge base",title:"Visit Note & Charge Builder (SOAP + CPT/ICD)",sub:"Reimbursement-ready note with an AI self-audit",
+  intro:"From any wound note, the builder turns the latest assessment into a reimbursement-ready SOAP note with the suggested CPT/HCPCS codes, modifiers (25, 59/XU, KX, LT/RT) and ICD-10 diagnoses — then a self-audit (deterministic, plus an optional Claude pass) checks for documentation gaps and under-coding before you finalize.",
+  fig:["Wound",[{label:"🧾 Note & Charges (suggestions panel)",n:1},{label:"Fill provider, E/M, debridement, CTP, NPWT",n:2},{label:"SOAP note + suggested charges + self-audit",n:3},{label:"🤖 AI self-audit, then ✓ Finalize",n:4}]],
+  steps:["In a wound note, click <span class='help-pill'>🧾 Note &amp; Charges</span> in the Suggested Care panel (1).","Confirm the visit details — provider/NPI, place of service, payer, E/M level, whether ≥4 weeks of conservative care failed, and any debridement (type/level/cm²), skin substitute (product/Q-code/area/application #) or NPWT performed (2). The note, charges and self-audit refresh as you type.","Review the <b>SOAP note</b>, the <b>suggested charges</b> (CPT/HCPCS with units &amp; modifiers, plus ICD-10), and the <b>self-audit</b> flags — e.g. missing measurements, laterality, sq-cm for debridement add-ons, or medical-necessity verbiage (3).","Click <span class='help-pill'>🤖 AI self-audit</span> for Claude to check the note &amp; codes for gaps, missing verbiage, under-coding and the optimal modifier/ICD/CPT combination; then <span class='help-pill'>📋 Copy</span> into eCW, download a <span class='help-pill'>📄 PDF</span> or <span class='help-pill'>📊 Superbill CSV</span> for billers, and <span class='help-pill'>✓ Finalize &amp; save</span> to attach it to the visit (4)."],
+  tips:["Opt-out by design: the AI self-audit’s verbiage, under-coding catches and recommended codes are <b>auto-added into the note</b> in a marked block — delete anything not supported before you finalize.","Suggested codes are decision support — a clinician/certified coder must confirm against current CPT/ICD and your MAC LCDs before billing.","The AI self-audit needs the server connected to Claude; the deterministic audit and code suggestions work with no AI.","Debridement add-on units come from total sq cm; enter it so you don’t under-code (e.g. 45 cm² of surgical debridement = first 20 cm² + 2 add-on units)."]},
 
  {id:"search",cat:"Power features",title:"Instant search & command palette",sub:"Jump anywhere with one shortcut",
   intro:"Press Ctrl/⌘-K (or the 🔍 in the top bar) to search every resident, wound, and facility — and run quick actions like Add Wound.",
@@ -3571,7 +4107,19 @@ var HELP=[
   intro:"By default data is local to your browser. If your organization runs the Clinilytics server, connect to it so your team shares one synced, durable, encrypted copy — and the app still works offline, syncing when it reconnects.",
   fig:["Settings",[{label:"⚙ Settings → Cloud sync",n:1},{label:"Connect to server (URL + login)",n:2},{label:"Status: Connected · Sync now",n:3}]],
   steps:["Open <span class='help-pill'>⚙ Settings → Cloud sync</span> (1).","Click <span class='help-pill'>Connect to server</span>, enter the server URL and your username/password (2).","Once connected, changes sync automatically; use <span class='help-pill'>Sync now</span> any time, and <span class='help-pill'>Disconnect</span> to go local-only (3)."],
-  tips:["Ask your administrator/IT for the server URL and your login.","AI photo analysis and draft-note require the cloud connection."]}
+  tips:["Ask your administrator/IT for the server URL and your login.","AI features work either via this server (BAA route) or a pasted Claude key (Settings → AI)."]},
+
+ {id:"aikey",cat:"AI & knowledge base",title:"Turn on the AI (Claude API key)",sub:"Paste a key — no server needed",
+  intro:"The fastest way to enable the AI features (photo analysis, draft notes, billing self-audit) is to paste your Claude API key in Settings. The app then talks to Claude directly — nothing to deploy.",
+  fig:["Settings",[{label:"⚙ Settings → AI (Claude)",n:1},{label:"Paste your key + Test & Connect",n:2},{label:"AI buttons light up everywhere",n:3}]],
+  steps:["Get a key at <b>console.anthropic.com → API Keys</b>.","Open <span class='help-pill'>⚙ Settings → AI (Claude) → Connect Claude API key…</span> (1).","Paste the key and click <span class='help-pill'>Test &amp; Connect</span> — it verifies the key, then turns on 🔬 Analyze photo, ✨ Draft note and the 🤖 billing self-audit (2,3)."],
+  tips:["The key is stored only in this browser and sent straight to Claude.","For real patient photos (PHI): use the server route (Cloud sync) with a signed BAA instead of paste-key mode.","Both routes work — if a server is connected and a key is set, the pasted key is used."]},
+
+ {id:"email",cat:"Power features",title:"Email automation: scheduled reports & alerts",sub:"Set rules; the server sends them",
+  intro:"Connect your email server once, then create rules that send reports on a schedule (daily/weekly/monthly) or fire alerts when something needs attention (overdue assessments, new infections, high-risk wounds). Your server sends them automatically — even when no one is logged in. Requires Cloud sync.",
+  fig:["Settings",[{label:"⚙ Settings → Email & automation",n:1},{label:"Save SMTP + send a test",n:2},{label:"＋ New rule: schedule or trigger",n:3},{label:"Pick report, recipients, timing",n:4}]],
+  steps:["Open <span class='help-pill'>⚙ Settings → Email &amp; automation</span> (needs Cloud sync connected) (1).","Enter your <b>SMTP</b> host/port/login and From address, click <span class='help-pill'>Send test</span> to confirm, then <span class='help-pill'>Save settings</span> (2).","Click <span class='help-pill'>＋ New rule</span> (3). Choose <b>Schedule</b> (e.g. Weekly · Monday 8:00) or <b>Trigger</b> (e.g. overdue assessments), pick the <b>report</b>, add <b>recipients</b>, optionally limit to a facility/provider, and Save (4).","Use <span class='help-pill'>▶ Run</span> to send now, the checkbox to pause/resume, and watch <b>Recent deliveries</b> for status."],
+  tips:["Reports go out as a formatted email with a CSV attachment for billers/QA.","Schedule times use the server's timezone.","Triggers re-check continuously and email at most once per cooldown while the condition holds.","Recipient emails are your responsibility — only send PHI to addresses covered by your policy/BAA."]}
 ];
 var helpCur="overview";
 function helpGo(id){helpCur=id;renderHelp();var b=document.getElementById("help-body");if(b)b.scrollTop=0;}

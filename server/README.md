@@ -63,7 +63,29 @@ npm start
 | PUT  | `/api/snapshot` | Admin/Provider | replace org state (encrypted, transactional, audited) |
 | POST | `/api/ai/draft-note` | Admin/Provider | draft a note from de-identified context (501 until an AI provider is configured) |
 | POST | `/api/ai/analyze-wound` | Admin/Provider | Claude **vision** analysis of a wound photo → imaging/meds/grafts/labs-PCR/dressings/referrals (501 until `ANTHROPIC_API_KEY` set) |
+| POST | `/api/ai/audit-note` | Admin/Provider | Claude **reimbursement self-audit** of a visit note + proposed CPT/ICD/modifiers → documentation gaps, verbiage, under-coding, recommended code combination, compliance flags (501 until an AI provider is configured) |
+| GET/PUT | `/api/email/settings` | Admin | SMTP config (stored encrypted; password write-only) |
+| POST | `/api/email/test` | Admin | send a test email to verify SMTP |
+| GET  | `/api/email/reports` | Admin | available report types |
+| GET/POST/DELETE | `/api/email/rules` | Admin | list / create-update / delete automation rules |
+| POST | `/api/email/rules/:id/run` | Admin | run a rule immediately |
+| GET  | `/api/email/log` | Admin | recent email deliveries (status) |
 | GET  | `/api/audit` | Admin | recent audit entries |
+
+### Email automation (scheduled reports + triggered alerts)
+Configure SMTP in-app (**Admin → ⚙ Settings → Email & automation**) — no env vars
+needed; the password is stored **encrypted** in the DB. An in-process **scheduler**
+(starts with the server) sends:
+- **Scheduled reports** — weekly wound summary, portfolio roll-up, overdue
+  assessments, infections, high-risk — daily/weekly/monthly/hourly at a chosen
+  time (server timezone; set `TZ`).
+- **Triggered alerts** — re-checks a condition (overdue / infection / high-risk)
+  continuously and emails a digest when matching wounds exist, then cools down.
+
+Each rule has recipients/CC, an optional facility/provider filter, and an output
+format (HTML email + CSV attachment for billers/QA). Delivery status is logged.
+Requires the frontend to be connected via **Cloud sync**. Run `npm i nodemailer`
+(already in `package.json`/lockfile; installed by the Docker build).
 
 ### Optional AI (Claude) — photo analysis + note drafting
 Off by default. To enable Claude, set `ANTHROPIC_API_KEY` (+ optional
