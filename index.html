@@ -29,6 +29,10 @@ nav{display:flex;overflow-x:auto;gap:4px;padding-bottom:9px;margin:0}
 nav button{background:transparent;border:none;color:#6b7077;padding:6px 13px;font-size:12.5px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .12s;border-radius:6px;display:inline-flex;align-items:center;gap:6px}
 nav button:hover{color:var(--tx);background:#eef0f0}
 nav button.A{background:var(--ink);color:#fff;font-weight:600}
+#mnav{display:flex;align-items:center;gap:3px;flex-wrap:wrap;border-top:1px solid var(--bd);margin-top:1px;padding:6px 0 7px}
+.acctbtn{background:var(--sf);border:1px solid var(--bd);border-radius:8px;height:30px;padding:0 9px;font-size:12px;font-weight:600;color:var(--tx);cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit;flex-shrink:0}
+.acctbtn:hover{background:#eef0f0}
+.acctbtn .car{color:var(--mu);font-size:10px}
 .hdr-r{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .live{width:6px;height:6px;border-radius:50%;background:var(--tl);box-shadow:0 0 5px var(--tl)}
 #main{flex:1;overflow-y:auto}
@@ -233,8 +237,15 @@ img,canvas,svg{max-width:100%}
       <button class="iconbtn" title="Search (Ctrl/⌘ K)" aria-label="Search" onclick="openCmdk()">🔍</button>
       <button class="iconbtn" id="bell-btn" title="Notifications &amp; worklist" aria-label="Notifications" onclick="toggleMenu('notif-menu')">🔔<span id="bell-badge" class="badge" style="display:none">0</span></button>
       <button class="iconbtn" id="gear-btn" title="Settings" aria-label="Settings" onclick="toggleMenu('settings-menu')">⚙</button>
-      <button id="admin-btn" class="btn bg3 bsm" style="display:none" onclick="openAdmin()">Admin</button>
-      <button class="btn bg3 bsm" onclick="ccLogout()">Sign out</button>
+      <button id="admin-btn" class="acctbtn" style="display:none" onclick="toggleMenu('acct-menu')"><span id="acct-role">Account</span> <span class="car">▾</span></button>
+      <button class="btn bg3 bsm" onclick="ccLogout()">⎋ Sign out</button>
+    </div>
+    <div id="acct-menu" class="menu">
+      <h4>Account</h4>
+      <div class="mi" style="cursor:default"><span id="acct-email">—</span></div>
+      <div class="mi" id="acct-admin" onclick="openAdmin()">User management <small>👤</small></div>
+      <div class="mi" onclick="toggleMenu('settings-menu')">Settings <small>⚙</small></div>
+      <div class="mi" style="color:var(--rd)" onclick="ccLogout()">Sign out <small>⎋</small></div>
     </div>
     <div id="notif-menu" class="menu"></div>
     <div id="settings-menu" class="menu">
@@ -245,11 +256,8 @@ img,canvas,svg{max-width:100%}
       <h4>AI (Claude)</h4>
       <div class="mi" style="cursor:default"><span>Status</span><small id="ai-stat">Not set</small></div>
       <div class="mi" onclick="openAI()">Connect Claude API key… <small>🤖</small></div>
-      <h4>Cloud sync (self-hosted server)</h4>
-      <div class="mi" style="cursor:default"><span>Status</span><small id="cloud-stat">Local only</small></div>
-      <div class="mi" onclick="cloudConnect()">Connect to server… <small>🔗</small></div>
-      <div class="mi" onclick="cloudSyncNow()">Sync now <small>⟳</small></div>
-      <div class="mi" onclick="cloudDisconnect()">Disconnect <small>⏏</small></div>
+      <h4>Cloud (Supabase)</h4>
+      <div class="mi" style="cursor:default"><span>Status</span><small id="cloud-stat">—</small></div>
       <h4>Email &amp; automation</h4>
       <div class="mi" onclick="openMail()">Reports, schedules &amp; alerts… <small>✉️</small></div>
       <h4>Data (this browser)</h4>
@@ -1130,7 +1138,7 @@ function saveUI(o){try{var u=JSON.parse(localStorage.getItem("cc_ui")||"{}");for
 function loadUI(){try{return JSON.parse(localStorage.getItem("cc_ui")||"{}");}catch(e){return {};}}
 
 /* Menus */
-function toggleMenu(id){var m=document.getElementById(id);if(!m)return;var open=m.classList.contains("show");closeMenus();if(!open){if(id==="notif-menu")renderNotif();if(id==="settings-menu"){updateCloudStat();updateAIStat();}m.classList.add("show");}}
+function toggleMenu(id){var m=document.getElementById(id);if(!m)return;var open=m.classList.contains("show");closeMenus();if(!open){if(id==="notif-menu")renderNotif();if(id==="settings-menu"){updateCloudStat();updateAIStat();}if(id==="notif-menu"){}m.classList.add("show");}}
 function closeMenus(){var ms=document.querySelectorAll(".menu.show");for(var i=0;i<ms.length;i++)ms[i].classList.remove("show");}
 
 /* Notifications / worklist bell */
@@ -1240,9 +1248,7 @@ document.addEventListener("input",function(ev){if(_ctx&&_ctx.tp==="wound"&&ev.ta
    When connected to the API, the server is the source of truth and the browser
    keeps a full localStorage mirror as an offline fallback — that's the client
    layer of redundancy. With no server configured, the app stays local-only. */
-function cloudGet(){return {api:(localStorage.getItem("cc_api")||"").replace(/\/+$/,""),token:sessionStorage.getItem("cc_token")||""};}
-function cloudOn(){var c=cloudGet();return !!(c.api&&c.token);}
-function updateCloudStat(){var el=document.getElementById("cloud-stat");if(!el)return;el.textContent=cloudOn()?("Connected"+(loadUI().lastSync?" · "+loadUI().lastSync:"")):(localStorage.getItem("cc_api")?"Configured (signed out)":"Local only");}
+function updateCloudStat(){var el=document.getElementById("cloud-stat");if(!el)return;el.textContent=(sbReady()?("Connected · "+(currentUser.u||"signed in")):(sbc?"Signed out":"Not configured"))+(loadUI().lastSync?" · synced "+loadUI().lastSync:"");}
 /* ── AI (Claude) connection ──────────────────────────────────────────────
    Two ways to power the AI features:
    (A) DIRECT — paste a Claude API key in Settings; the browser calls Claude
@@ -1266,8 +1272,8 @@ function aiCfg(){return {key:(localStorage.getItem("cc_ai_key")||"").trim(),mode
 function aiDirectOn(){return !!aiCfg().key;}
 function aiAvailable(){return aiDirectOn()||sbReady();}
 function _sbAI(path,body){return sbc.functions.invoke(path,{body:body}).then(function(r){if(r.error){throw new Error((r.error&&r.error.message)||"ai");}return r.data;});}
-function aiSourceLabel(){return aiDirectOn()?"Claude (direct key)":cloudOn()?"server":"";}
-function updateAIStat(){var el=document.getElementById("ai-stat");if(!el)return;el.textContent=aiDirectOn()?("Connected · "+aiCfg().model):(cloudOn()?"Via server":"Not set");}
+function aiSourceLabel(){return aiDirectOn()?"Claude (direct key)":sbReady()?"Supabase (shared key)":"";}
+function updateAIStat(){var el=document.getElementById("ai-stat");if(!el)return;el.textContent=aiDirectOn()?("Connected · "+aiCfg().model):(sbReady()?"Via Supabase (shared key)":"Not set");}
 function _aiImg(data,mime){return {type:"image",source:{type:"base64",media_type:mime||"image/jpeg",data:data}};}
 function _aiExtractJson(text){if(!text)return null;var t=String(text).trim().replace(/^```json\s*/i,"").replace(/^```\s*/i,"").replace(/```$/,"").trim();try{return JSON.parse(t);}catch(e){}var a=t.indexOf("{"),b=t.lastIndexOf("}");if(a>=0&&b>a){try{return JSON.parse(t.slice(a,b+1));}catch(e){}}return {assessment:t,disclaimer:"AI-generated — clinician to verify."};}
 function _aiDirectCall(messages,maxTokens){var cfg=aiCfg();
@@ -1307,13 +1313,6 @@ function aiRenderOrg(){
   var el=document.getElementById("ai-org-body");if(!el)return;
   el.innerHTML='<div style="font-size:11.5px;color:var(--mu);line-height:1.6">The team-wide key now lives as a <b>Supabase secret</b> (server-side), so every signed-in user gets AI automatically with no per-device key. An admin sets it once:<br><code style="font-size:10.5px;background:var(--in);padding:2px 5px;border-radius:4px">supabase secrets set ANTHROPIC_API_KEY=sk-ant-…</code><br>(or in the Supabase dashboard → Edge Functions → Secrets). The per-device key above is just a fallback for testing.</div>';
 }
-function aiSaveOrgKey(){
-  var k=gv("ai-org-key").trim(),m=gv("ai-org-model").trim()||"claude-opus-4-8";var st=document.getElementById("ai-org-stat");
-  if(!/^sk-ant-/.test(k)){toast("Enter a valid Claude key (sk-ant-…)","err");return;}
-  if(st){st.style.color="var(--mu)";st.textContent="Saving to server…";}
-  cloudFetch("/api/ai/key",{method:"PUT",body:JSON.stringify({apiKey:k,model:m})}).then(function(){if(st){st.style.color="var(--gn)";st.textContent="✓ Saved — every signed-in user now has AI.";}sv("ai-org-key","");toast("Team Claude key saved","ok");}).catch(function(err){if(st){st.style.color="var(--rd)";st.textContent="✕ "+err.message;}toast("Save failed","err");});
-}
-function aiClearOrgKey(){if(!confirm("Remove the team-wide Claude key from the server?"))return;cloudFetch("/api/ai/key",{method:"DELETE"}).then(function(){var st=document.getElementById("ai-org-stat");if(st){st.style.color="var(--mu)";st.textContent="Team key removed.";}toast("Team key removed");}).catch(function(err){toast("Failed: "+err.message,"err");});}
 function aiSaveKey(){
   var k=gv("ai-key").trim(),m=gv("ai-model").trim()||"claude-opus-4-8";
   if(!k){toast("Paste your Claude API key first","err");return;}
@@ -1328,70 +1327,52 @@ function aiClearKey(){localStorage.removeItem("cc_ai_key");updateAIStat();var s=
 /* ── Email & automation (server-backed) ─────────────────────────────────────
    The always-on backend sends scheduled reports and triggered alerts; this UI
    just configures SMTP and the rules. Requires Cloud sync to be connected. */
-function cloudFetch(path,opts){var g=cloudGet();opts=opts||{};opts.headers=Object.assign({"Content-Type":"application/json",Authorization:"Bearer "+g.token},opts.headers||{});
-  return fetch(g.api+path,opts).then(function(r){return r.json().catch(function(){return {};}).then(function(j){if(r.status===401){toast("Session expired — reconnect","err");throw new Error("401");}if(!r.ok)throw new Error(j.error||("HTTP "+r.status));return j;});});}
 function _provList(){var s={};WOUNDS.forEach(function(w){if(w.pv)s[w.pv]=1;});PATIENTS.forEach(function(p){if(p.pv)s[p.pv]=1;});return Object.keys(s).sort();}
 function _optList(arr,sel,blank){return '<option value="">'+(blank||"— Any —")+'</option>'+arr.map(function(x){return '<option'+(x===sel?' selected':'')+'>'+e(x)+'</option>';}).join("");}
+function _emails(s){return (s||"").split(/[,;\s]+/).map(function(x){return x.trim();}).filter(function(x){return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(x);});}
+var REPORT_TYPES=[{key:"weekly-wound",label:"Weekly wound summary"},{key:"portfolio",label:"Portfolio summary (per facility)"},{key:"stale-wounds",label:"Overdue assessments"},{key:"infections",label:"Active infections"},{key:"high-risk",label:"High-risk wounds"}];
 function openMail(){
-  if(!cloudOn()){toast("Email automation runs on your server — connect Cloud sync first (Settings)","err");return;}
+  if(!sbReady()){toast("Sign in first to manage email automation","err");return;}
+  if(!(currentUser&&currentUser.role==="Admin")){toast("Admin access required for email automation","err");return;}
   closeMenus();
-  // facility + provider filter options
-  var fac=FACS.map(function(f){return f.name;}).sort();
-  document.getElementById("rl-fac").innerHTML=_optList(fac,"","— All facilities —");
+  window._mailReports=REPORT_TYPES;
+  var ropt=REPORT_TYPES.map(function(t){return '<option value="'+e(t.key)+'">'+e(t.label)+'</option>';}).join("");
+  document.getElementById("rl-report").innerHTML=ropt;document.getElementById("rl-trep").innerHTML=ropt;
+  document.getElementById("rl-fac").innerHTML=_optList(FACS.map(function(f){return f.name;}).sort(),"","— All facilities —");
   document.getElementById("rl-prov").innerHTML=_optList(_provList(),"","— All providers —");
   document.getElementById("mail-rule-form").style.display="none";
-  mailLoadReports();mailLoadSettings();mailLoadRules();mailLoadLog();
+  document.getElementById("ml-smtp-stat").innerHTML='SMTP is set as Supabase Edge-Function secrets (SMTP_HOST/PORT/USER/PASS/FROM…). Sending runs in the <b>email-cron</b> function on a schedule — no SMTP password is stored in the app.';
+  mailLoadRules();mailLoadLog();
   oM("m-mail");
 }
-function mailLoadReports(){
-  cloudFetch("/api/email/reports").then(function(d){window._mailReports=d.types||[];
-    var html=(window._mailReports).map(function(t){return '<option value="'+e(t.key)+'">'+e(t.label)+'</option>';}).join("");
-    document.getElementById("rl-report").innerHTML=html;document.getElementById("rl-trep").innerHTML=html;
-  }).catch(function(){});
-}
-function mailLoadSettings(){
-  cloudFetch("/api/email/settings").then(function(c){
-    if(c&&c.configured){sv("ml-host",c.host);sv("ml-port",c.port);sv("ml-secure",c.secure?"Yes":"No");sv("ml-user",c.user);sv("ml-from",c.from);sv("ml-fromname",c.fromName);
-      var p=document.getElementById("ml-pass");if(p)p.placeholder=c.hasPass?"•••••••• (saved — leave blank to keep)":"SMTP password";
-      document.getElementById("ml-smtp-stat").textContent=c.host?("Configured · "+c.host):"";}
-    else{document.getElementById("ml-smtp-stat").textContent="Not configured yet";}
-  }).catch(function(){});
-}
-function mailSaveSettings(){
-  var body={host:gv("ml-host").trim(),port:parseInt(gv("ml-port"))||587,secure:gv("ml-secure")==="Yes",user:gv("ml-user").trim(),pass:gv("ml-pass"),from:gv("ml-from").trim(),fromName:gv("ml-fromname").trim()};
-  if(!body.host||!body.from){toast("Enter at least the SMTP host and From address","err");return;}
-  var s=document.getElementById("ml-smtp-stat");if(s){s.style.color="var(--mu)";s.textContent="Saving…";}
-  cloudFetch("/api/email/settings",{method:"PUT",body:JSON.stringify(body)}).then(function(){if(s){s.style.color="var(--gn)";s.textContent="✓ Saved";}sv("ml-pass","");toast("SMTP settings saved","ok");mailLoadSettings();})
-   .catch(function(err){if(s){s.style.color="var(--rd)";s.textContent="✕ "+err.message;}toast("Save failed","err");});
-}
-function mailTest(){
-  var to=gv("ml-test-to").trim();if(!to){toast("Enter an email to send the test to","err");return;}
-  var s=document.getElementById("ml-smtp-stat");if(s){s.style.color="var(--mu)";s.textContent="Sending test…";}
-  cloudFetch("/api/email/test",{method:"POST",body:JSON.stringify({to:to})}).then(function(){if(s){s.style.color="var(--gn)";s.textContent="✓ Test sent to "+to;}toast("Test email sent — check the inbox","ok");})
-   .catch(function(err){if(s){s.style.color="var(--rd)";s.textContent="✕ "+err.message;}toast("Test failed","err");});
-}
+function mailLoadReports(){window._mailReports=REPORT_TYPES;}
+function mailLoadSettings(){}
+function mailSaveSettings(){toast("On Supabase, SMTP lives in Edge-Function secrets (supabase secrets set SMTP_*) — not editable here.","err");}
+function mailTest(){toast("To test: create a rule and click ▶ Run; the email-cron function sends within ~1 minute.","err");}
 function _freqSummary(c){var s=c.schedule||{};var dn=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];var t=(("0"+(parseInt(s.hour)||8)).slice(-2))+":"+(("0"+(parseInt(s.minute)||0)).slice(-2));
   if(c.mode==="trigger")return "When triggered · checks continuously (cooldown "+((c.trigger&&c.trigger.cooldownHours)||24)+"h)";
   if(s.freq==="hourly")return "Hourly at :"+(("0"+(parseInt(s.minute)||0)).slice(-2));
   if(s.freq==="weekly")return "Weekly · "+dn[parseInt(s.dow)||1]+" "+t;
   if(s.freq==="monthly")return "Monthly · day "+(parseInt(s.dom)||1)+" "+t;
   return "Daily · "+t;}
-function _repLabel(k){var r=(window._mailReports||[]).find(function(x){return x.key===k;});return r?r.label:k;}
+function _repLabel(k){var r=(window._mailReports||REPORT_TYPES).find(function(x){return x.key===k;});return r?r.label:k;}
 function mailLoadRules(){
-  cloudFetch("/api/email/rules").then(function(rules){window._mailRules=rules||[];
-    var el=document.getElementById("mail-rules");
-    if(!rules.length){el.innerHTML='<div style="font-size:12px;color:var(--mu);padding:6px 0">No automation rules yet. Click <b>＋ New rule</b> to schedule a report or set up a triggered alert.</div>';return;}
-    el.innerHTML='<table class="tbl" style="font-size:11.5px;width:100%"><thead><tr><th>On</th><th>Name</th><th>Report</th><th>When</th><th>To</th><th>Next</th><th></th></tr></thead><tbody>'+rules.map(function(r){var c=r.config||{};
-      return '<tr><td><input type="checkbox" '+(r.enabled?"checked":"")+' onchange="mailToggleRule('+r.id+',this.checked)"></td><td class="b">'+e(r.name)+'</td><td>'+e(_repLabel(c.mode==="trigger"?(c.trigger&&c.trigger.report):c.report))+'</td><td>'+e(_freqSummary(c))+'</td><td>'+((c.recipients||[]).length)+'</td><td style="white-space:nowrap">'+(r.next_run?e(new Date(r.next_run).toLocaleString()):"—")+'</td>'+
-      '<td style="white-space:nowrap"><button class="btn bg3 bsm" onclick="mailRunRule('+r.id+')">▶ Run</button> <button class="btn bg3 bsm" onclick="mailEditRule('+r.id+')">✎</button> <button class="btn br2 bsm" onclick="mailDeleteRule('+r.id+')">🗑</button></td></tr>';
+  sbc.from("email_rules").select("id,name,enabled,config,next_run").order("created_at").then(function(res){
+    if(res.error){toast("Couldn't load rules: "+res.error.message,"err");return;}
+    window._mailRules=res.data||[];var el=document.getElementById("mail-rules");
+    if(!window._mailRules.length){el.innerHTML='<div style="font-size:12px;color:var(--mu);padding:6px 0">No automation rules yet. Click <b>＋ New rule</b> to schedule a report or set up a triggered alert.</div>';return;}
+    el.innerHTML='<table class="tbl" style="font-size:11.5px;width:100%"><thead><tr><th>On</th><th>Name</th><th>Report</th><th>When</th><th>To</th><th>Next</th><th></th></tr></thead><tbody>'+window._mailRules.map(function(r){var c=r.config||{};
+      return '<tr><td><input type="checkbox" '+(r.enabled?"checked":"")+' onchange="mailToggleRule(\''+r.id+'\',this.checked)"></td><td class="b">'+e(r.name)+'</td><td>'+e(_repLabel(c.mode==="trigger"?(c.trigger&&c.trigger.report):c.report))+'</td><td>'+e(_freqSummary(c))+'</td><td>'+((c.recipients||[]).length)+'</td><td style="white-space:nowrap">'+(r.next_run?e(new Date(r.next_run).toLocaleString()):"—")+'</td>'+
+      '<td style="white-space:nowrap"><button class="btn bg3 bsm" onclick="mailRunRule(\''+r.id+'\')">▶ Run</button> <button class="btn bg3 bsm" onclick="mailEditRule(\''+r.id+'\')">✎</button> <button class="btn br2 bsm" onclick="mailDeleteRule(\''+r.id+'\')">🗑</button></td></tr>';
     }).join("")+'</tbody></table>';
-  }).catch(function(err){toast("Couldn't load rules: "+err.message,"err");});
+  });
 }
 function mailLoadLog(){
-  cloudFetch("/api/email/log").then(function(log){var el=document.getElementById("mail-log");
+  sbc.from("email_log").select("rule_id,to_addrs,subject,status,detail,at").order("at",{ascending:false}).limit(30).then(function(res){
+    var el=document.getElementById("mail-log");var log=res.data||[];
     if(!log.length){el.innerHTML='<div style="font-size:11.5px;color:var(--mu)">No deliveries yet.</div>';return;}
-    el.innerHTML=log.slice(0,30).map(function(x){var c=x.status==="sent"?"var(--gn)":x.status==="error"?"var(--rd)":"var(--mu)";return '<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--bd)"><span style="color:'+c+'">'+(x.status==="sent"?"✓":x.status==="error"?"✕":"•")+' '+e(x.status)+'</span> · '+e(x.subject||"")+' <span style="color:var(--mu)">→ '+e(x.to_addrs||"")+' · '+e(new Date(x.at).toLocaleString())+(x.detail?" · "+e(x.detail):"")+'</span></div>';}).join("");
-  }).catch(function(){});
+    el.innerHTML=log.map(function(x){var c=x.status==="sent"?"var(--gn)":x.status==="error"?"var(--rd)":"var(--mu)";return '<div style="font-size:11px;padding:3px 0;border-bottom:1px solid var(--bd)"><span style="color:'+c+'">'+(x.status==="sent"?"✓":x.status==="error"?"✕":"•")+' '+e(x.status||"")+'</span> · '+e(x.subject||"")+' <span style="color:var(--mu)">→ '+e(x.to_addrs||"")+' · '+e(x.at?new Date(x.at).toLocaleString():"")+(x.detail?" · "+e(x.detail):"")+'</span></div>';}).join("");
+  });
 }
 function mailSchedUI(){var mode=gv("rl-mode");document.getElementById("rl-sched-wrap").style.display=mode==="schedule"?"":"none";document.getElementById("rl-trig-wrap").style.display=mode==="trigger"?"":"none";
   var f=gv("rl-freq");document.getElementById("rl-dow-wrap").style.display=f==="weekly"?"":"none";document.getElementById("rl-dom-wrap").style.display=f==="monthly"?"":"none";
@@ -1403,44 +1384,29 @@ function mailEditRule(id){var r=(window._mailRules||[]).find(function(x){return 
   sv("rl-trep",tg.report||"stale-wounds");sv("rl-cooldown",String(tg.cooldownHours||24));document.getElementById("rl-skipempty").checked=c.skipIfEmpty!==false;
   mailSchedUI();document.getElementById("mail-rule-title").textContent="Edit rule";document.getElementById("mail-rule-form").style.display="";document.getElementById("mail-rule-form").scrollIntoView({behavior:"smooth",block:"nearest"});}
 function mailCancelRule(){document.getElementById("mail-rule-form").style.display="none";}
+function _clientNextRun(cfg){
+  var s=cfg.schedule||{};var now=new Date();var d=new Date();
+  var hr=Math.max(0,Math.min(23,parseInt(s.hour)||8)),mn=Math.max(0,Math.min(59,parseInt(s.minute)||0));
+  if(cfg.mode==="trigger")return null;
+  if(s.freq==="hourly"){d.setMinutes(mn,0,0);if(d<=now)d.setHours(d.getHours()+1);return d.toISOString();}
+  if(s.freq==="weekly"){var dow=Math.max(0,Math.min(6,parseInt(s.dow)||1));d.setHours(hr,mn,0,0);var a=(dow-d.getDay()+7)%7;if(a===0&&d<=now)a=7;d.setDate(d.getDate()+a);return d.toISOString();}
+  if(s.freq==="monthly"){var dom=Math.max(1,Math.min(28,parseInt(s.dom)||1));d.setHours(hr,mn,0,0);d.setDate(dom);if(d<=now){d.setMonth(d.getMonth()+1);d.setDate(dom);}return d.toISOString();}
+  d.setHours(hr,mn,0,0);if(d<=now)d.setDate(d.getDate()+1);return d.toISOString();
+}
 function mailSaveRule(){
-  var body={id:window._editRuleId||undefined,name:gv("rl-name").trim(),enabled:true,mode:gv("rl-mode"),report:gv("rl-report"),recipients:gv("rl-recip"),cc:gv("rl-cc"),format:gv("rl-format"),skipIfEmpty:document.getElementById("rl-skipempty").checked,
+  var name=gv("rl-name").trim();if(!name){toast("Give the rule a name","err");return;}
+  var cfg={mode:gv("rl-mode"),report:gv("rl-report"),recipients:_emails(gv("rl-recip")),cc:_emails(gv("rl-cc")),format:gv("rl-format"),skipIfEmpty:document.getElementById("rl-skipempty").checked,
     filters:{facility:gv("rl-fac"),provider:gv("rl-prov")},
     schedule:{freq:gv("rl-freq"),dow:parseInt(gv("rl-dow")),dom:parseInt(gv("rl-dom")),hour:parseInt(gv("rl-hour")),minute:parseInt(gv("rl-min"))},
     trigger:{report:gv("rl-trep"),cooldownHours:parseInt(gv("rl-cooldown"))||24}};
-  if(!body.name){toast("Give the rule a name","err");return;}
-  if(!gv("rl-recip").trim()){toast("Add at least one recipient email","err");return;}
-  cloudFetch("/api/email/rules",{method:"POST",body:JSON.stringify(body)}).then(function(){toast("Rule saved","ok");document.getElementById("mail-rule-form").style.display="none";mailLoadRules();})
-   .catch(function(err){toast("Save failed: "+err.message,"err");});
+  if(!cfg.recipients.length){toast("Add at least one valid recipient email","err");return;}
+  var row={name:name,enabled:true,config:cfg,next_run:_clientNextRun(cfg),org_id:currentUser.org_id};
+  var q=window._editRuleId?sbc.from("email_rules").update(row).eq("id",window._editRuleId):sbc.from("email_rules").insert(row);
+  q.then(function(res){if(res.error){toast("Save failed: "+res.error.message,"err");return;}toast("Rule saved","ok");document.getElementById("mail-rule-form").style.display="none";mailLoadRules();});
 }
-function mailToggleRule(id,on){var r=(window._mailRules||[]).find(function(x){return x.id===id;});if(!r)return;var c=r.config||{};
-  var body=Object.assign({id:id,name:r.name,enabled:on},c);
-  cloudFetch("/api/email/rules",{method:"POST",body:JSON.stringify(body)}).then(function(){toast(on?"Rule enabled":"Rule paused","ok");mailLoadRules();}).catch(function(err){toast("Failed: "+err.message,"err");mailLoadRules();});}
-function mailRunRule(id){toast("Running rule…");cloudFetch("/api/email/rules/"+id+"/run",{method:"POST",body:"{}"}).then(function(d){toast(d.status==="sent"?"Sent ✓":d.status==="no-condition"?"No matching items — nothing sent":d.status==="no-smtp"?"Configure SMTP first":"Status: "+d.status,d.status==="sent"?"ok":"err");mailLoadLog();}).catch(function(err){toast("Run failed: "+err.message,"err");});}
-function mailDeleteRule(id){if(!confirm("Delete this automation rule?"))return;cloudFetch("/api/email/rules/"+id,{method:"DELETE"}).then(function(){toast("Rule deleted");mailLoadRules();}).catch(function(err){toast("Delete failed: "+err.message,"err");});}
-function cloudConnect(){closeMenus();
-  var api=prompt("Server API base URL (e.g. https://your-host.com):",localStorage.getItem("cc_api")||"");if(!api)return;api=api.replace(/\/+$/,"");
-  var u=prompt("Username:");if(!u)return;var p=prompt("Password:");if(p==null)return;
-  fetch(api+"/api/auth/login",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({username:u,password:p})})
-   .then(function(r){if(!r.ok)throw new Error("login");return r.json();})
-   .then(function(d){localStorage.setItem("cc_api",api);sessionStorage.setItem("cc_token",d.token);toast("Connected to server","ok");cloudPull(true);})
-   .catch(function(){toast("Could not connect (check URL / credentials)","err");});
-}
-function cloudDisconnect(){closeMenus();sessionStorage.removeItem("cc_token");toast("Disconnected — local data kept");}
-function cloudPull(silent){var c=cloudGet();if(!c.api||!c.token)return;
-  fetch(c.api+"/api/snapshot",{headers:{Authorization:"Bearer "+c.token}})
-   .then(function(r){if(r.status===401){toast("Session expired — reconnect","err");throw new Error("401");}if(!r.ok)throw new Error("pull");return r.json();})
-   .then(function(d){if(d.facilities)FACS=d.facilities;if(d.patients)PATIENTS=d.patients;if(d.wounds)WOUNDS=d.wounds;if(d.sentlog)SENTLOG=d.sentlog;persistNow();initWoundData();initDash();renderCensus();updateBell();saveUI({lastSync:nowStamp()});if(!silent)toast("Synced from server","ok");})
-   .catch(function(){if(!silent)toast("Pull failed — using local copy","err");});
-}
-var _cloudPushT=null;
-function cloudPushSoon(){if(!cloudOn())return;if(_cloudPushT)clearTimeout(_cloudPushT);_cloudPushT=setTimeout(cloudPush,1200);}
-function cloudPush(){var c=cloudGet();if(!c.api||!c.token)return;
-  fetch(c.api+"/api/snapshot",{method:"PUT",headers:{"Content-Type":"application/json",Authorization:"Bearer "+c.token},body:JSON.stringify({facilities:FACS,patients:PATIENTS,wounds:WOUNDS,sentlog:SENTLOG})})
-   .then(function(r){if(r.status===401){toast("Session expired — reconnect to sync","err");return;}if(r.ok)saveUI({lastSync:nowStamp()});})
-   .catch(function(){/* offline — local mirror keeps the data; retries on next change/Sync now */});
-}
-function cloudSyncNow(){closeMenus();if(!cloudOn()){toast("Not connected — use Connect to server","err");return;}cloudPush();cloudPull(false);}
+function mailToggleRule(id,on){sbc.from("email_rules").update({enabled:on}).eq("id",id).then(function(res){if(res.error){toast("Failed: "+res.error.message,"err");}else toast(on?"Rule enabled":"Rule paused","ok");mailLoadRules();});}
+function mailRunRule(id){sbc.from("email_rules").update({next_run:new Date().toISOString()}).eq("id",id).then(function(res){if(res.error){toast("Failed: "+res.error.message,"err");return;}toast("Queued — the scheduler will send it within ~1 minute","ok");setTimeout(mailLoadLog,1500);});}
+function mailDeleteRule(id){if(!confirm("Delete this automation rule?"))return;sbc.from("email_rules").delete().eq("id",id).then(function(res){if(res.error){toast("Delete failed: "+res.error.message,"err");return;}toast("Rule deleted");mailLoadRules();});}
 
 /* ── FAC STRIP ── */
 var _fcb={};
@@ -4297,9 +4263,13 @@ function lgateInit(){
 }
 function updateUserUI(){
   var b=document.getElementById("admin-btn");
-  if(b)b.style.display=(currentUser&&currentUser.role==="Admin")?"inline-flex":"none";
+  if(b)b.style.display=currentUser?"inline-flex":"none";
+  var role=document.getElementById("acct-role");if(role)role.textContent=(currentUser&&currentUser.role)||"Account";
+  var em=document.getElementById("acct-email");if(em)em.textContent=(currentUser&&currentUser.u)||"";
+  var ua=document.getElementById("acct-admin");if(ua)ua.style.display=(currentUser&&currentUser.role==="Admin")?"flex":"none";
 }
 function openAdmin(){
+  closeMenus();
   if(!currentUser||currentUser.role!=="Admin"){alert("Admin access required.");return;}
   renderAdminUsers();oM("m-admin");
 }
