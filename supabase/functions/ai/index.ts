@@ -25,7 +25,8 @@ const SKILL = [
   "When asked for an analysis, respond with STRICT JSON ONLY: {\"assessment\":string,\"tissue\":string,\"infectionSigns\":string,\"comparison\":string,\"trajectory\":string,\"imaging\":[string],\"medications\":[string],\"advancedTherapy\":[string],\"labs\":[string],\"debridement\":[string],\"dressings\":[string],\"referrals\":[string],\"redFlags\":[string],\"confidence\":string,\"disclaimer\":string}. Use [] / \"\" when not applicable.",
 ].join("\n")
 
-const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "content-type": "application/json" } })
+const CORS = { "Access-Control-Allow-Origin": "*", "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" }
+const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { "content-type": "application/json", ...CORS } })
 function extractJson(t: string): any {
   if (!t) return null
   let s = t.trim().replace(/^```json\s*/i, "").replace(/^```\s*/i, "").replace(/```$/, "").trim()
@@ -46,8 +47,7 @@ async function callClaude(messages: any[], maxTokens: number): Promise<string> {
 }
 const img = (data: string, mime?: string) => ({ type: "image", source: { type: "base64", media_type: mime || "image/jpeg", data } })
 
-export default {
-  fetch: withSupabase({ auth: "user" }, async (req: Request) => {
+const _handler = withSupabase({ auth: "user" }, async (req: Request) => {
     if (!KEY()) return json({ error: "AI not configured (set the ANTHROPIC_API_KEY secret)" }, 501)
     const op = new URL(req.url).pathname.split("/").filter(Boolean).pop()
     const body = await req.json().catch(() => ({})) as any
@@ -78,5 +78,14 @@ export default {
     } catch (e: any) {
       return json({ error: (e && e.message) || "AI request failed" }, 502)
     }
-  }),
+})
+export default {
+  fetch: async (req: Request) => {
+    // CORS preflight must be answered before auth (the browser sends it without a token).
+    if (req.method === "OPTIONS") return new Response("ok", { headers: CORS })
+    const res = await _handler(req)
+    const h = new Headers(res.headers)
+    Object.entries(CORS).forEach(([k, v]) => h.set(k, v))
+    return new Response(res.body, { status: res.status, headers: h })
+  },
 }
