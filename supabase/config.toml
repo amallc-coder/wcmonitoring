@@ -1,11 +1,14 @@
 project_id = "prvzcbyeuqlstqrlbbum"
 
-# "api" + "ai" use auth: "user" — keep the platform JWT gate on.
+# "api" uses auth: "user" — platform JWT gate on.
 [functions.api]
 verify_jwt = true
 
+# "ai" uses withSupabase auth:"user" INTERNALLY, so the platform gate is OFF — this
+# lets the browser's CORS preflight (OPTIONS, no token) reach the function. The
+# function still rejects unauthenticated requests via withSupabase.
 [functions.ai]
-verify_jwt = true
+verify_jwt = false
 
 # "health" is public.
 [functions.health]
