@@ -4,7 +4,7 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
 <meta name="theme-color" content="#3f7d76"/>
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"/>
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"/>
 <link rel="manifest" href="manifest.json"/>
 <title>Clinilytics · Wound Care</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -900,7 +900,8 @@ img,canvas,svg{max-width:100%}
 const SB_URL="https://prvzcbyeuqlstqrlbbum.supabase.co";
 const SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBydnpjYnlldXFsc3RxcmxiYnVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzU2MTIsImV4cCI6MjA5NzkxMTYxMn0._sddwUbrMQsHDWnVawDoLB3M-VuueqOUoPjcEmlZEsI";
 var sbc=null;
-try{ if(window.supabase&&SB_ANON){ sbc=window.supabase.createClient(SB_URL,SB_ANON,{auth:{persistSession:true,autoRefreshToken:true}}); } }catch(e){}
+function ensureSB(){ if(!sbc&&window.supabase&&SB_ANON){ try{ sbc=window.supabase.createClient(SB_URL,SB_ANON,{auth:{persistSession:true,autoRefreshToken:true}}); }catch(e){} } return sbc; }
+ensureSB();
 function sbReady(){return !!(sbc&&currentUser&&currentUser.org_id);}
 var _sbLoaded=false,_sbT=null;
 function _sbStrip(o){var c=Object.assign({},o);delete c._sbid;return c;}
@@ -4262,7 +4263,7 @@ async function doLogin(ev){
   var email=(document.getElementById("lg-user").value||"").trim();
   var p=document.getElementById("lg-pass").value||"";
   var err=document.getElementById("lg-err");
-  if(!sbc){err.textContent="Cloud backend not configured.";return false;}
+  if(!ensureSB()){err.textContent="Loading secure backend… please wait a moment and try again.";return false;}
   err.textContent="Signing in…";
   try{
     var r=await sbc.auth.signInWithPassword({email:email,password:p});
@@ -4288,7 +4289,7 @@ async function afterAuth(){
 function ccLogout(){if(sbc){sbc.auth.signOut().finally(function(){location.reload();});}else location.reload();}
 function lgateInit(){
   var g=document.getElementById("lgate");if(!g)return;
-  if(!sbc){var u0=document.getElementById("lg-user");if(u0)u0.focus();return;}
+  if(!ensureSB()){var u0=document.getElementById("lg-user");if(u0)u0.focus();return;}
   sbc.auth.getSession().then(function(r){
     if(r.data&&r.data.session){afterAuth();}
     else{var u=document.getElementById("lg-user");if(u)u.focus();}
