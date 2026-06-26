@@ -29,6 +29,10 @@ nav{display:flex;overflow-x:auto;gap:4px;padding-bottom:9px;margin:0}
 nav button{background:transparent;border:none;color:#6b7077;padding:6px 13px;font-size:12.5px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .12s;border-radius:6px;display:inline-flex;align-items:center;gap:6px}
 nav button:hover{color:var(--tx);background:#eef0f0}
 nav button.A{background:var(--ink);color:#fff;font-weight:600}
+#mnav{display:flex;align-items:center;gap:3px;flex-wrap:wrap;border-top:1px solid var(--bd);margin-top:1px;padding:6px 0 7px}
+.acctbtn{background:var(--sf);border:1px solid var(--bd);border-radius:8px;height:30px;padding:0 9px;font-size:12px;font-weight:600;color:var(--tx);cursor:pointer;display:inline-flex;align-items:center;gap:5px;font-family:inherit;flex-shrink:0}
+.acctbtn:hover{background:#eef0f0}
+.acctbtn .car{color:var(--mu);font-size:10px}
 .hdr-r{display:flex;align-items:center;gap:7px;flex-shrink:0}
 .live{width:6px;height:6px;border-radius:50%;background:var(--tl);box-shadow:0 0 5px var(--tl)}
 #main{flex:1;overflow-y:auto}
@@ -233,8 +237,15 @@ img,canvas,svg{max-width:100%}
       <button class="iconbtn" title="Search (Ctrl/⌘ K)" aria-label="Search" onclick="openCmdk()">🔍</button>
       <button class="iconbtn" id="bell-btn" title="Notifications &amp; worklist" aria-label="Notifications" onclick="toggleMenu('notif-menu')">🔔<span id="bell-badge" class="badge" style="display:none">0</span></button>
       <button class="iconbtn" id="gear-btn" title="Settings" aria-label="Settings" onclick="toggleMenu('settings-menu')">⚙</button>
-      <button id="admin-btn" class="btn bg3 bsm" style="display:none" onclick="openAdmin()">Admin</button>
-      <button class="btn bg3 bsm" onclick="ccLogout()">Sign out</button>
+      <button id="admin-btn" class="acctbtn" style="display:none" onclick="toggleMenu('acct-menu')"><span id="acct-role">Account</span> <span class="car">▾</span></button>
+      <button class="btn bg3 bsm" onclick="ccLogout()">⎋ Sign out</button>
+    </div>
+    <div id="acct-menu" class="menu">
+      <h4>Account</h4>
+      <div class="mi" style="cursor:default"><span id="acct-email">—</span></div>
+      <div class="mi" id="acct-admin" onclick="openAdmin()">User management <small>👤</small></div>
+      <div class="mi" onclick="toggleMenu('settings-menu')">Settings <small>⚙</small></div>
+      <div class="mi" style="color:var(--rd)" onclick="ccLogout()">Sign out <small>⎋</small></div>
     </div>
     <div id="notif-menu" class="menu"></div>
     <div id="settings-menu" class="menu">
@@ -4252,9 +4263,13 @@ function lgateInit(){
 }
 function updateUserUI(){
   var b=document.getElementById("admin-btn");
-  if(b)b.style.display=(currentUser&&currentUser.role==="Admin")?"inline-flex":"none";
+  if(b)b.style.display=currentUser?"inline-flex":"none";
+  var role=document.getElementById("acct-role");if(role)role.textContent=(currentUser&&currentUser.role)||"Account";
+  var em=document.getElementById("acct-email");if(em)em.textContent=(currentUser&&currentUser.u)||"";
+  var ua=document.getElementById("acct-admin");if(ua)ua.style.display=(currentUser&&currentUser.role==="Admin")?"flex":"none";
 }
 function openAdmin(){
+  closeMenus();
   if(!currentUser||currentUser.role!=="Admin"){alert("Admin access required.");return;}
   renderAdminUsers();oM("m-admin");
 }
