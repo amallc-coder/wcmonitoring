@@ -1,5 +1,5 @@
 /* Clinilytics — Wound Care · service worker (offline app shell) */
-var CACHE = "clinilytics-v2";
+var CACHE = "clinilytics-v3";
 var SHELL = ["./", "./index.html", "./manifest.json"];
 
 self.addEventListener("install", function (e) {
