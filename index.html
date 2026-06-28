@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<meta name="theme-color" content="#3f7d76"/>
+<meta name="theme-color" content="#c4623c"/>
 <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com data:; img-src 'self' data: blob:; connect-src 'self' https:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'"/>
 <link rel="manifest" href="manifest.json"/>
 <title>Clinilytics · Wound Care</title>
@@ -16,7 +16,7 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-:root{--bg:#f6f7f7;--sf:#ffffff;--bd:#e7e8e7;--b2:#d7d9d8;--tx:#23262b;--mu:#888d92;--tl:#3f7d76;--ac:#3f7d76;--bl:#4a6f86;--rd:#b3433a;--am:#b07d3c;--pu:#7d6a9c;--gn:#5b8c6e;--ink:#23262b;--in:var(--in);--mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
+:root{--bg:#F4F0E8;--sf:#FBF9F4;--bd:#E4DED2;--b2:#D8D0C0;--tx:#0F0E0C;--mu:#8B857A;--slate:#57534A;--tl:#C4623C;--ac:#C4623C;--clay:#C4623C;--clay-10:rgba(196,98,60,.10);--clay-20:rgba(196,98,60,.20);--bl:#0369A1;--rd:#E11D48;--am:#B45309;--pu:#7d6a9c;--gn:#5C8A6E;--ink:#0F0E0C;--in:#ECE8DE;--mono:"IBM Plex Mono",ui-monospace,"SFMono-Regular","DejaVu Sans Mono",Menlo,Consolas,monospace}
 body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--tx);min-height:100vh;display:flex;flex-direction:column;font-size:13px;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
 #hdr{background:var(--sf);border-bottom:1px solid var(--bd);padding:0 16px;display:flex;flex-direction:column;position:sticky;top:0;z-index:100;flex-shrink:0}
 .hdr-top{display:flex;align-items:center;justify-content:space-between;height:48px}
@@ -24,7 +24,7 @@ body{font-family:"Inter",system-ui,-apple-system,"Segoe UI",sans-serif;backgroun
 .lic{display:flex;align-items:center;justify-content:center;line-height:0}
 .lic svg{display:block}
 .ltx{font-weight:700;font-size:17px;color:var(--tx);letter-spacing:-.02em}.ltx span{color:var(--tl)}
-.modpill{background:rgba(63,125,118,.12);color:#356b64;border:1px solid rgba(63,125,118,.25);border-radius:5px;padding:3px 11px;font-size:11px;font-weight:600;white-space:nowrap;letter-spacing:.01em}
+.modpill{background:rgba(196,98,60,.12);color:#9c4e30;border:1px solid rgba(196,98,60,.25);border-radius:5px;padding:3px 11px;font-size:11px;font-weight:600;white-space:nowrap;letter-spacing:.01em}
 nav{display:flex;overflow-x:auto;gap:4px;padding-bottom:9px;margin:0}
 nav button{background:transparent;border:none;color:#6b7077;padding:6px 13px;font-size:12.5px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .12s;border-radius:6px;display:inline-flex;align-items:center;gap:6px}
 nav button:hover{color:var(--tx);background:#eef0f0}
@@ -52,7 +52,7 @@ footer{background:var(--sf);border-top:1px solid var(--bd);padding:5px 16px;disp
 .tbl td.b{color:var(--tx);font-weight:600}
 .pill{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:700}
 .ph{background:#f7e3df;color:#b23a2e}.pm2{background:#f6ecd7;color:#9a6a25}.pl{background:#e3efe1;color:#3f7d4e}
-.pt{background:rgba(95,154,120,.16);color:#477f5c}.pb2{background:rgba(63,125,118,.15);color:#356f68}
+.pt{background:rgba(95,154,120,.16);color:#477f5c}.pb2{background:rgba(196,98,60,.15);color:#356f68}
 .pp{background:rgba(138,109,176,.15);color:var(--pu)}.pr2{background:#f7e3df;color:#b23a2e}
 .btn{display:inline-flex;align-items:center;gap:4px;padding:5px 11px;border-radius:7px;font-size:11.5px;font-weight:600;cursor:pointer;border:1px solid transparent;font-family:inherit;transition:all .15s;white-space:nowrap}
 .bt{background:var(--tl);color:#fff;border-color:var(--tl)}
@@ -127,7 +127,7 @@ select option{background:#fff}
 .help-nav .hcat{font-size:9.5px;font-weight:700;color:var(--mu);letter-spacing:.08em;text-transform:uppercase;font-family:var(--mono);padding:9px 9px 4px}
 .help-nav button{text-align:left;background:transparent;border:none;color:#4d5258;font-size:12.5px;padding:7px 10px;border-radius:7px;cursor:pointer;font-family:inherit;line-height:1.3}
 .help-nav button:hover{background:#eef0f0;color:var(--tx)}
-.help-nav button.A{background:rgba(63,125,118,.12);color:#2f5f59;font-weight:600}
+.help-nav button.A{background:rgba(196,98,60,.12);color:#9c4e30;font-weight:600}
 .help-body{background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:22px 26px;min-height:60vh;box-shadow:0 1px 2px rgba(20,20,20,.03)}
 .help-body h2{font-size:20px;font-weight:700;letter-spacing:-.02em;margin-bottom:4px}
 .help-body .hsub{color:var(--mu);font-size:13px;margin-bottom:18px}
@@ -138,7 +138,7 @@ select option{background:#fff}
 .help-step .hn{flex-shrink:0;width:24px;height:24px;border-radius:50%;background:var(--ac);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-family:"Inter",sans-serif}
 .help-step .ht{font-size:13.5px;line-height:1.55;color:#42474d}
 .help-step .ht b{color:var(--tx)}
-.help-tip{background:rgba(63,125,118,.07);border-left:3px solid var(--ac);border-radius:0 7px 7px 0;padding:9px 13px;font-size:12.5px;color:#3a4f4b;margin:6px 0 4px;line-height:1.55}
+.help-tip{background:rgba(196,98,60,.07);border-left:3px solid var(--ac);border-radius:0 7px 7px 0;padding:9px 13px;font-size:12.5px;color:#3a4f4b;margin:6px 0 4px;line-height:1.55}
 .help-pill{display:inline-block;background:#eef0f0;border:1px solid var(--bd);border-radius:5px;padding:1px 7px;font-size:11.5px;font-family:var(--mono);color:#3a4f4b}
 @media (max-width:760px){.help-wrap{grid-template-columns:1fr}.help-nav{position:static;max-height:none;flex-direction:column}.help-body{padding:16px 15px}}
 /* ── QUALITY-OF-LIFE: toasts, palette, menus, density, dark, focus ── */
@@ -156,7 +156,7 @@ select option{background:#fff}
 #cmdk input:focus{box-shadow:none}
 #cmdk .cres{max-height:52vh;overflow-y:auto}
 #cmdk .cr{padding:9px 16px;display:flex;justify-content:space-between;gap:10px;cursor:pointer;font-size:13px;border-bottom:1px solid var(--bd)}
-#cmdk .cr.sel,#cmdk .cr:hover{background:rgba(63,125,118,.12)}
+#cmdk .cr.sel,#cmdk .cr:hover{background:rgba(196,98,60,.12)}
 #cmdk .cr .ct{color:var(--mu);font-size:11px;font-family:var(--mono);white-space:nowrap}
 .menu{position:absolute;top:46px;right:14px;background:var(--sf);border:1px solid var(--b2);border-radius:10px;box-shadow:0 16px 40px rgba(20,20,20,.18);z-index:400;width:270px;max-width:92vw;padding:8px;display:none}
 .menu.show{display:block}
@@ -1472,9 +1472,9 @@ function initDash(){sanitizeAll();
   var MO=["Jan","Feb","Mar","Apr","May","Jun"];
   var CO={border:{color:"rgba(20,20,20,0.07)"},ticks:{color:"#8c877d",font:{size:9}}};
   var OP={responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:CO.border,ticks:CO.ticks},y:{grid:CO.border,ticks:CO.ticks}}};
-  new Chart(document.getElementById("c-hosp"),{type:"line",data:{labels:MO,datasets:[{data:[22,20,19,17,16,15],borderColor:"#3f7d76",borderWidth:2,tension:.4,pointRadius:0,fill:false},{data:[18,18,18,18,18,18],borderColor:"#c4c9c8",borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false}]},options:OP});
+  new Chart(document.getElementById("c-hosp"),{type:"line",data:{labels:MO,datasets:[{data:[22,20,19,17,16,15],borderColor:"#c4623c",borderWidth:2,tension:.4,pointRadius:0,fill:false},{data:[18,18,18,18,18,18],borderColor:"#c4c9c8",borderWidth:1,borderDash:[4,3],pointRadius:0,fill:false}]},options:OP});
   new Chart(document.getElementById("c-wound"),{type:"bar",data:{labels:MO,datasets:[{data:[62,65,70,74,78,82],backgroundColor:"#5b8c6e",borderRadius:3},{data:[38,35,30,26,22,18],backgroundColor:"#d2d6d5",borderRadius:3}]},options:Object.assign({},OP,{scales:{x:Object.assign({},OP.scales.x,{stacked:true}),y:Object.assign({},OP.scales.y,{stacked:true})}})});
-  new Chart(document.getElementById("c-th"),{type:"line",data:{labels:MO,datasets:[{data:[142,158,171,189,204,214],borderColor:"#3f7d76",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(63,125,118,0.12)"}]},options:OP});
+  new Chart(document.getElementById("c-th"),{type:"line",data:{labels:MO,datasets:[{data:[142,158,171,189,204,214],borderColor:"#c4623c",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(196,98,60,0.12)"}]},options:OP});
   new Chart(document.getElementById("c-inf"),{type:"line",data:{labels:MO,datasets:[{data:[8.2,7.8,7.1,6.5,5.9,5.4],borderColor:"#b3433a",borderWidth:2,tension:.4,pointRadius:0,fill:true,backgroundColor:"rgba(179,67,58,0.10)"}]},options:OP});
 }
 
@@ -1488,7 +1488,7 @@ function renderDashWounds(){
   var slow=WOUNDS.filter(function(w){return w.heal==="Slow"||w.heal==="Worsening";});
   document.getElementById("d-wounds-kpis").innerHTML=
     kv2(WOUNDS.length,"Total","var(--tx)")+kv2(pressure.length,"Pressure","#b23a2e")+
-    kv2(WOUNDS.length-pressure.length,"Non-Pressure","#3f7d76")+kv2(WOUNDS.filter(function(w){return w.inf;}).length,"Infected","#b23a2e");
+    kv2(WOUNDS.length-pressure.length,"Non-Pressure","#c4623c")+kv2(WOUNDS.filter(function(w){return w.inf;}).length,"Infected","#b23a2e");
   var alerts="";
   if(stale.length)alerts+=alert2("#ef444412","#ef444433","#f87171","&#x26A0;",stale.length+" wound"+(stale.length>1?"s":"")+" stale 7d+",stale.slice(0,3).map(function(w){return'<div style="font-size:10px;color:#fca5a5">'+w.name+' &middot; '+w.loc+' ('+woundDaysSinceUpdate(w)+'d)</div>';}).join(""));
   if(lt.length)alerts+=alert2("#7c3aed12","#7c3aed33","#c4b5fd","&#x23F1;",lt.length+" near/past 100 days",lt.slice(0,2).map(function(w){return'<div style="font-size:10px;color:#a78bfa">'+w.name+' &middot; Day '+woundOnsetDays(w)+'</div>';}).join(""));
@@ -1775,7 +1775,7 @@ function cht(idx){
   if(idx===2) buildNotes();
 }
 function fldCell(f){
-  if(f.hdr)return '<div style="grid-column:1/-1;margin:8px 0 -1px;border-bottom:1px solid var(--bd);padding-bottom:3px"><span class="st" style="margin:0;color:#3a6f68">'+e(f.hdr)+'</span></div>';
+  if(f.hdr)return '<div style="grid-column:1/-1;margin:8px 0 -1px;border-bottom:1px solid var(--bd);padding-bottom:3px"><span class="st" style="margin:0;color:#c4623c">'+e(f.hdr)+'</span></div>';
   if(f.macros)return '<div style="grid-column:1/-1;display:flex;flex-wrap:wrap;gap:5px;align-items:center"><span class="fl" style="margin:0">Quick insert:</span>'+f.macros.map(function(m){return '<button type="button" class="fb" onclick="insertMacro(\''+f.target+'\',\''+m.replace(/'/g,"\\\\'")+'\')">'+e(m)+'</button>';}).join("")+'<button type="button" class="fb" style="font-weight:700" onclick="dictate(\''+f.target+'\')">🎤 Dictate</button></div>';
   var inner;
   if(f.sel){inner='<select id="'+f.id+'">'+f.sel.map(function(o){return'<option'+(o===f.v?' selected':'')+'>'+o+'</option>';}).join("")+'</select>';}
@@ -2314,8 +2314,8 @@ var WOUND_KB=[
 function woundSuggestions(w){var c=clinContext(w);var out=[];WOUND_KB.forEach(function(r){try{if(r.test(c)){var sug=r.sug;if(r.cat==="Vascular referral"&&c.abi!=null)sug="ABI "+c.abi+" indicates arterial insufficiency — AVOID compression; urgent vascular/revascularization referral.";if(r.cat==="Meds"){var mm=[];if(c.anticoag)mm.push("anticoagulant");if(c.immuno)mm.push("immunosuppressant");sug="Healing-impairing medications noted ("+mm.join(", ")+") — review necessity with prescriber; monitor for bleeding/poor healing.";}out.push({cat:r.cat,sug:sug,note:r.note(c),cite:r.cite});}}catch(e){}});return out;}
 function suggestionsPanelHtml(w){
   var list=woundSuggestions(w);window._sugCache={id:w.id,list:list};
-  var h='<div style="background:rgba(63,125,118,.07);border:1px solid rgba(63,125,118,.22);border-radius:8px;padding:11px 13px;margin-bottom:13px">';
-  h+='<div class="st" style="color:#356b64;margin-bottom:3px">💡 Suggested Care &amp; Smart Notes <span class="pill pt">'+list.length+'</span> <span style="float:right"><button class="btn bg3 bsm" style="font-weight:600" onclick="analyzeWoundPhoto(\''+w.id+'\')">🔬 Analyze photo</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="compareWoundPhotos(\''+w.id+'\')">📊 Compare to last</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="draftAINote(\''+w.id+'\')">✨ Draft note</button> <button class="btn bt bsm" style="font-weight:600" onclick="openBilling(\''+w.id+'\')">🧾 Note &amp; Charges</button></span></div>';
+  var h='<div style="background:rgba(196,98,60,.07);border:1px solid rgba(196,98,60,.22);border-radius:8px;padding:11px 13px;margin-bottom:13px">';
+  h+='<div class="st" style="color:#9c4e30;margin-bottom:3px">💡 Suggested Care &amp; Smart Notes <span class="pill pt">'+list.length+'</span> <span style="float:right"><button class="btn bg3 bsm" style="font-weight:600" onclick="analyzeWoundPhoto(\''+w.id+'\')">🔬 Analyze photo</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="compareWoundPhotos(\''+w.id+'\')">📊 Compare to last</button> <button class="btn bg3 bsm" style="font-weight:600" onclick="draftAINote(\''+w.id+'\')">✨ Draft note</button> <button class="btn bt bsm" style="font-weight:600" onclick="openBilling(\''+w.id+'\')">🧾 Note &amp; Charges</button></span></div>';
   h+='<div style="font-size:10px;color:var(--mu);margin-bottom:8px">These smart notes are <b>auto-added to the note below</b> — review and delete anything you don\'t agree with before saving.</div>';
   if(!list.length){h+='<div style="font-size:12px;color:var(--mu)">No specific guideline prompts for the current data.</div>';}
   list.forEach(function(s,i){
@@ -2535,7 +2535,7 @@ function computeBilling(){
   window._bill={w:w,inp:inp,icd:icd,cpt:cpt};
   document.getElementById("bk-note").value=note;
   document.getElementById("bk-charges").innerHTML='<table class="tbl" style="font-size:11px"><thead><tr><th>Code</th><th>Units</th><th>Modifiers</th><th>Description</th></tr></thead><tbody>'+cpt.codes.map(function(c){return'<tr><td class="b">'+e(c.code)+'</td><td>'+c.units+'</td><td>'+(c.mods.join(", ")||"—")+'</td><td>'+e(c.desc)+'</td></tr>';}).join("")+'</tbody></table><div style="font-size:11px;color:var(--mu);margin-top:5px">Dx: '+e(icd.codes.map(function(c){return c.code;}).join(", "))+'</div>';
-  document.getElementById("bk-audit").innerHTML='<div class="st" style="margin-bottom:5px">Self-audit ('+flags.length+')</div>'+(flags.length?flags.map(function(x){var c=x.lvl==="warn"?"#b3433a":"#356b64";return'<div style="font-size:11.5px;color:'+c+';margin-bottom:3px">'+(x.lvl==="warn"?"⚠ ":"• ")+e(x.t)+'</div>';}).join(""):'<div style="font-size:12px;color:var(--gn)">✓ No issues detected.</div>');
+  document.getElementById("bk-audit").innerHTML='<div class="st" style="margin-bottom:5px">Self-audit ('+flags.length+')</div>'+(flags.length?flags.map(function(x){var c=x.lvl==="warn"?"#b3433a":"#9c4e30";return'<div style="font-size:11.5px;color:'+c+';margin-bottom:3px">'+(x.lvl==="warn"?"⚠ ":"• ")+e(x.t)+'</div>';}).join(""):'<div style="font-size:12px;color:var(--gn)">✓ No issues detected.</div>');
 }
 function aiAuditBilling(){
   if(!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
@@ -2548,8 +2548,8 @@ function aiAuditBilling(){
    .catch(function(err){document.getElementById("bk-ai").innerHTML='';toast(err.message==="notcfg"?"Claude isn't configured on the server yet":"AI audit failed","err");});
 }
 function renderBillingAudit(a){
-  function sec(t,arr,clr){if(!arr||!arr.length)return"";return '<div style="margin-bottom:8px"><div class="st" style="margin-bottom:3px;color:'+(clr||"#356b64")+'">'+e(t)+'</div><ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.5;color:#42474d">'+arr.map(function(x){return"<li>"+e(x)+"</li>";}).join("")+'</ul></div>';}
-  var h='<div style="background:rgba(63,125,118,.07);border:1px solid rgba(63,125,118,.22);border-radius:8px;padding:11px 13px;margin-top:10px">';
+  function sec(t,arr,clr){if(!arr||!arr.length)return"";return '<div style="margin-bottom:8px"><div class="st" style="margin-bottom:3px;color:'+(clr||"#9c4e30")+'">'+e(t)+'</div><ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.5;color:#42474d">'+arr.map(function(x){return"<li>"+e(x)+"</li>";}).join("")+'</ul></div>';}
+  var h='<div style="background:rgba(196,98,60,.07);border:1px solid rgba(196,98,60,.22);border-radius:8px;padding:11px 13px;margin-top:10px">';
   h+='<div class="st" style="margin-bottom:6px">🤖 Claude reimbursement self-audit</div>';
   if(a.summary)h+='<div style="font-size:12.5px;color:#42474d;margin-bottom:8px">'+e(a.summary)+'</div>';
   h+=sec("⚠ Documentation gaps",a.gaps,"#b3433a")+sec("Verbiage to add (supports the codes)",a.verbiage)+sec("Under-coding / capture opportunities",a.underCoding,"#946325")+sec("Recommended ICD / CPT / modifiers",a.recommendedCodes)+sec("Compliance flags",a.complianceFlags,"#b3433a");
@@ -2658,8 +2658,8 @@ function bodyMapHtml(sel){
     {x:132,y:250,r:"R. Heel"},{x:168,y:250,r:"L. Heel"},
     {x:130,y:205,r:"R. Lat. Malleolus"},{x:170,y:205,r:"L. Lat. Malleolus"}
   ];
-  var dots=sites.map(function(s){var on=sel===s.r;return '<g style="cursor:pointer" onclick="pickBodySite(\''+s.r+'\')"><circle cx="'+s.x+'" cy="'+s.y+'" r="'+(on?7:5)+'" fill="'+(on?"#3f7d76":"#fff")+'" stroke="#3f7d76" stroke-width="1.5"/><title>'+s.r+'</title></g>';}).join("");
-  return '<div style="display:flex;gap:16px;align-items:center;background:var(--in);border:1px solid var(--bd);border-radius:9px;padding:12px"><svg viewBox="0 0 300 280" width="170" height="160"><ellipse cx="150" cy="24" rx="16" ry="18" fill="#eef1f1" stroke="#cfd6d4"/><rect x="120" y="44" width="60" height="92" rx="14" fill="#eef1f1" stroke="#cfd6d4"/><rect x="100" y="60" width="20" height="70" rx="9" fill="#eef1f1" stroke="#cfd6d4"/><rect x="180" y="60" width="20" height="70" rx="9" fill="#eef1f1" stroke="#cfd6d4"/><rect x="122" y="135" width="24" height="115" rx="11" fill="#eef1f1" stroke="#cfd6d4"/><rect x="154" y="135" width="24" height="115" rx="11" fill="#eef1f1" stroke="#cfd6d4"/>'+dots+'</svg><div style="font-size:11px;color:var(--mu);line-height:1.6"><div style="font-weight:700;color:var(--tx);margin-bottom:3px">Posterior pressure points</div>Click a common pressure-injury site to set the location.<div style="margin-top:6px">Selected: <b style="color:#356b64">'+(sel||"—")+'</b></div></div></div>';
+  var dots=sites.map(function(s){var on=sel===s.r;return '<g style="cursor:pointer" onclick="pickBodySite(\''+s.r+'\')"><circle cx="'+s.x+'" cy="'+s.y+'" r="'+(on?7:5)+'" fill="'+(on?"#c4623c":"#fff")+'" stroke="#c4623c" stroke-width="1.5"/><title>'+s.r+'</title></g>';}).join("");
+  return '<div style="display:flex;gap:16px;align-items:center;background:var(--in);border:1px solid var(--bd);border-radius:9px;padding:12px"><svg viewBox="0 0 300 280" width="170" height="160"><ellipse cx="150" cy="24" rx="16" ry="18" fill="#eef1f1" stroke="#cfd6d4"/><rect x="120" y="44" width="60" height="92" rx="14" fill="#eef1f1" stroke="#cfd6d4"/><rect x="100" y="60" width="20" height="70" rx="9" fill="#eef1f1" stroke="#cfd6d4"/><rect x="180" y="60" width="20" height="70" rx="9" fill="#eef1f1" stroke="#cfd6d4"/><rect x="122" y="135" width="24" height="115" rx="11" fill="#eef1f1" stroke="#cfd6d4"/><rect x="154" y="135" width="24" height="115" rx="11" fill="#eef1f1" stroke="#cfd6d4"/>'+dots+'</svg><div style="font-size:11px;color:var(--mu);line-height:1.6"><div style="font-weight:700;color:var(--tx);margin-bottom:3px">Posterior pressure points</div>Click a common pressure-injury site to set the location.<div style="margin-top:6px">Selected: <b style="color:#9c4e30">'+(sel||"—")+'</b></div></div></div>';
 }
 function awFacChange(){
   var fac=gv("aw-fac");var pt=document.getElementById("aw-pt");if(!pt)return;
@@ -2747,8 +2747,8 @@ function renderWAnalytics(){
     '<div style="display:grid;grid-template-columns:2fr 1fr;gap:11px;margin-bottom:13px"><div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Facility Benchmarks</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Census</th><th>Wounds</th><th>Prevalence</th><th>Pressure</th><th>Stage 2+</th><th>Infected</th><th>Healing</th><th>Avg Heal</th><th>Hosp</th></tr></thead><tbody>'+byFac.filter(function(f){return f.total>0;}).map(function(f){return'<tr><td class="b">'+f.fac+'</td><td>'+f.cs+'</td><td style="font-weight:700">'+f.total+'</td><td style="color:'+(f.prev>5?"#f87171":f.prev>3?"#fcd34d":"#6ee7b7")+';font-weight:700">'+f.prev+'%</td><td style="color:#fca5a5">'+f.pressure+'</td><td>'+f.s2+'</td><td style="color:'+(f.inf?"#f87171":"var(--mu)")+'">'+f.inf+'</td><td style="color:'+(f.hp>=70?"var(--tl)":f.hp>=40?"var(--am)":"#f87171")+';font-weight:700">'+f.hp+'%</td><td>'+f.avgHt+(f.avgHt!=="—"?"d":"")+'</td><td style="color:'+(f.wh?"#f87171":"var(--mu)")+'">'+f.wh+'</td></tr>';}).join("")+'</tbody></table></div></div>'+
     '<div class="card cp"><div class="st">Quarterly Metrics</div><table class="tbl" style="font-size:11px"><thead><tr><th>Quarter</th><th>New Wounds</th><th>Healed</th></tr></thead><tbody>'+(qArr.length?qArr.map(function(q){return'<tr><td class="b">'+q.q+'</td><td style="color:var(--bl);font-weight:700">'+q.nw+'</td><td style="color:var(--gn);font-weight:700">'+q.hl+'</td></tr>';}).join(""):'<tr><td colspan="3" style="color:var(--mu)">No dated wounds</td></tr>')+'</tbody></table><div style="font-size:10px;color:var(--mu);margin-top:8px;line-height:1.5">Marketable metrics for hospital partners & QAPI: healing rates, average healing time, and wound-related rehospitalizations.</div></div></div>';
   setTimeout(function(){
-    mkChart("wa-c1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#aeb4b3","#3f7d76"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom"}},scales:{x:{display:false},y:{display:false}}});
-    mkChart("wa-c2","doughnut",["Progressing","Improving","Stable","Slow","Worsening","Healed"],[{data:["Progressing","Improving","Stable","Slow","Worsening","Healed"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#5b8c6e","#9bbdb8","#d2d6d5","#b07d3c","#b3433a","#3f7d76"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wa-c1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#aeb4b3","#c4623c"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom"}},scales:{x:{display:false},y:{display:false}}});
+    mkChart("wa-c2","doughnut",["Progressing","Improving","Stable","Slow","Worsening","Healed"],[{data:["Progressing","Improving","Stable","Slow","Worsening","Healed"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#5b8c6e","#9bbdb8","#d2d6d5","#b07d3c","#b3433a","#c4623c"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
     mkChart("wa-c3","bar",["Mar","Apr","May","Jun"],[{label:"New",data:[2,4,3,2],backgroundColor:"#d2d6d5",borderRadius:3},{label:"Healed",data:[1,1,2,2],backgroundColor:"#5b8c6e",borderRadius:3}]);
   },60);
 }
@@ -2773,7 +2773,7 @@ function renderWQuality(){
   var incidence=totalCs?Math.round(acq.length/totalCs*1000)/10:0;
   document.getElementById("w-sub").textContent="QAPI / MDS Section M · "+pr.length+" pressure injuries · "+prev+"% prevalence";
   var byFac=facs.map(function(f){var fw=w.filter(function(x){return x.fac===f.name;});var fp=fw.filter(wIsPressure);var fac=fp.filter(function(x){return(x.poa||"").indexOf("Facility")>=0;});return{fac:f.name,co:f.co,cs:f.cs,pi:fp.length,prev:f.cs?Math.round(fp.length/f.cs*1000)/10:0,acq:fac.length,inf:fw.filter(function(x){return x.inf;}).length,infRate:fw.length?Math.round(fw.filter(function(x){return x.inf;}).length/fw.length*100):0,rth:f.rth};});
-  el.innerHTML='<div style="background:rgba(63,125,118,.08);border:1px solid rgba(63,125,118,.22);border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#356b64;margin-bottom:4px">📋 QAPI &amp; CMS MDS 3.0 Section M / F686</div><div style="font-size:11px;color:var(--mu);line-height:1.5">CMS-aligned measures reported into monthly QAPI: <b style="color:var(--tx)">prevalence</b>, <b style="color:var(--tx)">incidence (facility-acquired)</b>, <b style="color:var(--tx)">new or worsened pressure injuries</b> (deepest stage, no back-staging), infection and return-to-hospital rates, and <b style="color:var(--tx)">avoidable vs unavoidable (F686)</b> determinations.</div></div>'+
+  el.innerHTML='<div style="background:rgba(196,98,60,.08);border:1px solid rgba(196,98,60,.22);border-radius:8px;padding:11px 14px;margin-bottom:13px"><div style="font-size:12px;font-weight:700;color:#9c4e30;margin-bottom:4px">📋 QAPI &amp; CMS MDS 3.0 Section M / F686</div><div style="font-size:11px;color:var(--mu);line-height:1.5">CMS-aligned measures reported into monthly QAPI: <b style="color:var(--tx)">prevalence</b>, <b style="color:var(--tx)">incidence (facility-acquired)</b>, <b style="color:var(--tx)">new or worsened pressure injuries</b> (deepest stage, no back-staging), infection and return-to-hospital rates, and <b style="color:var(--tx)">avoidable vs unavoidable (F686)</b> determinations.</div></div>'+
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:9px">'+
     wk(prev+"%","PI Prevalence",prev>5?"var(--rd)":"var(--am)",prev>5)+wk(incidence+"%","PI Incidence (FA)",incidence>0?"var(--rd)":"var(--gn)",incidence>0)+wk(newWorsened.length,"New / Worsened PI",newWorsened.length?"var(--rd)":"var(--gn)",newWorsened.length>0)+wk(worsened.length,"Worsened in-stay","var(--am)")+'</div>'+
     '<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:13px">'+
@@ -2782,7 +2782,7 @@ function renderWQuality(){
     '<div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-top:13px"><div class="card cp"><div class="st">Pressure Injury Origin</div><div style="height:160px"><canvas id="wq-c1"></canvas></div></div><div class="card cp"><div class="st">Prevalence by Facility</div><div style="height:160px"><canvas id="wq-c2"></canvas></div></div></div>';
   setTimeout(function(){
     mkChart("wq-c1","doughnut",["Facility-Acquired","Present on Admission"],[{data:[acq.length,poa.length],backgroundColor:["#b3433a","#d2d6d5"],borderWidth:0}],{plugins:{legend:{display:true,position:"bottom",labels:{boxWidth:8,font:{size:9}}}},scales:{x:{display:false},y:{display:false}}});
-    mkChart("wq-c2","bar",byFac.map(function(f){return f.fac.split("–").pop().trim();}),[{label:"Prevalence %",data:byFac.map(function(f){return f.prev;}),backgroundColor:"#3f7d76",borderRadius:3}]);
+    mkChart("wq-c2","bar",byFac.map(function(f){return f.fac.split("–").pop().trim();}),[{label:"Prevalence %",data:byFac.map(function(f){return f.prev;}),backgroundColor:"#c4623c",borderRadius:3}]);
   },60);
 }
 
@@ -3733,9 +3733,9 @@ function renderRptWound(){
     +((!lowFacs.length&&!lowPorts.length&&!openTotal)?'<div style="font-size:11px;color:var(--tl)">✓ All facilities at or above the '+HEALTHRESH+'% healing target and no open action items. No education flags this period.</div>':"")
     +'</div>';
   setTimeout(function(){
-    mkChart("rc-w1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#aeb4b3","#3f7d76"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
+    mkChart("rc-w1","doughnut",["Pressure","Non-Pressure"],[{data:[pr.length,np.length],backgroundColor:["#aeb4b3","#c4623c"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
     mkChart("rc-w2","doughnut",["Progressing","Stable","Slow","Worsening"],[{data:["Progressing","Stable","Improving","Slow","Worsening"].map(function(h){return w.filter(function(x){return x.heal===h;}).length;}),backgroundColor:["#5b8c6e","#d2d6d5","#9bbdb8","#b07d3c","#b3433a"],borderWidth:0}],{scales:{x:{display:false},y:{display:false}}});
-    mkChart("rc-w3","bar",byPort.map(function(p){return p.co.split(" ")[0];}), [{label:"Pressure",data:byPort.map(function(p){return p.pressure;}),backgroundColor:"#aeb4b3",borderRadius:3},{label:"Non-Pressure",data:byPort.map(function(p){return p.nonPressure;}),backgroundColor:"#3f7d76",borderRadius:3}],{scales:{x:{stacked:true},y:{stacked:true}}});
+    mkChart("rc-w3","bar",byPort.map(function(p){return p.co.split(" ")[0];}), [{label:"Pressure",data:byPort.map(function(p){return p.pressure;}),backgroundColor:"#aeb4b3",borderRadius:3},{label:"Non-Pressure",data:byPort.map(function(p){return p.nonPressure;}),backgroundColor:"#c4623c",borderRadius:3}],{scales:{x:{stacked:true},y:{stacked:true}}});
   },50);
 }
 
@@ -4042,8 +4042,8 @@ function helpMock(screen,rows){
     }
     if(r.n){var cx2=W-152;
       bodyS+='<line x1="'+(x+bw)+'" y1="'+(y+h/2)+'" x2="'+(cx2-2)+'" y2="'+(y+h/2)+'" stroke="#cdd3d1" stroke-dasharray="3 3"/>';
-      bodyS+='<circle cx="'+cx2+'" cy="'+(y+h/2)+'" r="11" fill="#3f7d76"/><text x="'+cx2+'" y="'+(y+h/2+4)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#fff">'+r.n+'</text>';
-      bodyS+='<text x="'+(cx2+18)+'" y="'+(y+h/2+4)+'" font-family="Inter,sans-serif" font-size="10" fill="#3f7d76">'+e(r.cap||("Step "+r.n))+'</text>';}
+      bodyS+='<circle cx="'+cx2+'" cy="'+(y+h/2)+'" r="11" fill="#c4623c"/><text x="'+cx2+'" y="'+(y+h/2+4)+'" text-anchor="middle" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#fff">'+r.n+'</text>';
+      bodyS+='<text x="'+(cx2+18)+'" y="'+(y+h/2+4)+'" font-family="Inter,sans-serif" font-size="10" fill="#c4623c">'+e(r.cap||("Step "+r.n))+'</text>';}
     y+=h+gap;
   });
   var H=y+8,nav="",nx=x;
@@ -4053,7 +4053,7 @@ function helpMock(screen,rows){
   return '<svg viewBox="0 0 '+W+' '+H+'" width="100%" role="img" aria-label="'+e(screen)+' screen illustration">'
     +'<rect x="0.5" y="0.5" width="'+(W-1)+'" height="'+(H-1)+'" rx="10" fill="#fff" stroke="#e2e6e5"/>'
     +'<circle cx="20" cy="'+(top+10)+'" r="3.5" fill="#d9c3a8"/><circle cx="33" cy="'+(top+10)+'" r="3.5" fill="#cfd6d4"/><circle cx="46" cy="'+(top+10)+'" r="3.5" fill="#cfd6d4"/>'
-    +'<text x="'+(W-14)+'" y="'+(top+14)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#2f5f59">clinilytics <tspan fill="#9aa0a4" font-weight="400">· '+e(screen)+'</tspan></text>'
+    +'<text x="'+(W-14)+'" y="'+(top+14)+'" text-anchor="end" font-family="Inter,sans-serif" font-size="11" font-weight="700" fill="#9c4e30">clinilytics <tspan fill="#9aa0a4" font-weight="400">· '+e(screen)+'</tspan></text>'
     +'<line x1="0" y1="'+(navY-7)+'" x2="'+W+'" y2="'+(navY-7)+'" stroke="#eceeed"/>'+nav+bodyS+'</svg>';
 }
 var HELP=[
