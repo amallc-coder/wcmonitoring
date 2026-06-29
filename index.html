@@ -159,6 +159,32 @@ select option{background:#fff}
 .dot--good{background:var(--good)}.dot--warn{background:#F59E0B}.dot--info{background:#0EA5E9}
 .info-dot{height:14px;width:14px;display:inline-flex;align-items:center;justify-content:center;font-size:9px;line-height:1;border:1px solid var(--bd);border-radius:9999px;color:var(--mu);cursor:help;user-select:none}
 .info-dot:hover{color:var(--tx);border-color:var(--tx)}
+/* ── ROUNDS WORKFLOW ── */
+.rnd-steps{display:flex;gap:6px;overflow-x:auto;padding:2px 0 12px;scrollbar-width:none}
+.rnd-steps::-webkit-scrollbar{display:none}
+.rnd-step{display:inline-flex;align-items:center;gap:7px;padding:7px 12px;border:1px solid var(--bd);border-radius:999px;background:var(--sf);color:var(--mu);font-size:12px;white-space:nowrap;cursor:pointer;font-family:inherit;transition:all .12s}
+.rnd-step .rs-n{width:18px;height:18px;border-radius:50%;background:var(--in);color:var(--mu);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--mono)}
+.rnd-step.A{background:var(--ink);color:var(--sf);border-color:var(--ink)}
+.rnd-step.A .rs-n{background:var(--clay);color:#fff}
+.rnd-step.done{color:var(--gn);border-color:rgba(92,138,110,.4)}
+.rnd-step.done .rs-n{background:var(--gn);color:#fff}
+.rnd-panel{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r-panel);padding:18px 20px;box-shadow:var(--sh-panel)}
+.rnd-grid{display:grid;grid-template-columns:1fr 1fr;gap:11px 16px}
+.rnd-grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px 14px}
+.rnd-fld label{display:block;font-size:10px;font-weight:700;color:var(--mu);letter-spacing:.06em;text-transform:uppercase;margin-bottom:3px;font-family:var(--mono)}
+.rnd-chips{display:flex;flex-wrap:wrap;gap:6px}
+.rnd-chk{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--bd);border-radius:8px;padding:8px 11px;font-size:12.5px;cursor:pointer;background:var(--sf);line-height:1.3}
+.rnd-chk input{width:auto;margin:0;flex:none}
+.rnd-chk.on{border-color:var(--clay);background:var(--clay-10)}
+.rnd-sec{margin:2px 0 8px}
+.rnd-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:14px}
+.rnd-reg{margin-top:14px;background:var(--in);border:1px solid var(--bd);border-radius:9px;padding:9px 13px;font-size:11px;color:var(--slate);display:flex;flex-wrap:wrap;gap:14px;align-items:center}
+.rnd-reg b{color:var(--tx)}
+.tri-card{border:1px solid var(--bd);border-radius:10px;background:var(--sf);padding:12px 14px;display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px;box-shadow:var(--sh-panel)}
+.tri-tag{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:999px;background:var(--clay-10);color:var(--clay);white-space:nowrap}
+.tri-tag.warn{background:#f7e3df;color:#b23a2e}
+.tri-tag.ok{background:rgba(92,138,110,.15);color:#477f5c}
+@media(max-width:760px){.rnd-grid,.rnd-grid3{grid-template-columns:1fr}}
 /* ── HELP & TRAINING ── */
 .help-wrap{display:grid;grid-template-columns:248px 1fr;gap:16px;align-items:start}
 .help-nav{position:sticky;top:116px;display:flex;flex-direction:column;gap:2px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:8px;max-height:calc(100vh - 140px);overflow-y:auto}
@@ -302,6 +328,7 @@ img,canvas,svg{max-width:100%}
 </header>
 <nav id="mnav">
   <button class="A" onclick="go('dashboard')"><span class="nav-tab__dot"></span>Dashboard</button>
+  <button onclick="go('rounds')"><span class="nav-tab__dot"></span>Rounds</button>
   <button onclick="go('census')"><span class="nav-tab__dot"></span>Census &amp; Facilities</button>
   <button onclick="go('wound')"><span class="nav-tab__dot"></span>Wound Care</button>
   <button onclick="go('reports')"><span class="nav-tab__dot"></span>Reports &amp; Analytics</button>
@@ -328,6 +355,9 @@ img,canvas,svg{max-width:100%}
     <div class="card cp"><div class="st">Infection Rate</div><div class="cw"><canvas id="c-inf"></canvas></div></div>
   </div>
 </div>
+
+<!-- ROUNDS -->
+<div id="tab-rounds" class="tb"><div id="rounds-view"></div></div>
 
 <!-- CENSUS -->
 <div id="tab-census" class="tb">
@@ -1464,10 +1494,11 @@ function go(id){
   document.querySelectorAll(".tb").forEach(function(t){t.classList.remove("A");});
   document.querySelectorAll("#mnav button").forEach(function(b){b.classList.remove("A");});
   document.getElementById("tab-"+id).classList.add("A");
-  var idx={dashboard:0,census:1,wound:2,reports:3,help:4}[id];
+  var idx={dashboard:0,rounds:1,census:2,wound:3,reports:4,help:5}[id];
   document.querySelectorAll("#mnav button")[idx].classList.add("A");
   var nv=document.getElementById("mnav");if(nv)nv.classList.remove("open");
   saveUI({tab:id});closeMenus();
+  if(id==="rounds")  renderRounds();
   if(id==="census")  renderCensus();
   if(id==="wound")   wTab(wCurrentTab);
   if(id==="reports") renderReports();
@@ -2738,6 +2769,267 @@ function wTab(i){
   else if(i===5)renderWRehosp();
 }
 function wRefresh(){wTab(wCurrentTab);}
+/* ═══════════════ PROVIDER ROUNDING WORKFLOW ═══════════════
+   A guided, per-patient round that mirrors the clinical workflow:
+   prep → history/exam → assessment → plan → orders → documentation/coding → follow-up,
+   with the F-686 / MDS-M / infection-control / QAPI regulatory layer underneath.
+   Reuses clinContext(), woundSuggestions(), analyzeWoundPhoto(), openBilling(), aiDraftReq(). */
+var RND={wid:null,step:0,queue:[],fac:"All",prov:"All"};
+var ROUND_PHASES=[
+  {k:"prep",t:"Pre-round prep",ic:"\u{1F4CB}"},
+  {k:"exam",t:"History & exam",ic:"\u{1FA7A}"},
+  {k:"assess",t:"Assessment",ic:"\u{1F9E0}"},
+  {k:"plan",t:"Plan & treatment",ic:"\u{1F9F4}"},
+  {k:"orders",t:"Orders & comms",ic:"\u{1F4E3}"},
+  {k:"doc",t:"Documentation & coding",ic:"\u{1F9FE}"},
+  {k:"followup",t:"Follow-up",ic:"\u{1F4C5}"}
+];
+var ROUND_BARRIERS=[{k:"perf",t:"Perfusion / ischemia"},{k:"nutr",t:"Nutrition"},{k:"gly",t:"Glycemic control"},{k:"press",t:"Pressure / offloading"},{k:"moist",t:"Moisture balance"},{k:"inf",t:"Infection / biofilm"},{k:"meds",t:"Offending meds (steroid / immunosuppressant)"}];
+var ROUND_SYS=[{k:"offload",t:"Offloading / pressure redistribution (surface, turn q2h, heel protectors, mattress)"},{k:"nutr",t:"Nutrition (dietitian, protein, vitamin C, zinc)"},{k:"gly",t:"Glycemic optimization"},{k:"comp",t:"Compression (venous)"},{k:"vasc",t:"Vascular referral (arterial)"},{k:"abx",t:"Culture-directed antibiotics"},{k:"npwt",t:"NPWT for appropriate cavity wound"}];
+var ROUND_INFSIGNS=[{k:"eryth",t:"Spreading erythema"},{k:"warm",t:"Warmth"},{k:"indur",t:"Induration"},{k:"friab",t:"Friability"},{k:"exud",t:"Increased exudate"},{k:"purul",t:"Purulence"}];
+var ROUND_ESC=[{k:"noprog",t:"No measurable progress in 2–4 weeks"},{k:"newinf",t:"New infection"},{k:"bone",t:"Exposed bone / tendon"},{k:"sys",t:"Systemic signs (fever, sepsis)"}];
+function curW(){return WOUNDS.find(function(x){return x.id===RND.wid;});}
+/* ---- small field builders ---- */
+function rOpts(list,val){return list.map(function(o){return '<option'+(o===val?' selected':'')+'>'+e(o)+'</option>';}).join('');}
+function rF(label,inner){return '<div class="rnd-fld"><label>'+label+'</label>'+inner+'</div>';}
+function rSel(id,label,list,val){return rF(label,'<select id="'+id+'">'+rOpts(list,val)+'</select>');}
+function rInp(id,label,val,ph,typ){return rF(label,'<input id="'+id+'" type="'+(typ||'text')+'" value="'+e(val==null?'':String(val))+'" placeholder="'+e(ph||'')+'">');}
+function rTa(id,label,val,rows){return rF(label,'<textarea id="'+id+'" rows="'+(rows||3)+'">'+e(val||'')+'</textarea>');}
+function rChk(id,label,on){return '<label class="rnd-chk'+(on?' on':'')+'"><input type="checkbox" id="'+id+'"'+(on?' checked':'')+' onchange="this.parentNode.classList.toggle(\'on\',this.checked)"> '+e(label)+'</label>';}
+function rCheck(prefix,list){return list.map(function(o){return rChk(prefix+o.k,o.t,!!o.pre);}).join('');}
+function roundCheckedLabels(prefix,list){return list.filter(function(o){var el=document.getElementById(prefix+o.k);return el&&el.checked;}).map(function(o){return o.t;});}
+/* ---- triage ---- */
+function roundReasons(w){var r=[];
+  if(wIsNew(w))r.push("New");
+  if(w.poa==="Facility-Acquired"&&wIsPressure(w))r.push("Facility-acquired PI");
+  if(w.heal==="Slow"||w.heal==="Worsening")r.push("Non-healing");
+  var red=woundAreaReductionPct(w);if(red!=null&&woundOnsetDays(w)>=28&&red<40)r.push("Stalled <40% @4wk");
+  if(w.debride&&w.debride!=="None"&&w.debride!=="")r.push("Post-debridement f/u");
+  if(woundIsStale(w))r.push("Due weekly");
+  if(w.inf)r.push("Infection");
+  if(!r.length)r.push("Routine");return r;}
+function roundPriority(w){var s=0;if(w.inf)s+=5;if(w.heal==="Worsening")s+=5;if(w.heal==="Slow")s+=3;if(w.poa==="Facility-Acquired"&&wIsPressure(w))s+=2;if(woundIsStale(w))s+=2;if(wIsNew(w))s+=1;return s;}
+function roundSetFilter(which,val){RND[which]=val;renderRounds();}
+function roundWorklistHTML(){
+  var provs=(typeof woundProviders==="function"?woundProviders():[]);
+  var facs=(typeof FACS!=="undefined"?FACS.map(function(f){return f.name;}):[]);
+  var list=WOUNDS.filter(function(w){return !wIsHealed(w)&&(RND.fac==="All"||w.fac===RND.fac)&&(RND.prov==="All"||w.pv===RND.prov);});
+  list.forEach(function(w){w._rr=roundReasons(w);w._rp=roundPriority(w);});
+  list.sort(function(a,b){return b._rp-a._rp;});
+  var flagged=list.filter(function(w){return w._rr.indexOf("Routine")<0;});
+  var facOpts='<option value="All">All Facilities</option>'+facs.map(function(f){return '<option'+(f===RND.fac?' selected':'')+'>'+e(f)+'</option>';}).join('');
+  var provOpts='<option value="All">All Providers</option>'+provs.map(function(p){return '<option'+(p===RND.prov?' selected':'')+'>'+e(p)+'</option>';}).join('');
+  var rows=list.map(function(w){
+    var le=(w.chart||[]).slice(-1)[0]||{};var ar=woundAreaOf(le);
+    var tags=w._rr.map(function(t){var cl=(t==="Infection"||t==="Non-healing"||t==="Stalled <40% @4wk")?" warn":(t==="Routine"?" ok":"");return '<span class="tri-tag'+cl+'">'+e(t)+'</span>';}).join(" ");
+    return '<div class="tri-card"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-weight:700;font-size:13px">'+e(w.name)+'</span><span style="font-size:11px;color:var(--mu)">'+e(w.fac)+'</span></div>'+
+      '<div style="font-size:11.5px;color:var(--slate);margin:3px 0 5px">'+e(w.tp)+(w.stage&&w.stage!=="N/A"?(" · "+e(w.stage)):"")+" · "+e(w.loc)+" · last seen "+e(w.ls||"—")+" ("+woundDaysSinceUpdate(w)+"d)"+(ar!=null?(" · "+ar+" cm²"):"")+'</div>'+
+      '<div class="rnd-chips">'+tags+'</div></div>'+
+      '<div style="text-align:right;flex-shrink:0"><button class="btn bt bsm" onclick="startRound(\''+w.id+'\')">Start round →</button></div></div>';
+  }).join("");
+  return '<div class="ph2"><div><div class="pt3">Wound Rounds</div><div class="ps2">Triaged pre-round worklist · guided bedside workflow</div></div>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+
+    '<select style="width:180px;font-size:11px" onchange="roundSetFilter(\'fac\',this.value)">'+facOpts+'</select>'+
+    '<select style="width:160px;font-size:11px" onchange="roundSetFilter(\'prov\',this.value)">'+provOpts+'</select>'+
+    (flagged.length?'<button class="btn bp2 bsm" onclick="startRoundQueue()">▶ Round all flagged ('+flagged.length+')</button>':'')+'</div></div>'+
+    '<div class="g4" style="margin-bottom:12px">'+
+      roundKpi(list.length,"To be seen")+roundKpi(list.filter(function(w){return w.inf;}).length,"Infection active","#b23a2e")+
+      roundKpi(list.filter(function(w){return w.heal==="Slow"||w.heal==="Worsening";}).length,"Non-healing","#b07d3c")+
+      roundKpi(list.filter(function(w){return woundIsStale(w);}).length,"Overdue weekly","#b23a2e")+'</div>'+
+    '<div class="st">Pre-round prep — review prior notes, measurements, labs, vascular & dressing orders before the bedside</div>'+
+    (rows||'<div class="card cp" style="color:var(--mu)">No active wounds for this filter. \u{1F389}</div>')+
+    roundRegBanner();
+}
+function roundKpi(v,l,clr){return '<div class="kt"><div class="kv"'+(clr?(' style="color:'+clr+'"'):'')+'>'+v+'</div><div class="kl">'+e(l)+'</div></div>';}
+function roundRegBanner(){return '<div class="rnd-reg"><span><b>Regulatory layer:</b></span><span>F-686 skin integrity</span><span>MDS Section M accuracy</span><span>Infection control</span><span>QAPI — facility-acquired PI rate</span></div>';}
+/* ---- start / navigate ---- */
+function startRound(wid){RND.wid=wid;RND.step=0;go("rounds");renderRounds();}
+function startRoundQueue(){var list=WOUNDS.filter(function(w){return !wIsHealed(w)&&(RND.fac==="All"||w.fac===RND.fac)&&(RND.prov==="All"||w.pv===RND.prov)&&roundReasons(w).indexOf("Routine")<0;});list.sort(function(a,b){return roundPriority(b)-roundPriority(a);});RND.queue=list.map(function(w){return w.id;});if(RND.queue.length)startRound(RND.queue[0]);}
+function roundExit(){RND.wid=null;RND.queue=[];renderRounds();}
+function renderRounds(){var el=document.getElementById("rounds-view");if(!el)return;if(RND.wid&&curW()){el.innerHTML=roundStepperHTML();roundGoStep(RND.step);}else{RND.wid=null;el.innerHTML=roundWorklistHTML();}}
+function roundGoStep(n){if(n<0)n=0;if(n>6)n=6;RND.step=n;
+  for(var i=0;i<7;i++){var p=document.getElementById("rnd-panel-"+i);if(p)p.style.display=(i===n?"block":"none");var s=document.getElementById("rnd-chip-"+i);if(s){s.classList.toggle("A",i===n);s.classList.toggle("done",i<n);}}
+  var bk=document.getElementById("rnd-back"),nx=document.getElementById("rnd-next"),cp=document.getElementById("rnd-complete");
+  if(bk)bk.style.visibility=(n===0?"hidden":"visible");
+  if(nx)nx.style.display=(n===6?"none":"inline-flex");
+  if(cp)cp.style.display=(n===6?"inline-flex":"none");
+  if(n===5){var nt=document.getElementById("rnd-note");if(nt&&!nt.value.trim())nt.value=roundBuildNote(curW());}
+}
+function roundStepperHTML(){
+  var w=curW();var c=clinContext(w);
+  var qpos=RND.queue.length?(' · '+(RND.queue.indexOf(w.id)+1)+' of '+RND.queue.length+' in queue'):'';
+  var chips=ROUND_PHASES.map(function(p,i){return '<button class="rnd-step" id="rnd-chip-'+i+'" onclick="roundGoStep('+i+')"><span class="rs-n">'+(i+1)+'</span>'+p.ic+' '+e(p.t)+'</button>';}).join("");
+  var panels="";for(var i=0;i<7;i++){panels+='<div class="rnd-panel" id="rnd-panel-'+i+'" style="display:none">'+roundPhaseHTML(ROUND_PHASES[i].k,w,c)+'</div>';}
+  return '<div class="ph2"><div><div class="pt3">'+e(w.name)+'</div><div class="ps2">'+e(w.fac)+' · '+e(w.tp)+(w.stage&&w.stage!=="N/A"?(" · "+e(w.stage)):"")+" · "+e(w.loc)+qpos+'</div></div>'+
+    '<button class="btn bg3 bsm" onclick="roundExit()">← Worklist</button></div>'+
+    '<div class="rnd-steps">'+chips+'</div>'+
+    '<div id="rnd-panes">'+panels+'</div>'+
+    '<div class="rnd-foot"><button class="btn bg3" id="rnd-back" onclick="roundGoStep(RND.step-1)">← Back</button>'+
+      '<div style="display:flex;gap:7px"><button class="btn bt" id="rnd-next" onclick="roundGoStep(RND.step+1)">Next →</button>'+
+      '<button class="btn bp2" id="rnd-complete" style="display:none" onclick="roundComplete()">✓ Complete round &amp; chart</button></div></div>'+
+    roundRegBanner();
+}
+function roundPhaseHTML(k,w,c){
+  var le=(w.chart||[]).slice(-1)[0]||{};
+  if(k==="prep"){
+    var hist=[].concat(w.chart||[]).reverse().slice(0,3).map(function(h){return '<div style="font-size:12px;border-left:2px solid var(--bd);padding:2px 0 6px 9px;margin-bottom:4px"><b>'+e(h.dt)+'</b>'+(h.by?(" · "+e(h.by)):"")+(h.L?(" · "+h.L+"×"+h.W+(h.D?("×"+h.D):"")+"cm"):"")+(h.stage&&h.stage!=="N/A"?(" · "+e(h.stage)):"")+(h.heal?(" · "+e(h.heal)):"")+'<div style="color:var(--mu)">'+e(h.notes||"")+'</div></div>';}).join("")||'<div style="color:var(--mu);font-size:12px">No prior notes.</div>';
+    return '<div class="rnd-sec st">Snapshot</div><div class="rnd-grid3">'+
+      rInp("rnd-onset","Onset (days)",woundOnsetDays(w),"")+rInp("rnd-lastm","Last measurement",(le.L?(le.L+" × "+le.W+(le.D?(" × "+le.D):"")+" cm, "+(woundAreaOf(le)||"?")+" cm²"):"—"),"")+rInp("rnd-redux","Area change",((woundAreaReductionPct(w)!=null)?(woundAreaReductionPct(w)+"% vs baseline"):"—"),"")+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Prior notes (latest 3)</div>'+hist+
+      '<div class="rnd-sec st" style="margin-top:12px">Labs &amp; perfusion (review / update)</div><div class="rnd-grid3">'+
+        rInp("rnd-albumin","Albumin g/dL",(w.albumin!=null?w.albumin:""),"e.g. 2.8","number")+rInp("rnd-prealb","Prealbumin","","mg/dL","number")+rInp("rnd-a1c","HbA1c %","","e.g. 8.4","number")+
+        rInp("rnd-wbc","CBC / WBC","","","")+rInp("rnd-esr","ESR","","mm/hr","number")+rInp("rnd-crp","CRP","","mg/L","number")+'</div>'+
+      '<div class="rnd-grid" style="margin-top:6px">'+rInp("rnd-vasc","Vascular studies",(w.vascular||""),"pulses / duplex / ABI")+rInp("rnd-dressing-cur","Current dressing orders",(w.tx||""),"")+'</div>'+
+      '<div style="margin-top:10px">'+rChk("rnd-tn","Treatment nurse rounding with me (dressings down & back up)",true)+'</div>';
+  }
+  if(k==="exam"){
+    var etioL=["Pressure","Venous","Arterial","Diabetic / neuropathic","Surgical dehiscence","Skin tear","Moisture-associated (MASD)","Mixed"];
+    var stageL=["N/A","Stage 1","Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."];
+    var etioGuess=({"Pressure":"Pressure","Venous Ulcer":"Venous","Arterial Ulcer":"Arterial","Diabetic Ulcer":"Diabetic / neuropathic","Surgical Wound":"Surgical dehiscence","Skin Tear":"Skin tear"})[w.tp]||(w.etio==="Pressure"?"Pressure":"Mixed");
+    return '<div class="rnd-grid">'+rChk("rnd-consent","Patient identified, consent obtained",true)+rInp("rnd-pain","Pain score (0–10)","","0–10","number")+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Wound exam</div><div class="rnd-grid3">'+
+        rSel("rnd-etio","Etiology",etioL,etioGuess)+rInp("rnd-loc","Location",(w.loc||""),"")+rSel("rnd-stage","Stage / classification",stageL,(w.stage||"N/A"))+
+        rInp("rnd-L","Length cm",(le.L!=null?le.L:""),"","number")+rInp("rnd-W","Width cm",(le.W!=null?le.W:""),"","number")+rInp("rnd-D","Depth cm",(le.D!=null?le.D:""),"","number")+'</div>'+
+      '<div class="rnd-grid" style="margin-top:6px">'+rInp("rnd-under","Undermining / tunneling (clock position)","","e.g. 2.5cm @ 7 o'clock")+rInp("rnd-peri","Periwound skin","","intact / macerated / erythema / callus")+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Wound bed composition (%)</div><div class="rnd-grid">'+
+        rInp("rnd-tg","Granulation %",(le.tissueG!=null?le.tissueG:""),"","number")+rInp("rnd-ts","Slough %",(le.tissueS!=null?le.tissueS:""),"","number")+
+        rInp("rnd-te","Eschar %",(le.tissueE!=null?le.tissueE:""),"","number")+rInp("rnd-tep","Epithelial %","","","number")+'</div>'+
+      '<div class="rnd-grid3" style="margin-top:6px">'+rSel("rnd-exvol","Exudate volume",["None","Scant","Moderate","Heavy"],(le.exAmt||"Scant"))+rSel("rnd-exchar","Exudate character",["Serous","Serosanguineous","Sanguineous","Purulent"],"Serous")+rSel("rnd-odor","Odor",["No","Yes"],"No")+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Infection signs</div><div class="rnd-chips">'+rCheck_inf()+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Lower-extremity perfusion</div><div class="rnd-grid">'+
+        rSel("rnd-pulses","Pulses",["Palpable","Diminished","Absent"],"Palpable")+rSel("rnd-cap","Capillary refill",["<3s",">3s"],"<3s")+
+        rSel("rnd-edema","Edema",["0","1+","2+","3+"],"0")+rInp("rnd-abi","ABI",(w.abi!=null?w.abi:""),"e.g. 0.9","number")+'</div>'+
+      '<div style="margin-top:11px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn bg3 bsm" onclick="analyzeWoundPhoto(\''+w.id+'\')">\u{1F52C} Analyze photo</button><button class="btn bg3 bsm" onclick="compareWoundPhotos(\''+w.id+'\')">\u{1F4CA} Compare to last</button></div>';
+  }
+  if(k==="assess"){
+    var traj=({"Improving":"Improving","Progressing":"Improving","Stable":"Stable","Slow":"Deteriorating","Worsening":"Deteriorating"})[w.heal]||"Stable";
+    var bar=ROUND_BARRIERS.map(function(b){var pre=false;
+      if(b.k==="perf")pre=(c.abi!=null&&c.abi<0.8)||c.pvd;
+      if(b.k==="nutr")pre=c.malnutrition||(c.albumin!=null&&c.albumin<3);
+      if(b.k==="gly")pre=c.diabetes;
+      if(b.k==="press")pre=(w.etio==="Pressure"||w.tp==="Pressure Injury");
+      if(b.k==="moist")pre=/heavy|moderate/i.test(le.exAmt||"");
+      if(b.k==="inf")pre=!!w.inf;
+      if(b.k==="meds")pre=c.immuno||c.anticoag;
+      return rChk("rnd-bar-"+b.k,b.t,pre);}).join("");
+    var sugs=(typeof woundSuggestions==="function"?woundSuggestions(w):[]);
+    var sugHTML=sugs.length?('<div class="rnd-sec st" style="margin-top:12px">Guideline decision support</div><div style="display:flex;flex-direction:column;gap:6px">'+sugs.map(function(s){return '<div style="background:var(--clay-10);border:1px solid var(--clay-20);border-radius:8px;padding:8px 11px;font-size:12px"><b style="color:var(--clay)">'+e(s.cat)+'</b> — '+e(s.sug)+' <span style="color:var(--mu)">['+e(s.cite)+']</span></div>';}).join("")+'</div>'):'';
+    return '<div class="rnd-grid">'+rSel("rnd-traj","Healing trajectory",["Improving","Stable","Deteriorating"],traj)+rSel("rnd-inflvl","Infection level",["None","Local","Spreading","Systemic"],(w.inf?"Local":"None"))+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Barriers to healing</div><div class="rnd-chips">'+bar+'</div>'+
+      '<div class="rnd-grid" style="margin-top:12px">'+rSel("rnd-culture","Culture (deep tissue, not surface swab)",["None","Levine technique","Tissue biopsy"],"None")+rSel("rnd-osteo","Osteomyelitis workup",["None","Probe-to-bone","Plain film","MRI","Bone culture"],"None")+'</div>'+sugHTML;
+  }
+  if(k==="plan"){
+    return '<div class="rnd-grid">'+rSel("rnd-debride","Debridement",["None","Autolytic","Enzymatic","Mechanical","Sharp / selective","Surgical / excisional"],"None")+rInp("rnd-deb-method","Method / instruments","","curette, scalpel…")+'</div>'+
+      '<div class="rnd-grid" style="margin-top:6px">'+rInp("rnd-deb-tissue","Tissue removed","","slough / eschar, amount")+rInp("rnd-deb-tol","Anesthesia / tolerance","","tolerated well")+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Dressing selection — TIME (tissue / infection / moisture / edge)</div><div class="rnd-grid">'+
+        rInp("rnd-time-t","T — Tissue","","debride / protect")+rInp("rnd-time-i","I — Infection","","silver / iodine / PHMB")+
+        rInp("rnd-time-m","M — Moisture","","alginate/foam (absorb) · hydrogel (donate)")+rInp("rnd-time-e","E — Edge","","advanced therapy / NPWT")+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Systemic plan</div><div class="rnd-chips">'+rCheck_sys(w,c)+'</div>';
+  }
+  if(k==="orders"){
+    return '<div class="rnd-sec st">Nursing treatment order (executable without ambiguity)</div><div class="rnd-grid">'+
+        rInp("rnd-order-cleanser","Cleanser","","e.g. NS / wound cleanser")+rInp("rnd-order-product","Primary product","","exact product")+
+        rInp("rnd-order-sec","Secondary dressing","","cover / securement")+rSel("rnd-order-freq","Change frequency",["Daily","Every other day","3×/week","2×/week","Weekly","PRN saturation"],"Daily")+'</div>'+
+      '<div style="margin-top:6px">'+rTa("rnd-order-extra","Additional instructions","",2)+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Communication</div><div class="rnd-chips">'+
+        rChk("rnd-comm-tn","Verbal handoff to treatment nurse",true)+rChk("rnd-comm-don","Notified DON of changes",false)+rChk("rnd-comm-rp","Updated responsible party (significant wound)",false)+rChk("rnd-comm-idt","Care plan / IDT updated",false)+'</div>'+
+      '<div class="rnd-grid" style="margin-top:12px">'+rSel("rnd-goal","Goals of care",["Curative / healable","Maintenance","Comfort / palliative (goal is comfort, not closure)"],(w.goal&&/palli|non-heal/i.test(w.goal)?"Comfort / palliative (goal is comfort, not closure)":"Curative / healable"))+rChk("rnd-ktu","Kennedy terminal / end-of-life skin change",false)+'</div>';
+  }
+  if(k==="doc"){
+    return '<div class="rnd-sec st">Visit note (auto-assembled — review &amp; edit)</div>'+rTa("rnd-note","",("" ),12)+
+      '<div style="margin-top:7px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn bg3 bsm" onclick="document.getElementById(\'rnd-note\').value=roundBuildNote(curW())">↻ Rebuild from steps</button><button class="btn bg3 bsm" onclick="roundDraftNote()">✨ Draft note (AI)</button><button class="btn bt bsm" onclick="openBilling(\''+w.id+'\')">\u{1F9FE} Open full Charge Builder</button></div>'+
+      '<div style="margin-top:8px">'+rChk("rnd-photo","Wound photo captured per facility policy",false)+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Coding</div><div class="rnd-grid">'+
+        rSel("rnd-em","E/M visit",["Subsequent SNF 99307","Subsequent SNF 99308","Subsequent SNF 99309","Subsequent SNF 99310","Initial SNF 99304","Initial SNF 99305","Initial SNF 99306"],"Subsequent SNF 99308")+
+        rInp("rnd-mod","Modifiers","","25, 59/XU, KX, LT/RT")+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:10px">Procedure performed</div><div class="rnd-chips">'+
+        rChk("rnd-cpt-97597","Selective debridement 97597/97598",false)+rChk("rnd-cpt-11042","Surgical debridement 11042–11047 (by depth)",false)+rChk("rnd-cpt-npwt","NPWT 97605–97608",false)+'</div>'+
+      '<div class="rnd-grid" style="margin-top:12px">'+rSel("rnd-poa","Present-on-admission status",["Present on Admission","Facility-Acquired"],(w.poa||"Present on Admission"))+rSel("rnd-avoid","Avoidable vs unavoidable (F-686)",["Unavoidable","Avoidable","N/A"],"Unavoidable")+'</div>'+
+      '<div style="margin-top:6px">'+rInp("rnd-mds","MDS Section M coordination note","","stage, count, worsening since prior MDS")+'</div>';
+  }
+  if(k==="followup"){
+    return '<div class="rnd-grid">'+rSel("rnd-cadence","Reassessment cadence",["Weekly (minimum for active)","Twice weekly","Every 2 weeks","Sooner if deteriorating"],"Weekly (minimum for active)")+rSel("rnd-track","Objective tracking tool",["PUSH","Bates-Jensen","Serial measurements"],"PUSH")+'</div>'+
+      '<div class="rnd-grid" style="margin-top:6px">'+rInp("rnd-push","Score this visit","","PUSH / BWAT")+rInp("rnd-next","Next reassessment date","","")+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:12px">Escalation triggers (flag if present)</div><div class="rnd-chips">'+rCheck("rnd-esc-",ROUND_ESC)+'</div>'+
+      '<div class="rnd-chips" style="margin-top:12px">'+rChk("rnd-fu-cp","Care plan updated",true)+rChk("rnd-fu-idt","Loop closed with IDT",false)+'</div>'+
+      '<div style="margin-top:12px;font-size:11.5px;color:var(--mu)">Completing the round charts a dated entry (measurements, stage, trajectory, note) into this wound’s history so analytics, MDS &amp; QAPI stay current.</div>';
+  }
+  return "";
+}
+function rCheck_inf(){return ROUND_INFSIGNS.map(function(o){return rChk("rnd-infsign-"+o.k,o.t,false);}).join("");}
+function rCheck_sys(w,c){return ROUND_SYS.map(function(s){var pre=false;
+  if(s.k==="offload")pre=(w.etio==="Pressure"||w.tp==="Pressure Injury"||w.tp==="Diabetic Ulcer");
+  if(s.k==="nutr")pre=c.malnutrition||(c.albumin!=null&&c.albumin<3);
+  if(s.k==="gly")pre=c.diabetes;
+  if(s.k==="comp")pre=(w.tp==="Venous Ulcer");
+  if(s.k==="vasc")pre=(c.abi!=null&&c.abi<0.8);
+  if(s.k==="abx")pre=!!w.inf;
+  return rChk("rnd-sys-"+s.k,s.t,pre);}).join("");}
+function roundDraftNote(){
+  if(typeof aiAvailable==="function"&&!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
+  var w=curW();if(!w)return;var c=clinContext(w);delete c.name;
+  var sugs=woundSuggestions(w).map(function(s){return s.cat+": "+s.sug+" ["+s.cite+"]";});
+  toast("Drafting note…");
+  aiDraftReq({context:c,suggestions:sugs}).then(function(d){if(d.text){var t=(typeof stripAIDisclaimer==="function"?stripAIDisclaimer(d.text):d.text);var nt=document.getElementById("rnd-note");if(nt){nt.value=(nt.value?nt.value+"\n\n":"")+t;}toast("AI draft added — review & edit","ok");}}).catch(function(err){toast(err&&err.message==="notcfg"?"AI isn't configured on the server yet":"AI draft failed","err");});
+}
+function roundBuildNote(w){
+  function g(id){return gv(id)||"";}
+  var L=g("rnd-L"),W=g("rnd-W"),D=g("rnd-D");
+  var barriers=roundCheckedLabels("rnd-bar-",ROUND_BARRIERS);
+  var sysplan=roundCheckedLabels("rnd-sys-",ROUND_SYS);
+  var infsigns=roundCheckedLabels("rnd-infsign-",ROUND_INFSIGNS);
+  var esc=roundCheckedLabels("rnd-esc-",ROUND_ESC);
+  var deb=g("rnd-debride");
+  var L2=[];
+  L2.push("WOUND ROUNDING NOTE — "+TDS());
+  L2.push("Location: "+g("rnd-loc")+" | Etiology: "+g("rnd-etio")+" | Stage/Class: "+g("rnd-stage")+(g("rnd-pain")?(" | Pain "+g("rnd-pain")+"/10"):""));
+  L2.push("Measurements: "+L+" x "+W+(D?(" x "+D):"")+" cm"+(g("rnd-under")?("; undermining/tunneling "+g("rnd-under")):""));
+  L2.push("Wound bed: granulation "+g("rnd-tg")+"%, slough "+g("rnd-ts")+"%, eschar "+g("rnd-te")+"%, epithelial "+g("rnd-tep")+"%.");
+  L2.push("Exudate: "+g("rnd-exvol")+" "+g("rnd-exchar")+(g("rnd-odor")==="Yes"?"; odor present":"")+". Periwound: "+g("rnd-peri")+".");
+  L2.push("Infection: "+g("rnd-inflvl")+(infsigns.length?(" ("+infsigns.join(", ")+")"):""));
+  L2.push("Perfusion: pulses "+g("rnd-pulses")+", cap refill "+g("rnd-cap")+", edema "+g("rnd-edema")+", ABI "+g("rnd-abi")+".");
+  L2.push("ASSESSMENT: "+g("rnd-etio")+" wound, trajectory "+g("rnd-traj")+". Barriers: "+(barriers.join(", ")||"none identified")+".");
+  if(g("rnd-culture")&&g("rnd-culture")!=="None")L2.push("Culture: "+g("rnd-culture")+".");
+  if(g("rnd-osteo")&&g("rnd-osteo")!=="None")L2.push("Osteomyelitis workup: "+g("rnd-osteo")+".");
+  L2.push("PLAN — Debridement: "+deb+((deb&&deb!=="None")?(" ("+g("rnd-deb-method")+"; tissue: "+g("rnd-deb-tissue")+"; "+g("rnd-deb-tol")+")"):"")+".");
+  L2.push("Dressings (TIME): T "+g("rnd-time-t")+"; I "+g("rnd-time-i")+"; M "+g("rnd-time-m")+"; E "+g("rnd-time-e")+".");
+  if(sysplan.length)L2.push("Systemic plan: "+sysplan.join("; ")+".");
+  L2.push("Goals of care: "+g("rnd-goal")+(document.getElementById("rnd-ktu")&&document.getElementById("rnd-ktu").checked?" (Kennedy terminal / EOL skin change)":"")+".");
+  L2.push("Nursing order: cleanse with "+g("rnd-order-cleanser")+"; apply "+g("rnd-order-product")+(g("rnd-order-sec")?(" + "+g("rnd-order-sec")):"")+"; change "+g("rnd-order-freq")+"."+(g("rnd-order-extra")?(" "+g("rnd-order-extra")):""));
+  L2.push("FOLLOW-UP: reassess "+g("rnd-cadence")+"; "+g("rnd-track")+(g("rnd-push")?(" "+g("rnd-push")):"")+". Escalation triggers: "+(esc.join("; ")||"none active")+".");
+  L2.push("POA status: "+g("rnd-poa")+". F-686: "+g("rnd-avoid")+"."+(g("rnd-mds")?(" MDS-M: "+g("rnd-mds")+"."):""));
+  return L2.join("\n");
+}
+function roundComplete(){
+  var w=curW();if(!w)return;var today=TDS();
+  var L=parseFloat(gv("rnd-L"));if(isNaN(L))L=null;
+  var W=parseFloat(gv("rnd-W"));if(isNaN(W))W=null;
+  var D=parseFloat(gv("rnd-D"));if(isNaN(D))D=null;
+  var stage=gv("rnd-stage")||w.stage;
+  var heal=({Improving:"Improving",Stable:"Stable",Deteriorating:"Worsening"})[gv("rnd-traj")]||w.heal;
+  var infLvl=gv("rnd-inflvl");var inf=!!(infLvl&&infLvl!=="None");
+  var tx=gv("rnd-order-product")||w.tx;
+  var note=gv("rnd-note")||roundBuildNote(w);
+  var en={dt:today,stage:stage,tx:tx,heal:heal,inf:inf,L:L,W:W,D:D,notes:note,by:"Provider",round:true,
+    exAmt:gv("rnd-exvol"),tissueG:(parseInt(gv("rnd-tg"))||0),tissueS:(parseInt(gv("rnd-ts"))||0),tissueE:(parseInt(gv("rnd-te"))||0),
+    infSev:(infLvl==="Spreading"||infLvl==="Systemic")?"systemic":(infLvl==="Local"?"local":""),
+    offload:(document.getElementById("rnd-sys-offload")&&document.getElementById("rnd-sys-offload").checked)?"offloading":"",
+    compression:(document.getElementById("rnd-sys-comp")&&document.getElementById("rnd-sys-comp").checked)?"compression":"",
+    osteo:(gv("rnd-osteo")&&gv("rnd-osteo")!=="None")?"suspect":""};
+  if(!w.chart)w.chart=[];w.chart.push(en);
+  w.stage=stage;if(tx)w.tx=tx;w.heal=heal;w.inf=inf;w.ls=today;if(note)w.notes=note.split("\n")[2]||w.notes;
+  var ab=parseFloat(gv("rnd-abi"));if(!isNaN(ab))w.abi=ab;
+  var al=parseFloat(gv("rnd-albumin"));if(!isNaN(al))w.albumin=al;
+  var poa=gv("rnd-poa");if(poa)w.poa=poa;
+  var deb=gv("rnd-debride");if(deb&&deb!=="None")w.debride=deb;
+  if(!w.rounds)w.rounds=[];
+  w.rounds.push({dt:today,etio:gv("rnd-etio"),traj:gv("rnd-traj"),barriers:roundCheckedLabels("rnd-bar-",ROUND_BARRIERS),infLvl:infLvl,culture:gv("rnd-culture"),osteo:gv("rnd-osteo"),debride:deb,em:gv("rnd-em"),cpt:[(document.getElementById("rnd-cpt-97597")||{}).checked?"97597/97598":null,(document.getElementById("rnd-cpt-11042")||{}).checked?"11042-11047":null,(document.getElementById("rnd-cpt-npwt")||{}).checked?"97605-97608":null].filter(Boolean),mod:gv("rnd-mod"),avoid:gv("rnd-avoid"),cadence:gv("rnd-cadence"),esc:roundCheckedLabels("rnd-esc-",ROUND_ESC),note:note});
+  persist();
+  if(typeof updateBell==="function")updateBell();
+  RND.queue=RND.queue.filter(function(id){return id!==w.id;});
+  if(RND.queue.length){toast("✓ Round charted — next patient","ok");startRound(RND.queue[0]);}
+  else{toast("✓ Round completed & charted","ok");RND.wid=null;renderRounds();}
+}
 function wIsPressure(w){return w.etio==="Pressure"||w.tp==="Pressure Injury";}
 function wStage2Plus(w){return["Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."].indexOf(w.stage)>=0;}
 function stageNum(s){return ({"Stage 1":1,"Stage 2":2,"Stage 3":3,"Stage 4":4,"Unstageable":4,"Deep Tissue Inj.":3})[s]||0;}
