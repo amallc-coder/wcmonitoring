@@ -2457,7 +2457,7 @@ function _sendAnalyze(w,curURL,prevURL){
   toast(prevURL?"Comparing photos with Claude…":"Analyzing photo with Claude…");
   aiAnalyzeReq({context:c,suggestions:sugs,image:cm?cm[2]:null,mime:cm?cm[1]:null,prevImage:pm?pm[2]:null,prevMime:pm?pm[1]:null})
    .then(function(d){renderWoundAnalysis(w.id,d.analysis||{},{cur:curURL,prev:prevURL});})
-   .catch(function(err){toast(err.message==="notcfg"?"Claude isn't configured on the server yet":"Analysis failed","err");});
+   .catch(function(err){var m=err&&err.message;toast((typeof aiAvailable==="function"&&!aiAvailable())?"AI not connected — add a Claude key in Settings → AI, or finish Supabase setup":(m==="notcfg"?"AI not configured on the server yet — set the ANTHROPIC_API_KEY secret (Settings → AI)":("Photo analysis failed"+(m?(": "+m):""))),"err");});
 }
 function renderWoundAnalysis(woundId,a,imgs){
   window._lastAnalysis={id:woundId,a:a};
@@ -3026,6 +3026,11 @@ function roundPhaseHTML(k,w,c){
       '<div class="rnd-grid" style="margin-top:6px">'+rInp("rnd-push","Score this visit","","PUSH / BWAT")+rInp("rnd-next","Next reassessment date","","")+'</div>'+
       '<div class="rnd-sec st" style="margin-top:12px">Escalation triggers (flag if present)</div><div class="rnd-chips">'+rCheck("rnd-esc-",ROUND_ESC)+'</div>'+
       '<div class="rnd-chips" style="margin-top:12px">'+rChk("rnd-fu-cp","Care plan updated",true)+rChk("rnd-fu-idt","Loop closed with IDT",false)+'</div>'+
+      (function(){var f=(typeof FACS!=="undefined"?FACS.find(function(x){return x.name===w.fac;}):null);var em=f&&f.email;
+        return '<div class="rnd-sec st" style="margin-top:14px">Email facility DON</div>'+
+          '<div style="font-size:11px;color:var(--mu);margin-bottom:6px">'+(em?("Send to "+e(f.don||"DON")+" &lt;"+e(em)+"&gt; at "+e(w.fac)):("No DON email on file for "+e(w.fac||"this facility")+" — add it in Census → facility contact"))+'</div>'+
+          '<div style="display:flex;gap:7px;flex-wrap:wrap"><button class="btn bd2 bsm" onclick="roundEmailDON(\'patient\')">\u{1F4E7} Email DON — this patient</button><button class="btn bg3 bsm" onclick="roundEmailDON(\'all\')">\u{1F4E7} Email DON — all patients (this facility)</button></div>';
+      })()+
       '<div style="margin-top:12px;font-size:11.5px;color:var(--mu)">Completing the round charts a dated entry (measurements, stage, trajectory, note) into this wound’s history so analytics, MDS &amp; QAPI stay current.</div>';
   }
   return "";
@@ -3178,6 +3183,33 @@ function roundRenderAudit(a){
   if(a.summary)h+='<div style="font-size:12.5px;color:#42474d;margin-bottom:8px">'+e(a.summary)+'</div>';
   h+=sec("⚠ Documentation gaps",a.gaps,"#b3433a")+sec("Verbiage to add (supports the codes)",a.verbiage)+sec("Under-coding / capture opportunities",a.underCoding,"#946325")+sec("Recommended ICD / CPT / modifiers",a.recommendedCodes)+sec("Compliance flags",a.complianceFlags,"#b3433a")+'</div>';
   var box=document.getElementById("rnd-audit");if(box)box.innerHTML=h;
+}
+function _roundDONEmail(scope){
+  var w=curW();if(!w)return null;
+  var f=(typeof FACS!=="undefined"?FACS.find(function(x){return x.name===w.fac;}):null);
+  if(!f||!f.email)return {err:"noemail",fac:w.fac};
+  var subj,body,count=1;
+  if(scope==="all"){
+    var fws=WOUNDS.filter(function(x){return x.fac===w.fac&&!wIsHealed(x);});count=fws.length;
+    subj="Wound rounding updates — "+w.fac+" — "+TD();
+    var parts=fws.map(function(x){var r=(x.rounds||[]).slice(-1)[0];
+      var line="• "+x.name+" — "+x.tp+(x.stage&&x.stage!=="N/A"?(" · "+x.stage):"")+" · "+x.loc;
+      if(r){line+="\n  Trajectory: "+(r.traj||"—")+"; Infection: "+(r.infLvl||"—")+(r.dt?("; rounded "+r.dt):"");}
+      else{line+="\n  Status: "+(x.heal||"—")+(x.inf?"; infection active":"")+"; last seen "+(x.ls||"—");}
+      return line;});
+    body="Facility: "+w.fac+"\nProvider: "+((currentUser&&currentUser.name)||"Wound provider")+"\nDate: "+TD()+"\nPatients: "+fws.length+"\n\n"+parts.join("\n\n")+"\n\n— Generated from Clinilytics Wound Rounds. Full notes are in the chart.";
+  }else{
+    subj="Wound rounding update — "+w.name+" — "+TD();
+    body="Facility: "+w.fac+"\nPatient: "+w.name+"\nProvider: "+((currentUser&&currentUser.name)||"Wound provider")+"\n\n"+(gv("rnd-note")||roundBuildNote(w));
+  }
+  return {to:f.email,don:f.don||"",fac:w.fac,subj:subj,body:body,count:count};
+}
+function roundEmailDON(scope){
+  var m=_roundDONEmail(scope);if(!m)return;
+  if(m.err==="noemail"){toast("No DON email on file for "+(m.fac||"this facility")+" — add it in Census → facility contact","err");return;}
+  if(typeof SENTLOG!=="undefined"){SENTLOG.push({fac:m.fac,to:m.to,don:m.don,date:TDS(),count:m.count,by:((currentUser&&currentUser.name)||"You")+" (rounds)",pdf:false});if(typeof renderSendLog==="function")renderSendLog();if(typeof persist==="function")persist();}
+  window.location.href="mailto:"+encodeURIComponent(m.to)+"?subject="+encodeURIComponent(m.subj)+"&body="+encodeURIComponent(m.body);
+  toast("Email draft opened for DON · "+m.to,"ok");
 }
 function roundComplete(){
   var w=curW();if(!w)return;var today=TDS();
