@@ -3033,7 +3033,9 @@ function roundPhaseHTML(k,w,c){
       '<div style="margin-top:7px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn bg3 bsm" onclick="document.getElementById(\'rnd-note\').value=roundBuildNote(curW())">↻ Rebuild from steps</button><button class="btn bg3 bsm" onclick="roundDraftNote()">✨ Draft note (AI)</button><button class="btn bg3 bsm" onclick="roundCopyActiveNote()">\u{1F4CB} Copy</button><button class="btn bg3 bsm" onclick="roundPrintNote()">\u{1F5A8} Print / PDF</button><button class="btn bt bsm" onclick="openBilling(\''+w.id+'\')">\u{1F9FE} Open full Charge Builder</button></div>'+
       '<div class="rnd-grid" style="margin-top:8px">'+rChk("rnd-attest","I attest this note is accurate and complete",false)+rInp("rnd-cosign","Co-signing provider (optional)","","NPI / supervising provider")+'</div>'+
       '<div style="margin-top:8px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+rChk("rnd-photo","Wound photo captured per facility policy",false)+'<div id="rnd-doc-photo"></div></div>'+
-      '<div class="rnd-sec st" style="margin-top:12px">Coding</div><div class="rnd-grid">'+
+      '<div class="rnd-sec st" style="margin-top:12px">Coding</div>'+
+      '<div style="margin-bottom:8px">'+rTa("rnd-icd","ICD-10 diagnoses (auto-suggested — edit as needed)",((typeof icdForWound==="function"?(icdForWound(w).codes||[]):[]).map(function(c){return c.code+" — "+c.desc;}).join("\n")),3)+'</div>'+
+      '<div class="rnd-grid">'+
         rSel("rnd-em","E/M visit",["Subsequent SNF 99307","Subsequent SNF 99308","Subsequent SNF 99309","Subsequent SNF 99310","Initial SNF 99304","Initial SNF 99305","Initial SNF 99306"],"Subsequent SNF 99308")+
         rInp("rnd-mod","Modifiers","","25, 59/XU, KX, LT/RT")+'</div>'+
       '<div class="rnd-sec st" style="margin-top:10px">Procedure performed</div><div class="rnd-chips">'+
@@ -3128,6 +3130,7 @@ function roundBuildNote(w){
   add("ORDERS & COMMUNICATION",or);
   // DOCUMENTATION & CODING
   var dc=[];
+  var icd=g("rnd-icd");if(icd)dc.push("ICD-10: "+icd.split("\n").map(function(s){return s.trim();}).filter(Boolean).join("; "));
   if(g("rnd-em"))dc.push("E/M: "+g("rnd-em"));
   var cpt=[];if(ck("rnd-cpt-97597"))cpt.push("97597/97598 selective debridement");if(ck("rnd-cpt-11042"))cpt.push("11042–11047 surgical debridement");if(ck("rnd-cpt-npwt"))cpt.push("97605–97608 NPWT");
   if(cpt.length)dc.push("Procedure(s): "+cpt.join(", "));
@@ -3190,7 +3193,7 @@ function roundAddSmart(i){if(!RND._sug)return;var s=RND._sug[i];if(!s||!s.note)r
 function roundAddAllSmart(){if(!RND._sug)return;var n=0;RND._sug.forEach(function(s){if(s.note&&RND.smart.indexOf(s.note)<0){RND.smart.push(s.note);n++;}});var nt=document.getElementById("rnd-note");if(nt&&nt.value.trim()&&n)nt.value=nt.value+"\n- "+RND._sug.map(function(s){return s.note;}).join("\n- ");toast(n?(n+" smart note"+(n>1?"s":"")+" added"):"All already added","ok");}
 function roundAuditCoding(){
   var w=curW();if(!w)return;if(typeof aiAvailable==="function"&&!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
-  var codes=[];if(gv("rnd-em"))codes.push(gv("rnd-em"));
+  var codes=[];var _icd=gv("rnd-icd");if(_icd)_icd.split("\n").forEach(function(s){s=s.trim();if(s)codes.push(s);});if(gv("rnd-em"))codes.push(gv("rnd-em"));
   if(document.getElementById("rnd-cpt-97597")&&document.getElementById("rnd-cpt-97597").checked)codes.push("97597/97598 selective debridement");
   if(document.getElementById("rnd-cpt-11042")&&document.getElementById("rnd-cpt-11042").checked)codes.push("11042-11047 surgical debridement");
   if(document.getElementById("rnd-cpt-npwt")&&document.getElementById("rnd-cpt-npwt").checked)codes.push("97605-97608 NPWT");
@@ -3270,7 +3273,7 @@ function roundComplete(){
   var poa=gv("rnd-poa");if(poa)w.poa=poa;
   var deb=gv("rnd-debride");if(deb&&deb!=="None")w.debride=deb;
   if(!w.rounds)w.rounds=[];
-  w.rounds.push({dt:today,ts:Date.now(),by:"Provider",stage:stage,L:L,W:W,D:D,etio:gv("rnd-etio"),traj:gv("rnd-traj"),barriers:roundCheckedLabels("rnd-bar-",ROUND_BARRIERS),infLvl:infLvl,culture:gv("rnd-culture"),osteo:gv("rnd-osteo"),debride:deb,em:gv("rnd-em"),cpt:[(document.getElementById("rnd-cpt-97597")||{}).checked?"97597/97598":null,(document.getElementById("rnd-cpt-11042")||{}).checked?"11042-11047":null,(document.getElementById("rnd-cpt-npwt")||{}).checked?"97605-97608":null].filter(Boolean),mod:gv("rnd-mod"),avoid:gv("rnd-avoid"),cadence:gv("rnd-cadence"),esc:roundCheckedLabels("rnd-esc-",ROUND_ESC),attested:!!(document.getElementById("rnd-attest")&&document.getElementById("rnd-attest").checked),cosign:gv("rnd-cosign"),photo:(RND.photo||null),note:note});
+  w.rounds.push({dt:today,ts:Date.now(),by:"Provider",stage:stage,L:L,W:W,D:D,etio:gv("rnd-etio"),traj:gv("rnd-traj"),barriers:roundCheckedLabels("rnd-bar-",ROUND_BARRIERS),infLvl:infLvl,culture:gv("rnd-culture"),osteo:gv("rnd-osteo"),debride:deb,em:gv("rnd-em"),cpt:[(document.getElementById("rnd-cpt-97597")||{}).checked?"97597/97598":null,(document.getElementById("rnd-cpt-11042")||{}).checked?"11042-11047":null,(document.getElementById("rnd-cpt-npwt")||{}).checked?"97605-97608":null].filter(Boolean),icd:gv("rnd-icd"),mod:gv("rnd-mod"),avoid:gv("rnd-avoid"),cadence:gv("rnd-cadence"),esc:roundCheckedLabels("rnd-esc-",ROUND_ESC),attested:!!(document.getElementById("rnd-attest")&&document.getElementById("rnd-attest").checked),cosign:gv("rnd-cosign"),photo:(RND.photo||null),note:note});
   persist();
   if(typeof updateBell==="function")updateBell();
   RND.queue=RND.queue.filter(function(id){return id!==w.id;});
