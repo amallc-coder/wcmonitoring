@@ -2838,8 +2838,41 @@ function roundWorklistHTML(){
       roundKpi(list.filter(function(w){return woundIsStale(w);}).length,"Overdue weekly","#b23a2e")+'</div>'+
     '<div class="st">Pre-round prep — review prior notes, measurements, labs, vascular & dressing orders before the bedside</div>'+
     (rows||'<div class="card cp" style="color:var(--mu)">No active wounds for this filter. \u{1F389}</div>')+
+    roundCompletedHTML()+
     roundRegBanner();
 }
+function allCompletedRounds(){
+  var all=[];
+  WOUNDS.forEach(function(w){(w.rounds||[]).forEach(function(r,i){all.push({wid:w.id,idx:i,name:w.name,fac:w.fac,tp:w.tp,r:r});});});
+  all.sort(function(a,b){return (b.r.ts||0)-(a.r.ts||0);});
+  return all;
+}
+function roundCompletedHTML(){
+  var all=allCompletedRounds();
+  if(!all.length)return '';
+  var rows=all.slice(0,15).map(function(o){var r=o.r;
+    var tcl=/improv/i.test(r.traj)?"ok":/deterior|wors/i.test(r.traj)?"warn":"";
+    var bits=[];
+    if(r.L!=null)bits.push(r.L+"×"+r.W+(r.D!=null?("×"+r.D):"")+"cm");
+    if(r.debride&&r.debride!=="None")bits.push("debride: "+r.debride);
+    if(r.infLvl&&r.infLvl!=="None")bits.push("infection: "+r.infLvl);
+    if(r.em)bits.push(r.em);
+    return '<div class="tri-card"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap"><span style="font-weight:700;font-size:13px">'+e(o.name)+'</span><span style="font-size:11px;color:var(--mu)">'+e(o.fac)+'</span>'+(r.traj?'<span class="tri-tag'+(tcl?(" "+tcl):"")+'">'+e(r.traj)+'</span>':"")+(r.photo?'<span class="tri-tag">\u{1F4F7} photo</span>':"")+'</div>'+
+      '<div style="font-size:11.5px;color:var(--slate);margin:3px 0 0">'+e(r.dt||"")+(r.by?(" · "+e(r.by)):"")+(bits.length?(" · "+e(bits.join(" · "))):"")+'</div></div>'+
+      '<div style="text-align:right;flex-shrink:0;display:flex;gap:6px"><button class="btn bg3 bsm" onclick="roundViewNote(\''+o.wid+'\','+o.idx+')">View note</button><button class="btn bd2 bsm" onclick="startRound(\''+o.wid+'\')">New round →</button></div></div>';
+  }).join("");
+  return '<div class="st" style="margin-top:18px">Recently completed rounds ('+all.length+')</div>'+rows;
+}
+function roundViewNote(wid,idx){
+  var w=WOUNDS.find(function(x){return x.id===wid;});if(!w||!w.rounds||!w.rounds[idx])return;
+  var r=w.rounds[idx];cMrnd();
+  var imgs=r.photo?('<img src="'+r.photo+'" style="height:140px;border-radius:8px;border:1px solid var(--bd);display:block;margin-bottom:11px">'):'';
+  var html='<div class="mo" onclick="if(event.target===this)cMrnd()"><div class="mb"><div class="mh"><div class="mtt">Round note — '+e(w.name)+' · '+e(r.dt||"")+'</div><button class="xb" onclick="cMrnd()">✕</button></div><div class="mbd">'+imgs+'<pre style="white-space:pre-wrap;font-family:var(--mono);font-size:12px;line-height:1.55;color:var(--tx);margin:0">'+e(r.note||"(no note text saved for this round)")+'</pre></div><div class="mft"><button class="btn bg3" onclick="roundCopyNote('+idx+',\''+wid+'\')">Copy note</button><button class="btn bg3" onclick="cMrnd()">Close</button><button class="btn bt" onclick="cMrnd();startRound(\''+wid+'\')">New round on this wound</button></div></div></div>';
+  var holder=document.createElement("div");holder.id="rndview-holder";holder.innerHTML=html;document.body.appendChild(holder);
+}
+function cMrnd(){var h=document.getElementById("rndview-holder");if(h&&h.parentNode)h.parentNode.removeChild(h);}
+function roundCopyNote(idx,wid){var w=WOUNDS.find(function(x){return x.id===wid;});if(!w||!w.rounds[idx])return;var t=w.rounds[idx].note||"";if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast("Note copied","ok");},function(){toast("Copy failed","err");});}else{toast("Clipboard unavailable","err");}}
+function roundAIErr(prefix,err){var m=err&&err.message;if(typeof aiAvailable==="function"&&!aiAvailable()){toast("AI not connected — add a Claude key in Settings → AI (Claude), or finish the Supabase AI setup","err");return;}if(m==="notcfg"||m==="ai"){toast("AI not configured on the server yet — set the ANTHROPIC_API_KEY secret (Settings → AI)","err");return;}toast(prefix+(m?(": "+m):""),"err");}
 function roundKpi(v,l,clr){return '<div class="kt"><div class="kv"'+(clr?(' style="color:'+clr+'"'):'')+'>'+v+'</div><div class="kl">'+e(l)+'</div></div>';}
 function roundRegBanner(){return '<div class="rnd-reg"><span><b>Regulatory layer:</b></span><span>F-686 skin integrity</span><span>MDS Section M accuracy</span><span>Infection control</span><span>QAPI — facility-acquired PI rate</span></div>';}
 /* ---- start / navigate ---- */
@@ -2979,7 +3012,7 @@ function roundDraftNote(){
   var w=curW();if(!w)return;var c=clinContext(w);delete c.name;
   var sugs=woundSuggestions(w).map(function(s){return s.cat+": "+s.sug+" ["+s.cite+"]";});
   toast("Drafting note…");
-  aiDraftReq({context:c,suggestions:sugs}).then(function(d){if(d.text){var t=(typeof stripAIDisclaimer==="function"?stripAIDisclaimer(d.text):d.text);var nt=document.getElementById("rnd-note");if(nt){nt.value=(nt.value?nt.value+"\n\n":"")+t;}toast("AI draft added — review & edit","ok");}}).catch(function(err){toast(err&&err.message==="notcfg"?"AI isn't configured on the server yet":"AI draft failed","err");});
+  aiDraftReq({context:c,suggestions:sugs}).then(function(d){if(d.text){var t=(typeof stripAIDisclaimer==="function"?stripAIDisclaimer(d.text):d.text);var nt=document.getElementById("rnd-note");if(nt){nt.value=(nt.value?nt.value+"\n\n":"")+t;}toast("AI draft added — review & edit","ok");}}).catch(function(err){roundAIErr("AI draft failed",err);});
 }
 function roundBuildNote(w){
   // Builds the visit note from EVERY field the provider populated across all phases.
@@ -3087,7 +3120,7 @@ function roundAuditCoding(){
   if(gv("rnd-mod"))codes.push("Modifiers: "+gv("rnd-mod"));
   var ctx=clinContext(w);delete ctx.name;
   var box=document.getElementById("rnd-audit");if(box)box.innerHTML='<div style="font-size:12px;color:var(--mu);margin-top:8px">🤖 Claude is auditing the note &amp; charges…</div>';
-  aiAuditReq({note:gv("rnd-note"),codes:codes,context:ctx}).then(function(d){roundRenderAudit(d.audit||{});}).catch(function(err){if(box)box.innerHTML='';toast(err&&err.message==="notcfg"?"Claude isn't configured on the server yet":"AI audit failed","err");});
+  aiAuditReq({note:gv("rnd-note"),codes:codes,context:ctx}).then(function(d){roundRenderAudit(d.audit||{});}).catch(function(err){if(box)box.innerHTML='';roundAIErr("AI audit failed",err);});
 }
 function roundRenderAudit(a){
   function sec(t,arr,clr){if(!arr||!arr.length)return"";return '<div style="margin-bottom:8px"><div class="st" style="margin-bottom:3px;color:'+(clr||"#9c4e30")+'">'+e(t)+'</div><ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.5;color:#42474d">'+arr.map(function(x){return"<li>"+e(x)+"</li>";}).join("")+'</ul></div>';}
@@ -3120,7 +3153,7 @@ function roundComplete(){
   var poa=gv("rnd-poa");if(poa)w.poa=poa;
   var deb=gv("rnd-debride");if(deb&&deb!=="None")w.debride=deb;
   if(!w.rounds)w.rounds=[];
-  w.rounds.push({dt:today,etio:gv("rnd-etio"),traj:gv("rnd-traj"),barriers:roundCheckedLabels("rnd-bar-",ROUND_BARRIERS),infLvl:infLvl,culture:gv("rnd-culture"),osteo:gv("rnd-osteo"),debride:deb,em:gv("rnd-em"),cpt:[(document.getElementById("rnd-cpt-97597")||{}).checked?"97597/97598":null,(document.getElementById("rnd-cpt-11042")||{}).checked?"11042-11047":null,(document.getElementById("rnd-cpt-npwt")||{}).checked?"97605-97608":null].filter(Boolean),mod:gv("rnd-mod"),avoid:gv("rnd-avoid"),cadence:gv("rnd-cadence"),esc:roundCheckedLabels("rnd-esc-",ROUND_ESC),note:note});
+  w.rounds.push({dt:today,ts:Date.now(),by:"Provider",stage:stage,L:L,W:W,D:D,etio:gv("rnd-etio"),traj:gv("rnd-traj"),barriers:roundCheckedLabels("rnd-bar-",ROUND_BARRIERS),infLvl:infLvl,culture:gv("rnd-culture"),osteo:gv("rnd-osteo"),debride:deb,em:gv("rnd-em"),cpt:[(document.getElementById("rnd-cpt-97597")||{}).checked?"97597/97598":null,(document.getElementById("rnd-cpt-11042")||{}).checked?"11042-11047":null,(document.getElementById("rnd-cpt-npwt")||{}).checked?"97605-97608":null].filter(Boolean),mod:gv("rnd-mod"),avoid:gv("rnd-avoid"),cadence:gv("rnd-cadence"),esc:roundCheckedLabels("rnd-esc-",ROUND_ESC),photo:(RND.photo||null),note:note});
   persist();
   if(typeof updateBell==="function")updateBell();
   RND.queue=RND.queue.filter(function(id){return id!==w.id;});
