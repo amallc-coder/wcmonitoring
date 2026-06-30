@@ -184,7 +184,18 @@ select option{background:#fff}
 .tri-tag{font-family:var(--mono);font-size:9px;text-transform:uppercase;letter-spacing:.07em;padding:2px 7px;border-radius:999px;background:var(--clay-10);color:var(--clay);white-space:nowrap}
 .tri-tag.warn{background:#f7e3df;color:#b23a2e}
 .tri-tag.ok{background:rgba(92,138,110,.15);color:#477f5c}
-@media(max-width:760px){.rnd-grid,.rnd-grid3{grid-template-columns:1fr}}
+@media(max-width:760px){
+  .rnd-grid,.rnd-grid3{grid-template-columns:1fr}
+  #rounds-view .ph2 select{width:100%!important}
+  #rounds-view .ph2>div:last-child{width:100%}
+  .rnd-foot{flex-direction:column;align-items:stretch}
+  .rnd-foot button,.rnd-foot>div{width:100%}
+  .rnd-foot>div{display:flex;gap:7px}.rnd-foot>div button{flex:1}
+  .tri-card{flex-direction:column;align-items:stretch}
+  .tri-card>div:last-child{display:flex;gap:6px}.tri-card>div:last-child button{flex:1}
+  #adm-matrix{font-size:11px}
+  .itr{overflow-x:auto;flex-wrap:nowrap;-webkit-overflow-scrolling:touch}
+}
 /* ── HELP & TRAINING ── */
 .help-wrap{display:grid;grid-template-columns:248px 1fr;gap:16px;align-items:start}
 .help-nav{position:sticky;top:116px;display:flex;flex-direction:column;gap:2px;background:var(--sf);border:1px solid var(--bd);border-radius:10px;padding:8px;max-height:calc(100vh - 140px);overflow-y:auto}
@@ -332,7 +343,6 @@ img,canvas,svg{max-width:100%}
   <button class="A" data-tab="dashboard" onclick="go('dashboard')"><span class="nav-tab__dot"></span>Dashboard</button>
   <button data-tab="rounds" onclick="go('rounds')"><span class="nav-tab__dot"></span>Rounds</button>
   <button data-tab="census" onclick="go('census')"><span class="nav-tab__dot"></span>Census &amp; Facilities</button>
-  <button data-tab="wound" onclick="go('wound')"><span class="nav-tab__dot"></span>Wound Care</button>
   <button data-tab="reports" onclick="go('reports')"><span class="nav-tab__dot"></span>Reports &amp; Analytics</button>
   <button data-tab="help" onclick="go('help')"><span class="nav-tab__dot"></span>Help &amp; Training</button>
 </nav>
@@ -347,8 +357,8 @@ img,canvas,svg{max-width:100%}
     <div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Facility Risk Overview</span></div><table class="tbl" id="d-fac"></table></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:11px;margin-bottom:11px">
-    <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0;color:#7dd3fc">&#x1FA79; Wound Overview</span><button class="btn bg3 bsm" style="font-size:10px" onclick="go('wound')">View All</button></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px" id="d-wounds-kpis"></div><div id="d-wounds-alerts"></div></div>
-    <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0;color:#fca5a5">&#x1F6A9; Open Clinical Action Items</span><button class="btn bg3 bsm" style="font-size:10px" onclick="go('wound')">Review</button></div><div id="d-actions"></div></div>
+    <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0;color:#7dd3fc">&#x1FA79; Wound Overview</span><button class="btn bg3 bsm" style="font-size:10px" onclick="go('rounds')">View All</button></div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-bottom:8px" id="d-wounds-kpis"></div><div id="d-wounds-alerts"></div></div>
+    <div class="card cp"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px"><span class="st" style="margin:0;color:#fca5a5">&#x1F6A9; Open Clinical Action Items</span><button class="btn bg3 bsm" style="font-size:10px" onclick="go('rounds')">Review</button></div><div id="d-actions"></div></div>
   </div>
   <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:11px">
     <div class="card cp"><div class="st">Hosp. Rate</div><div class="cw"><canvas id="c-hosp"></canvas></div></div>
@@ -1522,7 +1532,7 @@ function go(id){
   document.querySelectorAll(".tb").forEach(function(t){t.classList.remove("A");});
   document.querySelectorAll("#mnav button").forEach(function(b){b.classList.remove("A");});
   document.getElementById("tab-"+id).classList.add("A");
-  var idx={dashboard:0,rounds:1,census:2,wound:3,reports:4,help:5}[id];
+  var idx={dashboard:0,rounds:1,census:2,reports:3,help:4}[id];
   document.querySelectorAll("#mnav button")[idx].classList.add("A");
   var nv=document.getElementById("mnav");if(nv)nv.classList.remove("open");
   saveUI({tab:id});closeMenus();
@@ -2897,7 +2907,7 @@ function roundCompletedHTML(){
       '<div style="font-size:11.5px;color:var(--slate);margin:3px 0 0">'+e(r.dt||"")+(r.by?(" · "+e(r.by)):"")+(bits.length?(" · "+e(bits.join(" · "))):"")+'</div></div>'+
       '<div style="text-align:right;flex-shrink:0;display:flex;gap:6px"><button class="btn bg3 bsm" onclick="roundViewNote(\''+o.wid+'\','+o.idx+')">View note</button><button class="btn bd2 bsm" onclick="startRound(\''+o.wid+'\')">New round →</button></div></div>';
   }).join("");
-  return '<div class="st" style="margin-top:18px">Recently completed rounds ('+all.length+')</div>'+rows;
+  return '<div class="st" style="margin-top:18px;display:flex;justify-content:space-between;align-items:center">Recently completed rounds ('+all.length+') <button class="btn bg3 bsm" style="margin:0" onclick="roundExportCSV()">⬇ Export CSV</button></div>'+rows;
 }
 function roundViewNote(wid,idx){
   var w=WOUNDS.find(function(x){return x.id===wid;});if(!w||!w.rounds||!w.rounds[idx])return;
@@ -3015,7 +3025,8 @@ function roundPhaseHTML(k,w,c){
   }
   if(k==="doc"){
     return '<div class="rnd-sec st">Visit note (auto-assembled — review &amp; edit)</div>'+rTa("rnd-note","",("" ),12)+
-      '<div style="margin-top:7px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn bg3 bsm" onclick="document.getElementById(\'rnd-note\').value=roundBuildNote(curW())">↻ Rebuild from steps</button><button class="btn bg3 bsm" onclick="roundDraftNote()">✨ Draft note (AI)</button><button class="btn bt bsm" onclick="openBilling(\''+w.id+'\')">\u{1F9FE} Open full Charge Builder</button></div>'+
+      '<div style="margin-top:7px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn bg3 bsm" onclick="document.getElementById(\'rnd-note\').value=roundBuildNote(curW())">↻ Rebuild from steps</button><button class="btn bg3 bsm" onclick="roundDraftNote()">✨ Draft note (AI)</button><button class="btn bg3 bsm" onclick="roundCopyActiveNote()">\u{1F4CB} Copy</button><button class="btn bg3 bsm" onclick="roundPrintNote()">\u{1F5A8} Print / PDF</button><button class="btn bt bsm" onclick="openBilling(\''+w.id+'\')">\u{1F9FE} Open full Charge Builder</button></div>'+
+      '<div class="rnd-grid" style="margin-top:8px">'+rChk("rnd-attest","I attest this note is accurate and complete",false)+rInp("rnd-cosign","Co-signing provider (optional)","","NPI / supervising provider")+'</div>'+
       '<div style="margin-top:8px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+rChk("rnd-photo","Wound photo captured per facility policy",false)+'<div id="rnd-doc-photo"></div></div>'+
       '<div class="rnd-sec st" style="margin-top:12px">Coding</div><div class="rnd-grid">'+
         rSel("rnd-em","E/M visit",["Subsequent SNF 99307","Subsequent SNF 99308","Subsequent SNF 99309","Subsequent SNF 99310","Initial SNF 99304","Initial SNF 99305","Initial SNF 99306"],"Subsequent SNF 99308")+
@@ -3124,6 +3135,7 @@ function roundBuildNote(w){
   var cl=[];if(ck("rnd-fu-cp"))cl.push("care plan updated");if(ck("rnd-fu-idt"))cl.push("loop closed with IDT");
   if(cl.length)fu.push(cl.join(", "));
   add("FOLLOW-UP & MONITORING",fu);
+  if(ck("rnd-attest"))sec.push("ATTESTATION\n- Attested accurate & complete by "+((currentUser&&currentUser.name)||"Provider")+(g("rnd-cosign")?("\n- Co-signing provider: "+g("rnd-cosign")):""));
   var head="WOUND ROUNDING NOTE — "+TDS()+"\nPatient: "+(w.name||"")+" · "+(w.fac||"");
   return head+"\n\n"+sec.join("\n\n");
 }
@@ -3189,6 +3201,19 @@ function roundRenderAudit(a){
   h+=sec("⚠ Documentation gaps",a.gaps,"#b3433a")+sec("Verbiage to add (supports the codes)",a.verbiage)+sec("Under-coding / capture opportunities",a.underCoding,"#946325")+sec("Recommended ICD / CPT / modifiers",a.recommendedCodes)+sec("Compliance flags",a.complianceFlags,"#b3433a")+'</div>';
   var box=document.getElementById("rnd-audit");if(box)box.innerHTML=h;
 }
+function roundCopyActiveNote(){var nt=document.getElementById("rnd-note");if(!nt)return;var t=nt.value||"";if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(t).then(function(){toast("Note copied","ok");},function(){toast("Copy failed","err");});}else{nt.select();try{document.execCommand("copy");toast("Note copied","ok");}catch(e){toast("Copy failed","err");}}}
+function roundPrintNote(){var w=curW();if(!w)return;var nt=document.getElementById("rnd-note");var body=(nt&&nt.value)||roundBuildNote(w);
+  var att=(document.getElementById("rnd-attest")&&document.getElementById("rnd-attest").checked)?("\n\nAttested by: "+((currentUser&&currentUser.name)||"Provider")+(gv("rnd-cosign")?(" · Co-sign: "+gv("rnd-cosign")):"")):"";
+  var win=window.open("","_blank");if(!win){toast("Allow pop-ups to print","err");return;}
+  win.document.write('<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Wound Rounding Note — '+e(w.name)+'</title><style>body{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.55;color:#111;max-width:760px;margin:24px auto;padding:0 20px;white-space:pre-wrap}h1{font-family:Inter,system-ui,sans-serif;font-size:16px}@media print{@page{margin:.5in}}</style></head><body><h1>'+e(w.name)+' · '+e(w.fac)+'</h1>'+e(body+att)+'</body></html>');
+  win.document.close();setTimeout(function(){try{win.print();}catch(e){}},250);}
+function roundExportCSV(){
+  var all=allCompletedRounds();if(!all.length){toast("No completed rounds yet","err");return;}
+  var cols=["Date","Patient","Facility","Type","Stage","Trajectory","Infection","Debridement","E/M","Modifiers","POA","Avoidable","Cadence"];
+  function q(v){v=(v==null?"":String(v));return '"'+v.replace(/"/g,'""')+'"';}
+  var rows=all.map(function(o){var r=o.r;return [r.dt||"",o.name,o.fac,o.tp||"",r.stage||"",r.traj||"",r.infLvl||"",r.debride||"",r.em||"",r.mod||"",r.avoid||"",r.avoid||"",r.cadence||""].map(q).join(",");});
+  var csv=cols.map(q).join(",")+"\n"+rows.join("\n");
+  try{var blob=new Blob([csv],{type:"text/csv"});var u=URL.createObjectURL(blob);var a=document.createElement("a");a.href=u;a.download="clinilytics_rounds_"+TDS().replace(/\//g,"-")+".csv";document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(u);toast("Rounds exported","ok");}catch(e){toast("Export failed","err");}}
 function _roundDONEmail(scope){
   var w=curW();if(!w)return null;
   var f=(typeof FACS!=="undefined"?FACS.find(function(x){return x.name===w.fac;}):null);
@@ -3240,7 +3265,7 @@ function roundComplete(){
   var poa=gv("rnd-poa");if(poa)w.poa=poa;
   var deb=gv("rnd-debride");if(deb&&deb!=="None")w.debride=deb;
   if(!w.rounds)w.rounds=[];
-  w.rounds.push({dt:today,ts:Date.now(),by:"Provider",stage:stage,L:L,W:W,D:D,etio:gv("rnd-etio"),traj:gv("rnd-traj"),barriers:roundCheckedLabels("rnd-bar-",ROUND_BARRIERS),infLvl:infLvl,culture:gv("rnd-culture"),osteo:gv("rnd-osteo"),debride:deb,em:gv("rnd-em"),cpt:[(document.getElementById("rnd-cpt-97597")||{}).checked?"97597/97598":null,(document.getElementById("rnd-cpt-11042")||{}).checked?"11042-11047":null,(document.getElementById("rnd-cpt-npwt")||{}).checked?"97605-97608":null].filter(Boolean),mod:gv("rnd-mod"),avoid:gv("rnd-avoid"),cadence:gv("rnd-cadence"),esc:roundCheckedLabels("rnd-esc-",ROUND_ESC),photo:(RND.photo||null),note:note});
+  w.rounds.push({dt:today,ts:Date.now(),by:"Provider",stage:stage,L:L,W:W,D:D,etio:gv("rnd-etio"),traj:gv("rnd-traj"),barriers:roundCheckedLabels("rnd-bar-",ROUND_BARRIERS),infLvl:infLvl,culture:gv("rnd-culture"),osteo:gv("rnd-osteo"),debride:deb,em:gv("rnd-em"),cpt:[(document.getElementById("rnd-cpt-97597")||{}).checked?"97597/97598":null,(document.getElementById("rnd-cpt-11042")||{}).checked?"11042-11047":null,(document.getElementById("rnd-cpt-npwt")||{}).checked?"97605-97608":null].filter(Boolean),mod:gv("rnd-mod"),avoid:gv("rnd-avoid"),cadence:gv("rnd-cadence"),esc:roundCheckedLabels("rnd-esc-",ROUND_ESC),attested:!!(document.getElementById("rnd-attest")&&document.getElementById("rnd-attest").checked),cosign:gv("rnd-cosign"),photo:(RND.photo||null),note:note});
   persist();
   if(typeof updateBell==="function")updateBell();
   RND.queue=RND.queue.filter(function(id){return id!==w.id;});
@@ -4818,7 +4843,7 @@ function lgateInit(){
 }
 /* ═══════════════ ROLE-BASED ACCESS CONTROL ═══════════════ */
 var CANON_ROLES=["Admin","Manager","Provider","Scheduler"];
-var ACCESS_TABS=[{k:"dashboard",t:"Dashboard"},{k:"rounds",t:"Rounds"},{k:"census",t:"Census"},{k:"wound",t:"Wound"},{k:"reports",t:"Reports"},{k:"help",t:"Help"}];
+var ACCESS_TABS=[{k:"dashboard",t:"Dashboard"},{k:"rounds",t:"Rounds"},{k:"census",t:"Census"},{k:"reports",t:"Reports"},{k:"help",t:"Help"}];
 var ACCESS_CAPS=[{k:"manageUsers",t:"Manage users"},{k:"manageFacilities",t:"Manage facilities"}];
 var ROLE_DEFAULTS={
   Admin:{tabs:["dashboard","rounds","census","wound","reports","help"],caps:["manageUsers","manageFacilities"]},
