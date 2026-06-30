@@ -421,9 +421,13 @@ img,canvas,svg{max-width:100%}
   <div class="ph2"><div><div class="pt3">Reports &amp; Analytics</div><div class="ps2">Enterprise · Portfolio · Facility</div></div></div>
   <div class="itr">
     <button class="it A" id="rpt-t0" onclick="rptTab(0)">&#x1FA79; Wound Reports</button>
+    <button class="it" id="rep-t-anal" onclick="repView('anal')">&#x1F4CA; Analytics</button>
+    <button class="it" id="rep-t-qual" onclick="repView('qual')">&#x26A0; Quality Measures</button>
+    <button class="it" id="rep-t-skin" onclick="repView('skin')">&#x1F9F4; Skin &amp; Braden</button>
+    <button class="it" id="rep-t-rehosp" onclick="repView('rehosp')">&#x1F3E5; Rehospitalizations</button>
     <button class="it" id="rpt-t4" onclick="rptTab(4)">&#x1F50D; Keyword Search</button>
   </div>
-  <div class="card cp" style="margin-bottom:11px">
+  <div class="card cp" id="rpt-scopecard" style="margin-bottom:11px">
     <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:center">
       <span class="st" style="margin:0">Scope:</span>
       <div style="display:flex;gap:4px;flex-wrap:wrap" id="rpt-scope-bar"></div>
@@ -434,6 +438,7 @@ img,canvas,svg{max-width:100%}
     </div>
   </div>
   <div id="rpt-p0"></div>
+  <div id="rpt-extra" style="display:none"></div>
   <div id="rpt-p1" style="display:none"></div>
   <div id="rpt-p2" style="display:none"></div>
   <div id="rpt-p3" style="display:none"></div>
@@ -3252,9 +3257,9 @@ function wQuarter(dt){var d=parseDate(dt);if(!d)return null;return"Q"+(Math.floo
 function wFacList(){return wFac==="All"?WOUNDS:WOUNDS.filter(function(w){return w.fac===wFac;});}
 function wk(v,l,c,warn){return'<div class="kt" style="'+(warn?"border-color:"+c+"55;":"")+'"><div class="kv" style="color:'+c+'">'+v+'</div><div class="kl">'+l+'</div></div>';}
 
-function renderWAnalytics(){
-  buildFS("w-fs",wFac,function(v){wFac=v;wRefresh();},"#0ea5e9");
-  var el=document.getElementById("w-p1");if(!el)return;
+function renderWAnalytics(tid,fsid,onF){
+  buildFS(fsid||"w-fs",wFac,onF||function(v){wFac=v;wRefresh();},"#0ea5e9");
+  var el=document.getElementById(tid||"w-p1");if(!el)return;
   var w=wFacList();
   var active=w.filter(function(x){return!wIsHealed(x);});
   var pr=w.filter(wIsPressure),np=w.filter(function(x){return!wIsPressure(x);});
@@ -3289,9 +3294,9 @@ function renderWAnalytics(){
   },60);
 }
 
-function renderWQuality(){
-  buildFS("w-fs",wFac,function(v){wFac=v;wRefresh();},"#0ea5e9");
-  var el=document.getElementById("w-p2");if(!el)return;
+function renderWQuality(tid,fsid,onF){
+  buildFS(fsid||"w-fs",wFac,onF||function(v){wFac=v;wRefresh();},"#0ea5e9");
+  var el=document.getElementById(tid||"w-p2");if(!el)return;
   var w=wFacList().filter(function(x){return!wIsHealed(x);});
   var facs=wFac==="All"?FACS:FACS.filter(function(f){return f.name===wFac;});
   var pr=w.filter(wIsPressure);
@@ -3322,9 +3327,9 @@ function renderWQuality(){
   },60);
 }
 
-function renderWSkin(){
-  buildFS("w-fs",wFac,function(v){wFac=v;wRefresh();},"#0ea5e9");
-  var el=document.getElementById("w-p3");if(!el)return;
+function renderWSkin(tid,fsid,onF){
+  buildFS(fsid||"w-fs",wFac,onF||function(v){wFac=v;wRefresh();},"#0ea5e9");
+  var el=document.getElementById(tid||"w-p3");if(!el)return;
   var pts=PATIENTS.filter(function(p){return p.st==="Active"&&(wFac==="All"||p.fac===wFac);});
   var rows=pts.map(function(p){var b=BRADEN[p.id];var risk=bradenRisk(b);var wd=WOUNDS.filter(function(x){return x.ptId===p.id&&!wIsHealed(x);});var freq=(b!=null&&b<=14)?"Twice weekly":(b!=null&&b<=18)?"Weekly":"Routine";return{p:p,b:b,risk:risk,wd:wd,freq:freq,hot:b!=null&&b<=14};}).sort(function(a,b){return(a.b==null?99:a.b)-(b.b==null?99:b.b);});
   var hot=rows.filter(function(r){return r.hot;});
@@ -3352,9 +3357,9 @@ function renderWRounds(){
     '<div class="card"><div style="padding:9px 12px;border-bottom:1px solid var(--bd)"><span class="st" style="margin:0">Rounds Schedule & Compliance</span></div><div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Facility</th><th>Portfolio</th><th>Rounds Day</th><th>Active Wounds</th><th>Most Recent Update</th><th>Overdue (7d+)</th><th>Status</th></tr></thead><tbody>'+rows.map(function(r){var sc=r.status==="On Track"?"#4f8268":r.status==="Action Needed"?"#b3433a":"#8a8f93";return'<tr style="'+(r.overdue?"background:rgba(179,67,58,.05);":"")+'"><td class="b">'+r.fac+'</td><td>'+coB(r.co)+'</td><td style="color:var(--ac)">'+r.day+'</td><td style="font-weight:700">'+r.wounds+'</td><td>'+(r.last==null?"—":r.last+"d ago")+'</td><td style="color:'+(r.overdue?"#b3433a":"var(--mu)")+';font-weight:700">'+r.overdue+'</td><td><span class="pill" style="background:'+sc+'22;color:'+sc+'">'+r.status+'</span></td></tr>';}).join("")+'</tbody></table></div></div>';
 }
 
-function renderWRehosp(){
-  buildFS("w-fs",wFac,function(v){wFac=v;wRefresh();},"#0ea5e9");
-  var el=document.getElementById("w-p5");if(!el)return;
+function renderWRehosp(tid,fsid,onF){
+  buildFS(fsid||"w-fs",wFac,onF||function(v){wFac=v;wRefresh();},"#0ea5e9");
+  var el=document.getElementById(tid||"w-p5");if(!el)return;
   var hs=wFac==="All"?WHOSP:WHOSP.filter(function(h){return h.fac===wFac;});
   var byType=function(t){return hs.filter(function(h){return h.type===t;}).length;};
   var readmit=hs.filter(function(h){return h.readmit;}).length;
@@ -4186,8 +4191,21 @@ function savePrReview(){
 /* ── REPORTS ── */
 var rptCatIdx=0,rptScope="all",kwActv=[],tCh={};
 
+var REP_VIEWS={anal:renderWAnalytics,qual:renderWQuality,skin:renderWSkin,rehosp:renderWRehosp};
+function repView(key){
+  ["anal","qual","skin","rehosp"].forEach(function(k){var b=document.getElementById("rep-t-"+k);if(b)b.className=(k===key?"it A":"it");});
+  ["0","4"].forEach(function(n){var b=document.getElementById("rpt-t"+n);if(b)b.className="it";});
+  for(var j=0;j<5;j++){var p=document.getElementById("rpt-p"+j);if(p)p.style.display="none";}
+  var sc=document.getElementById("rpt-scopecard");if(sc)sc.style.display="none";
+  var ex=document.getElementById("rpt-extra");if(!ex)return;ex.style.display="block";
+  ex.innerHTML='<div class="fs2" id="rpt-x-fs" style="margin-bottom:11px"></div><div id="rpt-x-body"></div>';
+  var fn=REP_VIEWS[key];if(fn)fn("rpt-x-body","rpt-x-fs",function(v){wFac=v;repView(key);});
+}
 function rptTab(i){
   rptCatIdx=i;
+  var ex=document.getElementById("rpt-extra");if(ex)ex.style.display="none";
+  var sc=document.getElementById("rpt-scopecard");if(sc)sc.style.display="";
+  ["anal","qual","skin","rehosp"].forEach(function(k){var b=document.getElementById("rep-t-"+k);if(b)b.className="it";});
   for(var j=0;j<5;j++){
     var p=document.getElementById("rpt-p"+j),b=document.getElementById("rpt-t"+j);
     if(p)p.style.display=j===i?"block":"none";
@@ -4805,7 +4823,7 @@ var ACCESS_CAPS=[{k:"manageUsers",t:"Manage users"},{k:"manageFacilities",t:"Man
 var ROLE_DEFAULTS={
   Admin:{tabs:["dashboard","rounds","census","wound","reports","help"],caps:["manageUsers","manageFacilities"]},
   Manager:{tabs:["dashboard","census","reports","help"],caps:["manageUsers","manageFacilities"]},
-  Provider:{tabs:["dashboard","rounds","census","wound","help"],caps:[]},
+  Provider:{tabs:["dashboard","rounds","census","help"],caps:[]},
   Scheduler:{tabs:["census","help"],caps:[]}
 };
 function loadRoleAccess(){var s={};try{s=JSON.parse(localStorage.getItem("cc_roleaccess")||"{}")||{};}catch(e){s={};}
