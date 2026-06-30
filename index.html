@@ -346,6 +346,7 @@ img,canvas,svg{max-width:100%}
   <button data-tab="schedule" onclick="go('schedule')"><span class="nav-tab__dot"></span>Schedule</button>
   <button data-tab="reports" onclick="go('reports')"><span class="nav-tab__dot"></span>Reports &amp; Analytics</button>
   <button data-tab="help" onclick="go('help')"><span class="nav-tab__dot"></span>Help &amp; Training</button>
+  <button id="nav-admin" onclick="openAdmin()" style="display:none"><span class="nav-tab__dot" style="background:var(--clay)"></span>🛡 Admin</button>
 </nav>
 <div id="main">
 
@@ -4929,6 +4930,7 @@ function applyAccess(){
   var ua=document.getElementById("acct-admin");if(ua)ua.style.display=mu?"flex":"none";
   var ah=document.getElementById("adm-sec-h");if(ah)ah.style.display=mu?"block":"none";
   var ai=document.getElementById("adm-sec-i");if(ai)ai.style.display=mu?"flex":"none";
+  var na=document.getElementById("nav-admin");if(na)na.style.display=mu?"inline-flex":"none";
   var af=document.getElementById("cen-addfac");if(af)af.style.display=canCap("manageFacilities")?"":"none";
 }
 function admTab(i){[0,1].forEach(function(n){var p=document.getElementById("adm-p"+n),t=document.getElementById("adm-t"+n);if(p)p.style.display=(n===i?"block":"none");if(t)t.classList.toggle("A",n===i);});}
