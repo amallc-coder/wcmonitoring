@@ -2878,7 +2878,7 @@ function roundRegBanner(){return '<div class="rnd-reg"><span><b>Regulatory layer
 /* ---- start / navigate ---- */
 function startRound(wid){RND.wid=wid;RND.step=0;RND.photo=null;RND.smart=[];RND._sug=null;go("rounds");renderRounds();}
 function startRoundQueue(){var list=WOUNDS.filter(function(w){return !wIsHealed(w)&&(RND.fac==="All"||w.fac===RND.fac)&&(RND.prov==="All"||w.pv===RND.prov)&&roundReasons(w).indexOf("Routine")<0;});list.sort(function(a,b){return roundPriority(b)-roundPriority(a);});RND.queue=list.map(function(w){return w.id;});if(RND.queue.length)startRound(RND.queue[0]);}
-function roundExit(){RND.wid=null;RND.queue=[];renderRounds();}
+function roundExit(){if(typeof roundCamClose==="function")roundCamClose();RND.wid=null;RND.queue=[];renderRounds();}
 function renderRounds(){var el=document.getElementById("rounds-view");if(!el)return;if(RND.wid&&curW()){el.innerHTML=roundStepperHTML();roundGoStep(RND.step);}else{RND.wid=null;el.innerHTML=roundWorklistHTML();}}
 function roundGoStep(n){if(n<0)n=0;if(n>6)n=6;RND.step=n;
   for(var i=0;i<7;i++){var p=document.getElementById("rnd-panel-"+i);if(p)p.style.display=(i===n?"block":"none");var s=document.getElementById("rnd-chip-"+i);if(s){s.classList.toggle("A",i===n);s.classList.toggle("done",i<n);}}
@@ -2937,8 +2937,9 @@ function roundPhaseHTML(k,w,c){
         rSel("rnd-edema","Edema",["0","1+","2+","3+"],"0")+rInp("rnd-abi","ABI",(w.abi!=null?w.abi:""),"e.g. 0.9","number")+'</div>'+
       '<div class="rnd-sec st" style="margin-top:12px">Wound photo</div>'+
       '<div id="rnd-photo-box">'+roundPhotoBoxHTML(w)+'</div>'+
-      '<input type="file" id="rnd-photo-input" accept="image/*" capture="environment" style="display:none" onchange="roundAddPhoto(this)">'+
-      '<div style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn bd2 bsm" onclick="document.getElementById(\'rnd-photo-input\').click()">\u{1F4F7} Add / capture photo</button><button class="btn bg3 bsm" onclick="roundAnalyzePhoto()">\u{1F52C} Analyze photo (AI)</button><button class="btn bg3 bsm" onclick="roundComparePhoto()">\u{1F4CA} Compare to last (AI)</button></div>';
+      '<input type="file" id="rnd-photo-input" accept="image/*" style="display:none" onchange="roundAddPhoto(this)">'+
+      '<input type="file" id="rnd-photo-cam" accept="image/*" capture="environment" style="display:none" onchange="roundAddPhoto(this)">'+
+      '<div style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn bt bsm" onclick="roundOpenCamera()">\u{1F4F7} Take photo (camera)</button><button class="btn bd2 bsm" onclick="document.getElementById(\'rnd-photo-input\').click()">\u{1F5BC} Upload / library</button><button class="btn bg3 bsm" onclick="roundAnalyzePhoto()">\u{1F52C} Analyze photo (AI)</button><button class="btn bg3 bsm" onclick="roundComparePhoto()">\u{1F4CA} Compare to last (AI)</button></div>';
   }
   if(k==="assess"){
     var traj=({"Improving":"Improving","Progressing":"Improving","Stable":"Stable","Slow":"Deteriorating","Worsening":"Deteriorating"})[w.heal]||"Stable";
@@ -3102,6 +3103,24 @@ function roundPhotoBoxHTML(w){
 }
 function roundAddPhoto(input){if(!input||!input.files||!input.files[0])return;var fr=new FileReader();fr.onload=function(){RND.photo=fr.result;var box=document.getElementById("rnd-photo-box");if(box)box.innerHTML=roundPhotoBoxHTML(curW());toast("Photo added to this round","ok");};fr.readAsDataURL(input.files[0]);}
 function roundRemovePhoto(){RND.photo=null;var box=document.getElementById("rnd-photo-box");if(box)box.innerHTML=roundPhotoBoxHTML(curW());}
+/* Live in-app camera (getUserMedia) — works on phone/iPad/desktop; falls back to native picker. */
+var _rndCam={stream:null,facing:"environment"};
+function roundOpenCamera(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){var ci=document.getElementById("rnd-photo-cam");if(ci)ci.click();return;}
+  roundCamClose();
+  var html='<div class="mo" id="rndcam-mo" onclick="if(event.target===this)roundCamClose()"><div class="mb" style="max-width:560px"><div class="mh"><div class="mtt">\u{1F4F7} Take wound photo</div><button class="xb" onclick="roundCamClose()">✕</button></div>'+
+    '<div class="mbd" style="text-align:center"><div id="rndcam-err" style="color:var(--rd);font-size:12px;margin-bottom:8px"></div><video id="rndcam-video" autoplay playsinline muted style="width:100%;max-height:58vh;border-radius:10px;background:#0c0c0c;display:block"></video><canvas id="rndcam-canvas" style="display:none"></canvas></div>'+
+    '<div class="mft" style="justify-content:space-between"><button class="btn bg3" onclick="roundCamSwitch()">⟲ Switch camera</button><div style="display:flex;gap:7px"><button class="btn bg3" onclick="document.getElementById(\'rnd-photo-cam\').click();roundCamClose()">Use device camera</button><button class="btn bt" onclick="roundCamCapture()">\u{1F4F8} Capture</button></div></div></div></div>';
+  var holder=document.createElement("div");holder.id="rndcam-holder";holder.innerHTML=html;document.body.appendChild(holder);
+  _rndCamStart();
+}
+function _rndCamStart(){
+  navigator.mediaDevices.getUserMedia({video:{facingMode:_rndCam.facing},audio:false}).then(function(stream){_rndCam.stream=stream;var v=document.getElementById("rndcam-video");if(v)v.srcObject=stream;}).catch(function(err){var e=document.getElementById("rndcam-err");if(e)e.textContent="Camera unavailable ("+((err&&err.name)||"error")+"). Tap “Use device camera” or Upload instead.";});
+}
+function _rndCamStop(){if(_rndCam.stream){_rndCam.stream.getTracks().forEach(function(t){t.stop();});_rndCam.stream=null;}}
+function roundCamSwitch(){_rndCam.facing=(_rndCam.facing==="environment"?"user":"environment");_rndCamStop();_rndCamStart();}
+function roundCamCapture(){var v=document.getElementById("rndcam-video");if(!v||!v.videoWidth){toast("Camera still starting — try again in a moment","err");return;}var c=document.getElementById("rndcam-canvas");c.width=v.videoWidth;c.height=v.videoHeight;c.getContext("2d").drawImage(v,0,0,c.width,c.height);RND.photo=c.toDataURL("image/jpeg",0.85);var box=document.getElementById("rnd-photo-box");if(box)box.innerHTML=roundPhotoBoxHTML(curW());roundCamClose();toast("Photo captured","ok");}
+function roundCamClose(){_rndCamStop();var h=document.getElementById("rndcam-holder");if(h&&h.parentNode)h.parentNode.removeChild(h);}
 function roundAnalyzePhoto(){var w=curW();if(!w)return;if(typeof aiAvailable==="function"&&!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}if(RND.photo){_sendAnalyze(w,RND.photo,null);return;}var ph=_chartPhotos(w);if(ph.length){_sendAnalyze(w,ph[ph.length-1].url,null);return;}toast("Add a wound photo first","err");}
 function roundComparePhoto(){var w=curW();if(!w)return;if(typeof aiAvailable==="function"&&!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}var ph=_chartPhotos(w);if(RND.photo){if(!ph.length){toast("Need a prior photo on the chart to compare","err");return;}_sendAnalyze(w,RND.photo,ph[ph.length-1].url);return;}if(ph.length>=2){_sendAnalyze(w,ph[ph.length-1].url,ph[ph.length-2].url);return;}toast("Need two photos to compare (add one this visit)","err");}
 function roundSmartHTML(w){
