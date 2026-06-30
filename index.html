@@ -5010,7 +5010,16 @@ document.addEventListener("DOMContentLoaded",function(){
   document.getElementById("ftr").textContent="Last sync: "+TD()+" · "+FACS.length+" facilities · "+PATIENTS.filter(function(p){return p.st==="Active";}).length+" active residents";
   if(!hadSaved&&!loadUI().seen){saveUI({seen:1});setTimeout(function(){toast("Welcome! Your work autosaves to this browser. Press Ctrl/⌘-K to search anything.","ok");},900);}
   // PWA service worker (offline / installable)
-  if("serviceWorker" in navigator){try{navigator.serviceWorker.register("sw.js").catch(function(){});}catch(e){}}
+  if("serviceWorker" in navigator){try{
+    navigator.serviceWorker.register("sw.js").then(function(reg){
+      try{reg.update();}catch(e){}
+      function nudge(w){if(w&&navigator.serviceWorker.controller){try{w.postMessage("skipWaiting");}catch(e){}}}
+      nudge(reg.waiting);
+      reg.addEventListener&&reg.addEventListener("updatefound",function(){var nw=reg.installing;if(nw)nw.addEventListener("statechange",function(){if(nw.state==="installed")nudge(nw);});});
+    }).catch(function(){});
+    var _swReloaded=false;
+    navigator.serviceWorker.addEventListener("controllerchange",function(){if(_swReloaded)return;_swReloaded=true;location.reload();});
+  }catch(e){}}
 })
 </script>
 </body>
