@@ -327,12 +327,12 @@ img,canvas,svg{max-width:100%}
   </div>
 </header>
 <nav id="mnav">
-  <button class="A" onclick="go('dashboard')"><span class="nav-tab__dot"></span>Dashboard</button>
-  <button onclick="go('rounds')"><span class="nav-tab__dot"></span>Rounds</button>
-  <button onclick="go('census')"><span class="nav-tab__dot"></span>Census &amp; Facilities</button>
-  <button onclick="go('wound')"><span class="nav-tab__dot"></span>Wound Care</button>
-  <button onclick="go('reports')"><span class="nav-tab__dot"></span>Reports &amp; Analytics</button>
-  <button onclick="go('help')"><span class="nav-tab__dot"></span>Help &amp; Training</button>
+  <button class="A" data-tab="dashboard" onclick="go('dashboard')"><span class="nav-tab__dot"></span>Dashboard</button>
+  <button data-tab="rounds" onclick="go('rounds')"><span class="nav-tab__dot"></span>Rounds</button>
+  <button data-tab="census" onclick="go('census')"><span class="nav-tab__dot"></span>Census &amp; Facilities</button>
+  <button data-tab="wound" onclick="go('wound')"><span class="nav-tab__dot"></span>Wound Care</button>
+  <button data-tab="reports" onclick="go('reports')"><span class="nav-tab__dot"></span>Reports &amp; Analytics</button>
+  <button data-tab="help" onclick="go('help')"><span class="nav-tab__dot"></span>Help &amp; Training</button>
 </nav>
 <div id="main">
 
@@ -365,7 +365,7 @@ img,canvas,svg{max-width:100%}
     <div><div class="pt3">Master Census</div><div class="ps2" id="cen-sub">Loading…</div></div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
       <input id="cen-q" placeholder="Search patient, dx, facility…" style="width:210px" oninput="renderCensus()">
-      <button class="btn bd2" onclick="openFacAdd()">🏢 Add Facility</button>
+      <button class="btn bd2" id="cen-addfac" onclick="openFacAdd()">🏢 Add Facility</button>
       <button class="btn bd2" onclick="oM('m-upload')">📤 Upload Facesheets</button>
       <button class="btn bt" onclick="oM('m-addpt')">＋ Add Patient</button>
     </div>
@@ -937,23 +937,43 @@ img,canvas,svg{max-width:100%}
 
 <!-- ADMIN / USER MANAGEMENT -->
 <div id="m-admin" class="mo h">
-<div class="mb">
-  <div class="mh"><div class="mtt">👤 User Management</div><button class="xb" onclick="cM('m-admin')">✕</button></div>
+<div class="mb xl">
+  <div class="mh"><div class="mtt">🛡 Admin · Users &amp; Access</div><button class="xb" onclick="cM('m-admin')">✕</button></div>
   <div class="mbd">
-    <div style="padding:9px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:13px">
-      <div style="font-size:12px;font-weight:600;margin-bottom:2px">Create sign-in accounts</div>
-      <div style="font-size:11px;color:var(--mu)">Each provider/admin signs in with their own username &amp; password. Passwords are stored as SHA-256 hashes in this browser. (For org-wide accounts across devices, a backend would be required.)</div>
+    <div class="itr">
+      <button class="it A" id="adm-t0" onclick="admTab(0)">👤 Users</button>
+      <button class="it" id="adm-t1" onclick="admTab(1)">🛡 Roles &amp; Access</button>
     </div>
-    <div class="st">Create User</div>
-    <div class="g4">
-      <div><label class="fl">Username *</label><input id="au-user" autocapitalize="none" placeholder="e.g. treeves"></div>
-      <div><label class="fl">Full Name</label><input id="au-name" placeholder="e.g. Tabitha Reeves"></div>
-      <div><label class="fl">Role</label><select id="au-role"><option>Wound Provider</option><option>Admin</option><option>Viewer</option></select></div>
-      <div><label class="fl">Temporary Password *</label><input id="au-pass" placeholder="set a password"></div>
+    <!-- USERS -->
+    <div id="adm-p0">
+      <div style="padding:9px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:13px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:2px">Create team accounts &amp; assign roles</div>
+        <div style="font-size:11px;color:var(--mu)">Each teammate signs in with their own credentials. A person's <b>role</b> controls which sections they can open (configure that in <b>Roles &amp; Access</b>). Passwords are stored as SHA-256 hashes in this browser; Supabase accounts are managed in the Supabase dashboard.</div>
+      </div>
+      <div class="st">Create user</div>
+      <div class="g4">
+        <div><label class="fl">Username *</label><input id="au-user" autocapitalize="none" placeholder="e.g. treeves"></div>
+        <div><label class="fl">Full Name</label><input id="au-name" placeholder="e.g. Tabitha Reeves"></div>
+        <div><label class="fl">Role</label><select id="au-role"><option>Provider</option><option>Scheduler</option><option>Manager</option><option>Admin</option></select></div>
+        <div><label class="fl">Temporary Password *</label><input id="au-pass" placeholder="set a password"></div>
+      </div>
+      <div style="margin-top:10px;display:flex;justify-content:flex-end"><button class="btn bt bsm" onclick="addUser()">＋ Create User</button></div>
+      <div class="st" style="margin-top:16px">Team members</div>
+      <div id="admin-users"></div>
     </div>
-    <div style="margin-top:10px;display:flex;justify-content:flex-end"><button class="btn bt bsm" onclick="addUser()">＋ Create User</button></div>
-    <div class="st" style="margin-top:16px">Existing Users</div>
-    <div id="admin-users"></div>
+    <!-- ROLES & ACCESS -->
+    <div id="adm-p1" style="display:none">
+      <div style="padding:9px 11px;background:var(--in);border:1px solid var(--bd);border-radius:7px;border-left:3px solid var(--tl);margin-bottom:13px">
+        <div style="font-size:12px;font-weight:600;margin-bottom:2px">Role-based access control</div>
+        <div style="font-size:11px;color:var(--mu)">Check the sections &amp; abilities each role can use. Unchecking a tab <b>hides it</b> for everyone with that role. <b>Admin</b> always keeps full access. Changes apply immediately and are saved on this device.</div>
+      </div>
+      <div id="adm-matrix"></div>
+      <div style="margin-top:12px;display:flex;justify-content:space-between;gap:7px">
+        <button class="btn bg3 bsm" onclick="resetAccessMatrix()">↺ Reset to defaults</button>
+        <button class="btn bt bsm" onclick="saveAccessMatrix()">Save access settings</button>
+      </div>
+      <div style="font-size:11px;color:var(--mu);margin-top:12px;line-height:1.5"><b>Defaults:</b> Admin — everything. Manager — Dashboard, Reports/Analytics, manage users. Provider — Dashboard, Rounds, Census, Wound, all clinical work. Scheduler — Census (patient schedule) only.</div>
+    </div>
   </div>
   <div class="mft"><button class="btn bg3" onclick="cM('m-admin')">Close</button></div>
 </div>
@@ -1491,6 +1511,7 @@ function buildFS(id,sel,cb,ac){
 /* ── NAV ── */
 function toggleNav(){var n=document.getElementById("mnav");if(n)n.classList.toggle("open");}
 function go(id){
+  if(currentUser&&!canTab(id)){toast("Your role doesn't have access to that section","err");id=firstAllowedTab();}
   document.querySelectorAll(".tb").forEach(function(t){t.classList.remove("A");});
   document.querySelectorAll("#mnav button").forEach(function(b){b.classList.remove("A");});
   document.getElementById("tab-"+id).classList.add("A");
@@ -1678,7 +1699,7 @@ function renderFacList(){
   renderSendLog();
 }
 var _facEdit=null;
-function openFacAdd(){_facEdit=null;document.getElementById("af-title").textContent="🏢 Add Facility";["af-n","af-reg","af-pv","af-cs","af-addr","af-don","af-email","af-phone","af-nc"].forEach(function(id){sv(id,"");});oM("m-addfac");}
+function openFacAdd(){if(!canCap("manageFacilities")){toast("Only Managers/Admins can add facilities","err");return;}_facEdit=null;document.getElementById("af-title").textContent="🏢 Add Facility";["af-n","af-reg","af-pv","af-cs","af-addr","af-don","af-email","af-phone","af-nc"].forEach(function(id){sv(id,"");});oM("m-addfac");}
 function openFacEdit(id){
   var f=FACS.find(function(x){return x.id===id;});if(!f)return;_facEdit=id;
   document.getElementById("af-title").textContent="✏ Edit Facility — "+f.name;
@@ -4723,6 +4744,7 @@ async function afterAuth(){
     document.getElementById("lgate").classList.add("h");
     await sbLoad();_sbLoaded=true;
     initWoundData();initDash();renderCensus();updateBell();updateUserUI();
+    var _t=loadUI().tab;if(!_t||!canTab(_t))_t=firstAllowedTab();go(_t);
   }catch(e){if(err)err.textContent="Sign-in error. Please retry.";}
 }
 function ccLogout(){if(sbc){sbc.auth.signOut().finally(function(){location.reload();});}else location.reload();}
@@ -4734,28 +4756,81 @@ function lgateInit(){
     else{var u=document.getElementById("lg-user");if(u)u.focus();}
   });
 }
+/* ═══════════════ ROLE-BASED ACCESS CONTROL ═══════════════ */
+var CANON_ROLES=["Admin","Manager","Provider","Scheduler"];
+var ACCESS_TABS=[{k:"dashboard",t:"Dashboard"},{k:"rounds",t:"Rounds"},{k:"census",t:"Census"},{k:"wound",t:"Wound"},{k:"reports",t:"Reports"},{k:"help",t:"Help"}];
+var ACCESS_CAPS=[{k:"manageUsers",t:"Manage users"},{k:"manageFacilities",t:"Manage facilities"}];
+var ROLE_DEFAULTS={
+  Admin:{tabs:["dashboard","rounds","census","wound","reports","help"],caps:["manageUsers","manageFacilities"]},
+  Manager:{tabs:["dashboard","census","reports","help"],caps:["manageUsers","manageFacilities"]},
+  Provider:{tabs:["dashboard","rounds","census","wound","help"],caps:[]},
+  Scheduler:{tabs:["census","help"],caps:[]}
+};
+function loadRoleAccess(){var s={};try{s=JSON.parse(localStorage.getItem("cc_roleaccess")||"{}")||{};}catch(e){s={};}
+  var cfg={};CANON_ROLES.forEach(function(r){var d=ROLE_DEFAULTS[r],o=s[r]||{};cfg[r]={tabs:(o.tabs||d.tabs).slice(),caps:(o.caps||d.caps).slice()};});
+  cfg.Admin={tabs:ACCESS_TABS.map(function(t){return t.k;}),caps:ACCESS_CAPS.map(function(c){return c.k;})}; // Admin is always full-access
+  return cfg;}
+function saveRoleAccess(cfg){try{localStorage.setItem("cc_roleaccess",JSON.stringify(cfg));}catch(e){}}
+function normRole(r){r=(""+(r||"")).toLowerCase();
+  if(r.indexOf("admin")>=0)return "Admin";
+  if(r.indexOf("manager")>=0||r.indexOf("director")>=0)return "Manager";
+  if(r.indexOf("sched")>=0)return "Scheduler";
+  if(r.indexOf("viewer")>=0)return "Scheduler";
+  return "Provider";}
+function myRole(){return normRole(currentUser&&currentUser.role);}
+function myAccess(){return loadRoleAccess()[myRole()]||{tabs:[],caps:[]};}
+function canTab(k){if(!currentUser)return true;return (myAccess().tabs||[]).indexOf(k)>=0;}
+function canCap(k){if(!currentUser)return false;return (myAccess().caps||[]).indexOf(k)>=0;}
+function firstAllowedTab(){var a=myAccess().tabs||[];for(var i=0;i<ACCESS_TABS.length;i++){if(a.indexOf(ACCESS_TABS[i].k)>=0)return ACCESS_TABS[i].k;}return "help";}
+function applyAccess(){
+  document.querySelectorAll("#mnav button[data-tab]").forEach(function(b){b.style.display=canTab(b.getAttribute("data-tab"))?"":"none";});
+  var ua=document.getElementById("acct-admin");if(ua)ua.style.display=canCap("manageUsers")?"flex":"none";
+  var af=document.getElementById("cen-addfac");if(af)af.style.display=canCap("manageFacilities")?"":"none";
+}
+function admTab(i){[0,1].forEach(function(n){var p=document.getElementById("adm-p"+n),t=document.getElementById("adm-t"+n);if(p)p.style.display=(n===i?"block":"none");if(t)t.classList.toggle("A",n===i);});}
+function renderAccessMatrix(){
+  var el=document.getElementById("adm-matrix");if(!el)return;var cfg=loadRoleAccess();
+  var cols=ACCESS_TABS.map(function(t){return {k:t.k,t:t.t,cap:false};}).concat(ACCESS_CAPS.map(function(c){return {k:c.k,t:c.t,cap:true};}));
+  var head='<tr><th>Role</th>'+cols.map(function(c){return '<th style="text-align:center;font-size:9px">'+e(c.t)+'</th>';}).join("")+'</tr>';
+  var rows=CANON_ROLES.map(function(r){var a=cfg[r]||{tabs:[],caps:[]};var adm=(r==="Admin");
+    return '<tr><td class="b">'+r+(adm?' <span class="pill pp">full</span>':'')+'</td>'+cols.map(function(c){
+      var on=c.cap?(a.caps.indexOf(c.k)>=0):(a.tabs.indexOf(c.k)>=0);
+      return '<td style="text-align:center"><input type="checkbox" data-role="'+r+'" data-kind="'+(c.cap?"cap":"tab")+'" data-k="'+c.k+'"'+(on?" checked":"")+(adm?" disabled":"")+' style="width:auto;margin:0"></td>';}).join("")+'</tr>';
+  }).join("");
+  el.innerHTML='<div class="card" style="overflow-x:auto"><table class="tbl">'+head+rows+'</table></div>';
+}
+function saveAccessMatrix(){var cfg=loadRoleAccess();
+  CANON_ROLES.forEach(function(r){if(r!=="Admin")cfg[r]={tabs:[],caps:[]};});
+  document.querySelectorAll("#adm-matrix input[type=checkbox]").forEach(function(cb){if(cb.disabled)return;var r=cb.getAttribute("data-role"),kind=cb.getAttribute("data-kind"),k=cb.getAttribute("data-k");if(!cfg[r])cfg[r]={tabs:[],caps:[]};if(cb.checked){(kind==="cap"?cfg[r].caps:cfg[r].tabs).push(k);}});
+  saveRoleAccess(cfg);applyAccess();toast("Access settings saved","ok");}
+function resetAccessMatrix(){try{localStorage.removeItem("cc_roleaccess");}catch(e){}renderAccessMatrix();applyAccess();toast("Reset to default roles","ok");}
 function updateUserUI(){
   var b=document.getElementById("admin-btn");
   if(b)b.style.display=currentUser?"inline-flex":"none";
-  var role=document.getElementById("acct-role");if(role)role.textContent=(currentUser&&currentUser.role)||"Account";
+  var role=document.getElementById("acct-role");if(role)role.textContent=(currentUser?myRole():"Account");
   var em=document.getElementById("acct-email");if(em)em.textContent=(currentUser&&currentUser.u)||"";
-  var ua=document.getElementById("acct-admin");if(ua)ua.style.display=(currentUser&&currentUser.role==="Admin")?"flex":"none";
+  applyAccess();
 }
 function openAdmin(){
   closeMenus();
-  if(!currentUser||currentUser.role!=="Admin"){alert("Admin access required.");return;}
-  renderAdminUsers();oM("m-admin");
+  if(!canCap("manageUsers")){alert("You don't have access to user management.");return;}
+  var t1=document.getElementById("adm-t1");if(t1)t1.style.display=(myRole()==="Admin")?"":"none";
+  admTab(0);renderAdminUsers();renderAccessMatrix();oM("m-admin");
 }
+function roleBadge(r){r=normRole(r);return '<span class="pill '+(r==="Admin"?"pp":r==="Manager"?"pb2":r==="Provider"?"pt":"pm2")+'">'+r+'</span>';}
 function renderAdminUsers(){
   var el=document.getElementById("admin-users");if(!el)return;
+  var canEdit=(myRole()==="Admin");
   el.innerHTML='<div class="card"><table class="tbl"><thead><tr><th>Username</th><th>Name</th><th>Role</th><th></th></tr></thead><tbody>'+USERS.map(function(x){
     var me=currentUser&&currentUser.u===x.u;
-    return'<tr><td class="b">'+e(x.u)+(me?' <span class="pill pt">you</span>':'')+'</td><td>'+e(x.name||"")+'</td><td><span class="pill '+(x.role==="Admin"?"pp":x.role==="Wound Provider"?"pt":"pb2")+'">'+e(x.role||"Viewer")+'</span></td><td style="text-align:right">'+(me?'':'<button class="btn br2 bsm" onclick="delUser(\''+e(x.u)+'\')">Remove</button>')+'</td></tr>';
+    var roleCell=canEdit?('<select onchange="changeRole(\''+e(x.u)+'\',this.value)" style="font-size:11px;width:118px;padding:3px 6px">'+CANON_ROLES.map(function(r){return '<option'+((normRole(x.role)===r)?" selected":"")+'>'+r+'</option>';}).join("")+'</select>'):roleBadge(x.role);
+    return'<tr><td class="b">'+e(x.u)+(me?' <span class="pill pt">you</span>':'')+'</td><td>'+e(x.name||"")+'</td><td>'+roleCell+'</td><td style="text-align:right">'+(me?'':'<button class="btn br2 bsm" onclick="delUser(\''+e(x.u)+'\')">Remove</button>')+'</td></tr>';
   }).join("")+'</tbody></table></div>';
 }
+function changeRole(u,role){var x=USERS.find(function(y){return y.u===u;});if(!x)return;x.role=role;saveUsers();if(currentUser&&currentUser.u===u){currentUser.role=role;updateUserUI();}toast("Role updated to "+role,"ok");}
 async function addUser(){
-  if(!currentUser||currentUser.role!=="Admin"){alert("Admin access required.");return;}
-  var u=(gv("au-user")||"").trim().toLowerCase();var nm=gv("au-name").trim();var role=gv("au-role");var p=gv("au-pass");
+  if(!canCap("manageUsers")){alert("You don't have access to user management.");return;}
+  var u=(gv("au-user")||"").trim().toLowerCase();var nm=gv("au-name").trim();var role=gv("au-role")||"Provider";var p=gv("au-pass");
   if(!u||!p){alert("Username and a temporary password are required.");return;}
   if(!/^[a-z0-9._-]+$/.test(u)){alert("Username may only contain letters, numbers, dot, dash, underscore.");return;}
   if(USERS.find(function(x){return x.u===u;})){alert("That username already exists.");return;}
@@ -4767,8 +4842,9 @@ async function addUser(){
   alert("User '"+u+"' created with role "+role+".\nThey can sign in with the temporary password you set.");
 }
 function delUser(u){
+  if(!canCap("manageUsers")){alert("You don't have access to user management.");return;}
   if(currentUser&&currentUser.u===u){alert("You can't remove the account you're signed in as.");return;}
-  if(USERS.filter(function(x){return x.role==="Admin";}).length<=1&&(USERS.find(function(x){return x.u===u;})||{}).role==="Admin"){alert("Can't remove the last Admin account.");return;}
+  if(USERS.filter(function(x){return normRole(x.role)==="Admin";}).length<=1&&normRole((USERS.find(function(x){return x.u===u;})||{}).role)==="Admin"){alert("Can't remove the last Admin account.");return;}
   if(!confirm("Remove user '"+u+"'? They will no longer be able to sign in."))return;
   USERS=USERS.filter(function(x){return x.u!==u;});saveUsers();renderAdminUsers();
 }
