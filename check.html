@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta http-equiv="Cache-Control" content="no-store, no-cache, must-revalidate, max-age=0">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>Clinilytics · Build &amp; Access Check</title>
+<style>
+  :root{--bone:#F4F0E8;--paper:#fff;--ink:#0F0E0C;--clay:#C4623C;--good:#5C8A6E;--rose:#B3543F;--line:#E4DDD0;--muted:#7A7264}
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.5 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bone);color:var(--ink);padding:24px}
+  .wrap{max-width:680px;margin:0 auto}
+  .banner{background:var(--clay);color:#fff;border-radius:16px;padding:22px 24px;text-align:center;box-shadow:0 6px 24px rgba(0,0,0,.12)}
+  .banner h1{margin:0 0 4px;font-size:26px;letter-spacing:-.5px}
+  .banner .v{font:600 15px ui-monospace,SFMono-Regular,Menlo,monospace;opacity:.95}
+  .card{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin-top:18px}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px dashed var(--line)}
+  .row:last-child{border-bottom:0}
+  .k{color:var(--muted)} .val{font-weight:600;text-align:right}
+  .ok{color:var(--good)} .bad{color:var(--rose)}
+  .big{font-size:20px;font-weight:700;margin:10px 0}
+  label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+  input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:15px}
+  button{margin-top:12px;background:var(--ink);color:#fff;border:0;border-radius:10px;padding:11px 18px;font-size:15px;font-weight:600;cursor:pointer}
+  .mono{font:13px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);word-break:break-all}
+  .hint{font-size:13px;color:var(--muted);margin-top:14px}
+  a{color:var(--clay)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="banner">
+    <h1>✓ Fresh build is loading</h1>
+    <div class="v" id="bid">BUILD check-2026-06-30T1635Z</div>
+  </div>
+
+  <div class="card">
+    <div class="big">What this page tells you</div>
+    <p style="margin:6px 0 0">If you can read the orange banner above with today's build stamp, your browser <b>is</b> able to fetch the current files from GitHub. That means the only thing stale is the cached <code>index.html</code> — see the fix steps at the bottom.</p>
+  </div>
+
+  <div class="card" id="acc">
+    <div class="big">Your access (live from Supabase)</div>
+    <div id="accbody"><div class="mono">Checking your signed-in session…</div></div>
+    <div id="loginbox" style="display:none">
+      <label>Email</label><input id="em" type="email" autocomplete="username">
+      <label>Password</label><input id="pw" type="password" autocomplete="current-password">
+      <button id="go">Sign in &amp; check role</button>
+      <div id="lerr" class="bad" style="margin-top:8px"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="big">If the main app still hides Admin</div>
+    <ol style="margin:6px 0 0;padding-left:20px">
+      <li>Open the app, then in the address bar add <code>?fresh=1</code> and load it.</li>
+      <li>Hard refresh: <b>Ctrl+Shift+R</b> (Windows) / <b>Cmd+Shift+R</b> (Mac).</li>
+      <li>Still old? Your network has a caching proxy serving an old copy of <code>index.html</code> by path. This page proves fresh files load — forward it to IT and ask them to purge / exclude <code>amallc-coder.github.io</code> from the web cache.</li>
+    </ol>
+    <div class="hint">Back to the app: <a href="./index.html?fresh=1">index.html</a> · <a href="./app.html">app.html</a></div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script>
+var SB_URL="https://prvzcbyeuqlstqrlbbum.supabase.co";
+var SB_ANON="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBydnpjYnlldXFsc3RxcmxiYnVtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIzMzU2MTIsImV4cCI6MjA5NzkxMTYxMn0._sddwUbrMQsHDWnVawDoLB3M-VuueqOUoPjcEmlZEsI";
+var sbc=null;
+function esc(s){return (""+(s==null?"":s)).replace(/[&<>]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;"}[c];});}
+function normRole(r){r=(""+(r||"")).toLowerCase();
+  if(r.indexOf("admin")>=0)return "Admin";
+  if(r.indexOf("manager")>=0||r.indexOf("director")>=0)return "Manager";
+  if(r.indexOf("sched")>=0||r.indexOf("viewer")>=0)return "Scheduler";
+  return "Provider";}
+function adminCan(role){return role==="Admin"||role==="Manager";} // manage-users capability default
+function render(o){
+  var body=document.getElementById("accbody");
+  if(o.error){body.innerHTML='<div class="bad mono">'+esc(o.error)+'</div>';return;}
+  var role=normRole(o.role);
+  var canAdmin=adminCan(role);
+  body.innerHTML=''+
+    '<div class="row"><span class="k">Signed in as</span><span class="val">'+esc(o.email||"—")+'</span></div>'+
+    '<div class="row"><span class="k">Role in Supabase</span><span class="val">'+esc(o.role||"(none)")+'</span></div>'+
+    '<div class="row"><span class="k">Normalized role</span><span class="val">'+esc(role)+'</span></div>'+
+    '<div class="row"><span class="k">Organization set</span><span class="val '+(o.org?"ok":"bad")+'">'+(o.org?"Yes":"No")+'</span></div>'+
+    '<div class="row"><span class="k">🛡 Admin button shows on new build</span><span class="val '+(canAdmin?"ok":"bad")+'">'+(canAdmin?"YES":"No (role lacks manage-users)")+'</span></div>';
+  if(canAdmin){
+    body.innerHTML+='<p class="ok" style="margin:12px 0 0"><b>Your account is fully entitled.</b> On the current build you will see the 🛡 Admin tab in the nav row and "Users &amp; access" in the ⚙ menu. If you don\'t, you are still being served an old cached copy — use the steps below.</p>';
+  }
+}
+function check(){
+  if(!(window.supabase&&SB_ANON)){document.getElementById("accbody").innerHTML='<div class="bad">Could not load Supabase client.</div>';return;}
+  try{sbc=window.supabase.createClient(SB_URL,SB_ANON,{auth:{persistSession:true,autoRefreshToken:true}});}catch(e){}
+  if(!sbc){document.getElementById("accbody").innerHTML='<div class="bad">Supabase init failed.</div>';return;}
+  sbc.auth.getUser().then(function(ur){
+    var user=ur&&ur.data&&ur.data.user;
+    if(!user){document.getElementById("accbody").innerHTML='<div class="mono">No active session on this device. Sign in to check your role:</div>';document.getElementById("loginbox").style.display="block";return;}
+    sbc.from("profiles").select("org_id,role,full_name").eq("id",user.id).maybeSingle().then(function(pr){
+      render({email:user.email,role:pr&&pr.data&&pr.data.role,org:pr&&pr.data&&pr.data.org_id});
+    }).catch(function(e){render({email:user.email,error:"Profile lookup failed: "+(e&&e.message||e)});});
+  }).catch(function(e){document.getElementById("accbody").innerHTML='<div class="bad mono">'+esc(e&&e.message||e)+'</div>';});
+}
+document.getElementById("go").addEventListener("click",function(){
+  var em=document.getElementById("em").value.trim(),pw=document.getElementById("pw").value;
+  var le=document.getElementById("lerr");le.textContent="";
+  if(!em||!pw){le.textContent="Enter email and password.";return;}
+  sbc.auth.signInWithPassword({email:em,password:pw}).then(function(r){
+    if(r.error){le.textContent=r.error.message;return;}
+    document.getElementById("loginbox").style.display="none";check();
+  });
+});
+check();
+</script>
+</body>
+</html>
