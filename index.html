@@ -343,6 +343,7 @@ img,canvas,svg{max-width:100%}
   <button class="A" data-tab="dashboard" onclick="go('dashboard')"><span class="nav-tab__dot"></span>Dashboard</button>
   <button data-tab="rounds" onclick="go('rounds')"><span class="nav-tab__dot"></span>Rounds</button>
   <button data-tab="census" onclick="go('census')"><span class="nav-tab__dot"></span>Census &amp; Facilities</button>
+  <button data-tab="schedule" onclick="go('schedule')"><span class="nav-tab__dot"></span>Schedule</button>
   <button data-tab="reports" onclick="go('reports')"><span class="nav-tab__dot"></span>Reports &amp; Analytics</button>
   <button data-tab="help" onclick="go('help')"><span class="nav-tab__dot"></span>Help &amp; Training</button>
 </nav>
@@ -370,6 +371,9 @@ img,canvas,svg{max-width:100%}
 
 <!-- ROUNDS -->
 <div id="tab-rounds" class="tb"><div id="rounds-view"></div></div>
+
+<!-- SCHEDULE -->
+<div id="tab-schedule" class="tb"><div id="sched-view"></div></div>
 
 <!-- CENSUS -->
 <div id="tab-census" class="tb">
@@ -1532,11 +1536,12 @@ function go(id){
   document.querySelectorAll(".tb").forEach(function(t){t.classList.remove("A");});
   document.querySelectorAll("#mnav button").forEach(function(b){b.classList.remove("A");});
   document.getElementById("tab-"+id).classList.add("A");
-  var idx={dashboard:0,rounds:1,census:2,reports:3,help:4}[id];
+  var idx={dashboard:0,rounds:1,census:2,schedule:3,reports:4,help:5}[id];
   document.querySelectorAll("#mnav button")[idx].classList.add("A");
   var nv=document.getElementById("mnav");if(nv)nv.classList.remove("open");
   saveUI({tab:id});closeMenus();
   if(id==="rounds")  renderRounds();
+  if(id==="schedule")renderSchedule();
   if(id==="census")  renderCensus();
   if(id==="wound")   wTab(wCurrentTab);
   if(id==="reports") renderReports();
@@ -3272,6 +3277,54 @@ function roundComplete(){
   if(RND.queue.length){toast("✓ Round charted — next patient","ok");startRound(RND.queue[0]);}
   else{toast("✓ Round completed & charted","ok");RND.wid=null;renderRounds();}
 }
+/* ═══════════════ VISIT SCHEDULE / FREQUENCY (Scheduler) ═══════════════ */
+var SCHED={org:"All",fac:"All",prov:"All"};
+var SCHED_FREQ=["Weekly","Twice weekly","Every 2 weeks","Monthly","PRN"];
+function schedFreqDays(f){return ({"Weekly":7,"Twice weekly":3,"Every 2 weeks":14,"Monthly":30,"PRN":null})[f];}
+function woundFreq(w){if(w.sched&&w.sched.freq)return w.sched.freq;var r=(w.rounds||[]).slice(-1)[0];if(r&&r.cadence){if(/twice/i.test(r.cadence))return "Twice weekly";if(/2 weeks/i.test(r.cadence))return "Every 2 weeks";if(/sooner/i.test(r.cadence))return "Twice weekly";return "Weekly";}return "Weekly";}
+function woundNextDue(w){if(w.sched&&w.sched.next)return w.sched.next;var d=schedFreqDays(woundFreq(w));if(d==null)return "";var base=parseDate(w.ls);if(!base)return "";var nd=new Date(base.getTime()+d*86400000);return ("0"+(nd.getMonth()+1)).slice(-2)+"/"+("0"+nd.getDate()).slice(-2)+"/"+nd.getFullYear();}
+function _mdyToInput(s){var p=(""+(s||"")).split("/");return p.length===3?(p[2]+"-"+p[0]+"-"+p[1]):"";}
+function schedSetFreq(wid,v){var w=WOUNDS.find(function(x){return x.id===wid;});if(!w)return;w.sched=w.sched||{};w.sched.freq=v;w.sched.next="";w.sched.next=woundNextDue(w);if(typeof persist==="function")persist();renderSchedule();}
+function schedSetNext(wid,v){var w=WOUNDS.find(function(x){return x.id===wid;});if(!w)return;w.sched=w.sched||{};if(v){var p=v.split("-");w.sched.next=p[1]+"/"+p[2]+"/"+p[0];}else{w.sched.next="";}if(typeof persist==="function")persist();renderSchedule();}
+function schedSetFilter(which,val){SCHED[which]=val;if(which==="org")SCHED.fac="All";renderSchedule();}
+function renderSchedule(){
+  var el=document.getElementById("sched-view");if(!el)return;
+  var provs=(typeof woundProviders==="function"?woundProviders():[]);
+  var FA=(typeof FACS!=="undefined"?FACS:[]);
+  var orgs=[];FA.forEach(function(f){if(f.co&&orgs.indexOf(f.co)<0)orgs.push(f.co);});orgs.sort();
+  if(SCHED.org!=="All"&&orgs.indexOf(SCHED.org)<0)SCHED.org="All";
+  var facObjs=FA.filter(function(f){return SCHED.org==="All"||f.co===SCHED.org;});
+  var facs=facObjs.map(function(f){return f.name;});
+  if(SCHED.fac!=="All"&&facs.indexOf(SCHED.fac)<0)SCHED.fac="All";
+  var t0=new Date();t0.setHours(0,0,0,0);
+  var list=WOUNDS.filter(function(w){return !wIsHealed(w)&&(SCHED.org==="All"||woundOrg(w)===SCHED.org)&&(SCHED.fac==="All"||w.fac===SCHED.fac)&&(SCHED.prov==="All"||w.pv===SCHED.prov);});
+  list.forEach(function(w){var nd=parseDate(woundNextDue(w));w._nd=nd;w._days=nd?Math.round((nd.getTime()-t0.getTime())/86400000):null;});
+  list.sort(function(a,b){var A=(a._days==null?99999:a._days),B=(b._days==null?99999:b._days);return A-B;});
+  var overdue=list.filter(function(w){return w._days!=null&&w._days<0;});
+  var dueWk=list.filter(function(w){return w._days!=null&&w._days>=0&&w._days<=7;});
+  var prn=list.filter(function(w){return w._days==null;});
+  var orgOpts='<option value="All">All Organizations</option>'+orgs.map(function(o){return '<option'+(o===SCHED.org?' selected':'')+'>'+e(o)+'</option>';}).join('');
+  var facOpts='<option value="All">All Facilities</option>'+facs.map(function(f){return '<option'+(f===SCHED.fac?' selected':'')+'>'+e(f)+'</option>';}).join('');
+  var provOpts='<option value="All">All Providers</option>'+provs.map(function(p){return '<option'+(p===SCHED.prov?' selected':'')+'>'+e(p)+'</option>';}).join('');
+  var rows=list.map(function(w){
+    var freq=woundFreq(w);var nextV=_mdyToInput(woundNextDue(w));
+    var st=w._days==null?'<span class="tri-tag">PRN</span>':w._days<0?'<span class="tri-tag warn">Overdue '+(-w._days)+'d</span>':w._days<=3?'<span class="tri-tag" style="background:#f6ecd7;color:#9a6a25">Due in '+w._days+'d</span>':'<span class="tri-tag ok">Scheduled</span>';
+    var freqSel='<select onchange="schedSetFreq(\''+w.id+'\',this.value)" style="width:130px;font-size:11px;padding:3px 6px">'+SCHED_FREQ.map(function(f){return '<option'+(f===freq?' selected':'')+'>'+f+'</option>';}).join("")+'</select>';
+    var dateInp='<input type="date" value="'+nextV+'" onchange="schedSetNext(\''+w.id+'\',this.value)" style="width:150px;font-size:11px;padding:3px 6px">';
+    return '<tr><td class="b">'+e(w.name)+'</td><td style="font-size:11px">'+e(w.fac)+'</td><td style="font-size:11px">'+e(w.tp)+(w.loc?(" · "+e(w.loc)):"")+'</td><td style="font-size:11px">'+e(w.ls||"—")+" ("+woundDaysSinceUpdate(w)+"d)"+'</td><td>'+freqSel+'</td><td>'+dateInp+'</td><td>'+st+'</td></tr>';
+  }).join("");
+  el.innerHTML='<div class="ph2"><div><div class="pt3">Visit Schedule</div><div class="ps2">Patient reassessment cadence &amp; next-visit planning</div></div>'+
+    '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+
+    '<select style="width:170px;font-size:11px" onchange="schedSetFilter(\'org\',this.value)">'+orgOpts+'</select>'+
+    '<select style="width:170px;font-size:11px" onchange="schedSetFilter(\'fac\',this.value)">'+facOpts+'</select>'+
+    '<select style="width:150px;font-size:11px" onchange="schedSetFilter(\'prov\',this.value)">'+provOpts+'</select></div></div>'+
+    '<div class="g4" style="margin-bottom:12px">'+
+      roundKpi(list.length,"Active to schedule")+roundKpi(overdue.length,"Overdue",overdue.length?"#b23a2e":"#5C8A6E")+
+      roundKpi(dueWk.length,"Due this week","#b07d3c")+roundKpi(prn.length,"PRN / unscheduled")+'</div>'+
+    '<div class="st">Reassessment schedule — set the visit frequency and next-visit date per patient</div>'+
+    '<div class="card" style="overflow-x:auto"><table class="tbl"><thead><tr><th>Patient</th><th>Facility</th><th>Wound</th><th>Last Seen</th><th>Frequency</th><th>Next Visit</th><th>Status</th></tr></thead><tbody>'+
+    (rows||'<tr><td colspan="7" style="color:var(--mu)">No active wounds for this filter.</td></tr>')+'</tbody></table></div>';
+}
 function wIsPressure(w){return w.etio==="Pressure"||w.tp==="Pressure Injury";}
 function wStage2Plus(w){return["Stage 2","Stage 3","Stage 4","Unstageable","Deep Tissue Inj."].indexOf(w.stage)>=0;}
 function stageNum(s){return ({"Stage 1":1,"Stage 2":2,"Stage 3":3,"Stage 4":4,"Unstageable":4,"Deep Tissue Inj.":3})[s]||0;}
@@ -4843,13 +4896,13 @@ function lgateInit(){
 }
 /* ═══════════════ ROLE-BASED ACCESS CONTROL ═══════════════ */
 var CANON_ROLES=["Admin","Manager","Provider","Scheduler"];
-var ACCESS_TABS=[{k:"dashboard",t:"Dashboard"},{k:"rounds",t:"Rounds"},{k:"census",t:"Census"},{k:"reports",t:"Reports"},{k:"help",t:"Help"}];
+var ACCESS_TABS=[{k:"dashboard",t:"Dashboard"},{k:"rounds",t:"Rounds"},{k:"census",t:"Census"},{k:"schedule",t:"Schedule"},{k:"reports",t:"Reports"},{k:"help",t:"Help"}];
 var ACCESS_CAPS=[{k:"manageUsers",t:"Manage users"},{k:"manageFacilities",t:"Manage facilities"}];
 var ROLE_DEFAULTS={
-  Admin:{tabs:["dashboard","rounds","census","wound","reports","help"],caps:["manageUsers","manageFacilities"]},
-  Manager:{tabs:["dashboard","census","reports","help"],caps:["manageUsers","manageFacilities"]},
-  Provider:{tabs:["dashboard","rounds","census","help"],caps:[]},
-  Scheduler:{tabs:["census","help"],caps:[]}
+  Admin:{tabs:["dashboard","rounds","census","schedule","reports","help"],caps:["manageUsers","manageFacilities"]},
+  Manager:{tabs:["dashboard","census","schedule","reports","help"],caps:["manageUsers","manageFacilities"]},
+  Provider:{tabs:["dashboard","rounds","census","schedule","help"],caps:[]},
+  Scheduler:{tabs:["census","schedule","help"],caps:[]}
 };
 function loadRoleAccess(){var s={};try{s=JSON.parse(localStorage.getItem("cc_roleaccess")||"{}")||{};}catch(e){s={};}
   var cfg={};CANON_ROLES.forEach(function(r){var d=ROLE_DEFAULTS[r],o=s[r]||{};cfg[r]={tabs:(o.tabs||d.tabs).slice(),caps:(o.caps||d.caps).slice()};});
