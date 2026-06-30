@@ -307,6 +307,8 @@ img,canvas,svg{max-width:100%}
     </div>
     <div id="notif-menu" class="menu"></div>
     <div id="settings-menu" class="menu">
+      <h4 id="adm-sec-h" style="display:none">Administration</h4>
+      <div class="mi" id="adm-sec-i" style="display:none" onclick="openAdmin()"><span>🛡 Users &amp; access</span> <small>Admin</small></div>
       <h4>Display</h4>
       <div class="mi" onclick="prefToggle('dense')">Compact density <small id="pf-dense">Off</small></div>
       <div class="mi" onclick="prefToggle('theme')">Dark theme <small id="pf-theme">Off</small></div>
@@ -647,12 +649,12 @@ img,canvas,svg{max-width:100%}
   <div class="mh"><div class="mtt" id="af-title">🏢 Add Facility</div><button class="xb" onclick="cM('m-addfac')">✕</button></div>
   <div class="mbd"><div class="g2">
     <div><label class="fl">Facility Name *</label><input id="af-n" placeholder="e.g. Embassy – Westlake"></div>
-    <div><label class="fl">Company / Portfolio *</label>
+    <div><label class="fl">Organization *</label>
       <select id="af-co" onchange="document.getElementById('af-ncw').style.display=this.value==='__new__'?'block':'none'">
-        <option>Embassy Healthcare</option><option>Reliant Senior Care</option><option>Sunrise Health Group</option><option>Valley SNF Partners</option><option value="__new__">+ New Company…</option>
+        <option>Embassy Healthcare</option><option>Reliant Senior Care</option><option>Sunrise Health Group</option><option>Valley SNF Partners</option><option value="__new__">+ New Organization…</option>
       </select>
     </div>
-    <div id="af-ncw" style="display:none;grid-column:1/-1"><label class="fl">New Company Name</label><input id="af-nc"></div>
+    <div id="af-ncw" style="display:none;grid-column:1/-1"><label class="fl">New Organization Name</label><input id="af-nc"></div>
     <div style="grid-column:1/-1"><label class="fl">Address</label><input id="af-addr"></div>
     <div><label class="fl">Region</label><input id="af-reg"></div>
     <div><label class="fl">Type</label><select id="af-tp"><option>SNF</option><option>ALF</option><option>Rehab</option><option>Memory Care</option></select></div>
@@ -2795,7 +2797,8 @@ function wRefresh(){wTab(wCurrentTab);}
    prep → history/exam → assessment → plan → orders → documentation/coding → follow-up,
    with the F-686 / MDS-M / infection-control / QAPI regulatory layer underneath.
    Reuses clinContext(), woundSuggestions(), analyzeWoundPhoto(), openBilling(), aiDraftReq(). */
-var RND={wid:null,step:0,queue:[],fac:"All",prov:"All",photo:null,smart:[],_sug:null};
+var RND={wid:null,step:0,queue:[],org:"All",fac:"All",prov:"All",photo:null,smart:[],_sug:null};
+function woundOrg(w){var f=(typeof FACS!=="undefined"?FACS.find(function(x){return x.name===w.fac;}):null);return f?(f.co||""):"";}
 var ROUND_PHASES=[
   {k:"prep",t:"Pre-round prep",ic:"\u{1F4CB}"},
   {k:"exam",t:"History & exam",ic:"\u{1FA7A}"},
@@ -2830,14 +2833,20 @@ function roundReasons(w){var r=[];
   if(w.inf)r.push("Infection");
   if(!r.length)r.push("Routine");return r;}
 function roundPriority(w){var s=0;if(w.inf)s+=5;if(w.heal==="Worsening")s+=5;if(w.heal==="Slow")s+=3;if(w.poa==="Facility-Acquired"&&wIsPressure(w))s+=2;if(woundIsStale(w))s+=2;if(wIsNew(w))s+=1;return s;}
-function roundSetFilter(which,val){RND[which]=val;renderRounds();}
+function roundSetFilter(which,val){RND[which]=val;if(which==="org")RND.fac="All";renderRounds();}
 function roundWorklistHTML(){
   var provs=(typeof woundProviders==="function"?woundProviders():[]);
-  var facs=(typeof FACS!=="undefined"?FACS.map(function(f){return f.name;}):[]);
-  var list=WOUNDS.filter(function(w){return !wIsHealed(w)&&(RND.fac==="All"||w.fac===RND.fac)&&(RND.prov==="All"||w.pv===RND.prov);});
+  var FA=(typeof FACS!=="undefined"?FACS:[]);
+  var orgs=[];FA.forEach(function(f){if(f.co&&orgs.indexOf(f.co)<0)orgs.push(f.co);});orgs.sort();
+  if(RND.org!=="All"&&orgs.indexOf(RND.org)<0)RND.org="All";
+  var facObjs=FA.filter(function(f){return RND.org==="All"||f.co===RND.org;});
+  var facs=facObjs.map(function(f){return f.name;});
+  if(RND.fac!=="All"&&facs.indexOf(RND.fac)<0)RND.fac="All";
+  var list=WOUNDS.filter(function(w){return !wIsHealed(w)&&(RND.org==="All"||woundOrg(w)===RND.org)&&(RND.fac==="All"||w.fac===RND.fac)&&(RND.prov==="All"||w.pv===RND.prov);});
   list.forEach(function(w){w._rr=roundReasons(w);w._rp=roundPriority(w);});
   list.sort(function(a,b){return b._rp-a._rp;});
   var flagged=list.filter(function(w){return w._rr.indexOf("Routine")<0;});
+  var orgOpts='<option value="All">All Organizations</option>'+orgs.map(function(o){return '<option'+(o===RND.org?' selected':'')+'>'+e(o)+'</option>';}).join('');
   var facOpts='<option value="All">All Facilities</option>'+facs.map(function(f){return '<option'+(f===RND.fac?' selected':'')+'>'+e(f)+'</option>';}).join('');
   var provOpts='<option value="All">All Providers</option>'+provs.map(function(p){return '<option'+(p===RND.prov?' selected':'')+'>'+e(p)+'</option>';}).join('');
   var rows=list.map(function(w){
@@ -2850,8 +2859,9 @@ function roundWorklistHTML(){
   }).join("");
   return '<div class="ph2"><div><div class="pt3">Wound Rounds</div><div class="ps2">Triaged pre-round worklist · guided bedside workflow</div></div>'+
     '<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">'+
-    '<select style="width:180px;font-size:11px" onchange="roundSetFilter(\'fac\',this.value)">'+facOpts+'</select>'+
-    '<select style="width:160px;font-size:11px" onchange="roundSetFilter(\'prov\',this.value)">'+provOpts+'</select>'+
+    '<select style="width:170px;font-size:11px" onchange="roundSetFilter(\'org\',this.value)">'+orgOpts+'</select>'+
+    '<select style="width:170px;font-size:11px" onchange="roundSetFilter(\'fac\',this.value)">'+facOpts+'</select>'+
+    '<select style="width:150px;font-size:11px" onchange="roundSetFilter(\'prov\',this.value)">'+provOpts+'</select>'+
     (flagged.length?'<button class="btn bp2 bsm" onclick="startRoundQueue()">▶ Round all flagged ('+flagged.length+')</button>':'')+'</div></div>'+
     '<div class="g4" style="margin-bottom:12px">'+
       roundKpi(list.length,"To be seen")+roundKpi(list.filter(function(w){return w.inf;}).length,"Infection active","#b23a2e")+
@@ -2898,7 +2908,7 @@ function roundKpi(v,l,clr){return '<div class="kt"><div class="kv"'+(clr?(' styl
 function roundRegBanner(){return '<div class="rnd-reg"><span><b>Regulatory layer:</b></span><span>F-686 skin integrity</span><span>MDS Section M accuracy</span><span>Infection control</span><span>QAPI — facility-acquired PI rate</span></div>';}
 /* ---- start / navigate ---- */
 function startRound(wid){RND.wid=wid;RND.step=0;RND.photo=null;RND.smart=[];RND._sug=null;go("rounds");renderRounds();}
-function startRoundQueue(){var list=WOUNDS.filter(function(w){return !wIsHealed(w)&&(RND.fac==="All"||w.fac===RND.fac)&&(RND.prov==="All"||w.pv===RND.prov)&&roundReasons(w).indexOf("Routine")<0;});list.sort(function(a,b){return roundPriority(b)-roundPriority(a);});RND.queue=list.map(function(w){return w.id;});if(RND.queue.length)startRound(RND.queue[0]);}
+function startRoundQueue(){var list=WOUNDS.filter(function(w){return !wIsHealed(w)&&(RND.org==="All"||woundOrg(w)===RND.org)&&(RND.fac==="All"||w.fac===RND.fac)&&(RND.prov==="All"||w.pv===RND.prov)&&roundReasons(w).indexOf("Routine")<0;});list.sort(function(a,b){return roundPriority(b)-roundPriority(a);});RND.queue=list.map(function(w){return w.id;});if(RND.queue.length)startRound(RND.queue[0]);}
 function roundExit(){if(typeof roundCamClose==="function")roundCamClose();RND.wid=null;RND.queue=[];renderRounds();}
 function renderRounds(){var el=document.getElementById("rounds-view");if(!el)return;if(RND.wid&&curW()){el.innerHTML=roundStepperHTML();roundGoStep(RND.step);}else{RND.wid=null;el.innerHTML=roundWorklistHTML();}}
 function roundGoStep(n){if(n<0)n=0;if(n>6)n=6;RND.step=n;
@@ -4784,7 +4794,10 @@ function canCap(k){if(!currentUser)return false;return (myAccess().caps||[]).ind
 function firstAllowedTab(){var a=myAccess().tabs||[];for(var i=0;i<ACCESS_TABS.length;i++){if(a.indexOf(ACCESS_TABS[i].k)>=0)return ACCESS_TABS[i].k;}return "help";}
 function applyAccess(){
   document.querySelectorAll("#mnav button[data-tab]").forEach(function(b){b.style.display=canTab(b.getAttribute("data-tab"))?"":"none";});
-  var ua=document.getElementById("acct-admin");if(ua)ua.style.display=canCap("manageUsers")?"flex":"none";
+  var mu=canCap("manageUsers");
+  var ua=document.getElementById("acct-admin");if(ua)ua.style.display=mu?"flex":"none";
+  var ah=document.getElementById("adm-sec-h");if(ah)ah.style.display=mu?"block":"none";
+  var ai=document.getElementById("adm-sec-i");if(ai)ai.style.display=mu?"flex":"none";
   var af=document.getElementById("cen-addfac");if(af)af.style.display=canCap("manageFacilities")?"":"none";
 }
 function admTab(i){[0,1].forEach(function(n){var p=document.getElementById("adm-p"+n),t=document.getElementById("adm-t"+n);if(p)p.style.display=(n===i?"block":"none");if(t)t.classList.toggle("A",n===i);});}
