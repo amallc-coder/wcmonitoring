@@ -2774,7 +2774,7 @@ function wRefresh(){wTab(wCurrentTab);}
    prep → history/exam → assessment → plan → orders → documentation/coding → follow-up,
    with the F-686 / MDS-M / infection-control / QAPI regulatory layer underneath.
    Reuses clinContext(), woundSuggestions(), analyzeWoundPhoto(), openBilling(), aiDraftReq(). */
-var RND={wid:null,step:0,queue:[],fac:"All",prov:"All"};
+var RND={wid:null,step:0,queue:[],fac:"All",prov:"All",photo:null,smart:[],_sug:null};
 var ROUND_PHASES=[
   {k:"prep",t:"Pre-round prep",ic:"\u{1F4CB}"},
   {k:"exam",t:"History & exam",ic:"\u{1FA7A}"},
@@ -2843,7 +2843,7 @@ function roundWorklistHTML(){
 function roundKpi(v,l,clr){return '<div class="kt"><div class="kv"'+(clr?(' style="color:'+clr+'"'):'')+'>'+v+'</div><div class="kl">'+e(l)+'</div></div>';}
 function roundRegBanner(){return '<div class="rnd-reg"><span><b>Regulatory layer:</b></span><span>F-686 skin integrity</span><span>MDS Section M accuracy</span><span>Infection control</span><span>QAPI — facility-acquired PI rate</span></div>';}
 /* ---- start / navigate ---- */
-function startRound(wid){RND.wid=wid;RND.step=0;go("rounds");renderRounds();}
+function startRound(wid){RND.wid=wid;RND.step=0;RND.photo=null;RND.smart=[];RND._sug=null;go("rounds");renderRounds();}
 function startRoundQueue(){var list=WOUNDS.filter(function(w){return !wIsHealed(w)&&(RND.fac==="All"||w.fac===RND.fac)&&(RND.prov==="All"||w.pv===RND.prov)&&roundReasons(w).indexOf("Routine")<0;});list.sort(function(a,b){return roundPriority(b)-roundPriority(a);});RND.queue=list.map(function(w){return w.id;});if(RND.queue.length)startRound(RND.queue[0]);}
 function roundExit(){RND.wid=null;RND.queue=[];renderRounds();}
 function renderRounds(){var el=document.getElementById("rounds-view");if(!el)return;if(RND.wid&&curW()){el.innerHTML=roundStepperHTML();roundGoStep(RND.step);}else{RND.wid=null;el.innerHTML=roundWorklistHTML();}}
@@ -2853,7 +2853,9 @@ function roundGoStep(n){if(n<0)n=0;if(n>6)n=6;RND.step=n;
   if(bk)bk.style.visibility=(n===0?"hidden":"visible");
   if(nx)nx.style.display=(n===6?"none":"inline-flex");
   if(cp)cp.style.display=(n===6?"inline-flex":"none");
-  if(n===5){var nt=document.getElementById("rnd-note");if(nt&&!nt.value.trim())nt.value=roundBuildNote(curW());}
+  if(n===5){var nt=document.getElementById("rnd-note");if(nt&&!nt.value.trim())nt.value=roundBuildNote(curW());
+    var dp=document.getElementById("rnd-doc-photo");if(dp)dp.innerHTML=RND.photo?('<img src="'+RND.photo+'" style="height:96px;border-radius:7px;border:1px solid var(--bd);display:block">'):'';
+    var pc=document.getElementById("rnd-photo");if(pc&&RND.photo&&!pc.checked){pc.checked=true;if(pc.parentNode)pc.parentNode.classList.add("on");}}
 }
 function roundStepperHTML(){
   var w=curW();var c=clinContext(w);
@@ -2876,6 +2878,7 @@ function roundPhaseHTML(k,w,c){
     return '<div class="rnd-sec st">Snapshot</div><div class="rnd-grid3">'+
       rInp("rnd-onset","Onset (days)",woundOnsetDays(w),"")+rInp("rnd-lastm","Last measurement",(le.L?(le.L+" × "+le.W+(le.D?(" × "+le.D):"")+" cm, "+(woundAreaOf(le)||"?")+" cm²"):"—"),"")+rInp("rnd-redux","Area change",((woundAreaReductionPct(w)!=null)?(woundAreaReductionPct(w)+"% vs baseline"):"—"),"")+'</div>'+
       '<div class="rnd-sec st" style="margin-top:12px">Prior notes (latest 3)</div>'+hist+
+      roundHistoryHTML(w)+
       '<div class="rnd-sec st" style="margin-top:12px">Labs &amp; perfusion (review / update)</div><div class="rnd-grid3">'+
         rInp("rnd-albumin","Albumin g/dL",(w.albumin!=null?w.albumin:""),"e.g. 2.8","number")+rInp("rnd-prealb","Prealbumin","","mg/dL","number")+rInp("rnd-a1c","HbA1c %","","e.g. 8.4","number")+
         rInp("rnd-wbc","CBC / WBC","","","")+rInp("rnd-esr","ESR","","mm/hr","number")+rInp("rnd-crp","CRP","","mg/L","number")+'</div>'+
@@ -2899,7 +2902,10 @@ function roundPhaseHTML(k,w,c){
       '<div class="rnd-sec st" style="margin-top:12px">Lower-extremity perfusion</div><div class="rnd-grid">'+
         rSel("rnd-pulses","Pulses",["Palpable","Diminished","Absent"],"Palpable")+rSel("rnd-cap","Capillary refill",["<3s",">3s"],"<3s")+
         rSel("rnd-edema","Edema",["0","1+","2+","3+"],"0")+rInp("rnd-abi","ABI",(w.abi!=null?w.abi:""),"e.g. 0.9","number")+'</div>'+
-      '<div style="margin-top:11px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn bg3 bsm" onclick="analyzeWoundPhoto(\''+w.id+'\')">\u{1F52C} Analyze photo</button><button class="btn bg3 bsm" onclick="compareWoundPhotos(\''+w.id+'\')">\u{1F4CA} Compare to last</button></div>';
+      '<div class="rnd-sec st" style="margin-top:12px">Wound photo</div>'+
+      '<div id="rnd-photo-box">'+roundPhotoBoxHTML(w)+'</div>'+
+      '<input type="file" id="rnd-photo-input" accept="image/*" capture="environment" style="display:none" onchange="roundAddPhoto(this)">'+
+      '<div style="margin-top:9px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn bd2 bsm" onclick="document.getElementById(\'rnd-photo-input\').click()">\u{1F4F7} Add / capture photo</button><button class="btn bg3 bsm" onclick="roundAnalyzePhoto()">\u{1F52C} Analyze photo (AI)</button><button class="btn bg3 bsm" onclick="roundComparePhoto()">\u{1F4CA} Compare to last (AI)</button></div>';
   }
   if(k==="assess"){
     var traj=({"Improving":"Improving","Progressing":"Improving","Stable":"Stable","Slow":"Deteriorating","Worsening":"Deteriorating"})[w.heal]||"Stable";
@@ -2924,7 +2930,9 @@ function roundPhaseHTML(k,w,c){
       '<div class="rnd-sec st" style="margin-top:12px">Dressing selection — TIME (tissue / infection / moisture / edge)</div><div class="rnd-grid">'+
         rInp("rnd-time-t","T — Tissue","","debride / protect")+rInp("rnd-time-i","I — Infection","","silver / iodine / PHMB")+
         rInp("rnd-time-m","M — Moisture","","alginate/foam (absorb) · hydrogel (donate)")+rInp("rnd-time-e","E — Edge","","advanced therapy / NPWT")+'</div>'+
-      '<div class="rnd-sec st" style="margin-top:12px">Systemic plan</div><div class="rnd-chips">'+rCheck_sys(w,c)+'</div>';
+      '<div class="rnd-sec st" style="margin-top:12px">Systemic plan</div><div class="rnd-chips">'+rCheck_sys(w,c)+'</div>'+
+      '<div class="rnd-sec st" style="margin-top:14px;display:flex;justify-content:space-between;align-items:center">Suggested care &amp; smart notes <button class="btn bg3 bsm" style="margin:0" onclick="roundAddAllSmart()">+ Add all to note</button></div>'+
+      '<div id="rnd-smart">'+roundSmartHTML(w)+'</div>';
   }
   if(k==="orders"){
     return '<div class="rnd-sec st">Nursing treatment order (executable without ambiguity)</div><div class="rnd-grid">'+
@@ -2938,14 +2946,15 @@ function roundPhaseHTML(k,w,c){
   if(k==="doc"){
     return '<div class="rnd-sec st">Visit note (auto-assembled — review &amp; edit)</div>'+rTa("rnd-note","",("" ),12)+
       '<div style="margin-top:7px;display:flex;gap:7px;flex-wrap:wrap"><button class="btn bg3 bsm" onclick="document.getElementById(\'rnd-note\').value=roundBuildNote(curW())">↻ Rebuild from steps</button><button class="btn bg3 bsm" onclick="roundDraftNote()">✨ Draft note (AI)</button><button class="btn bt bsm" onclick="openBilling(\''+w.id+'\')">\u{1F9FE} Open full Charge Builder</button></div>'+
-      '<div style="margin-top:8px">'+rChk("rnd-photo","Wound photo captured per facility policy",false)+'</div>'+
+      '<div style="margin-top:8px;display:flex;gap:14px;align-items:center;flex-wrap:wrap">'+rChk("rnd-photo","Wound photo captured per facility policy",false)+'<div id="rnd-doc-photo"></div></div>'+
       '<div class="rnd-sec st" style="margin-top:12px">Coding</div><div class="rnd-grid">'+
         rSel("rnd-em","E/M visit",["Subsequent SNF 99307","Subsequent SNF 99308","Subsequent SNF 99309","Subsequent SNF 99310","Initial SNF 99304","Initial SNF 99305","Initial SNF 99306"],"Subsequent SNF 99308")+
         rInp("rnd-mod","Modifiers","","25, 59/XU, KX, LT/RT")+'</div>'+
       '<div class="rnd-sec st" style="margin-top:10px">Procedure performed</div><div class="rnd-chips">'+
         rChk("rnd-cpt-97597","Selective debridement 97597/97598",false)+rChk("rnd-cpt-11042","Surgical debridement 11042–11047 (by depth)",false)+rChk("rnd-cpt-npwt","NPWT 97605–97608",false)+'</div>'+
       '<div class="rnd-grid" style="margin-top:12px">'+rSel("rnd-poa","Present-on-admission status",["Present on Admission","Facility-Acquired"],(w.poa||"Present on Admission"))+rSel("rnd-avoid","Avoidable vs unavoidable (F-686)",["Unavoidable","Avoidable","N/A"],"Unavoidable")+'</div>'+
-      '<div style="margin-top:6px">'+rInp("rnd-mds","MDS Section M coordination note","","stage, count, worsening since prior MDS")+'</div>';
+      '<div style="margin-top:6px">'+rInp("rnd-mds","MDS Section M coordination note","","stage, count, worsening since prior MDS")+'</div>'+
+      '<div style="margin-top:10px"><button class="btn bg3 bsm" onclick="roundAuditCoding()">\u{1F916} AI reimbursement self-audit</button></div><div id="rnd-audit"></div>';
   }
   if(k==="followup"){
     return '<div class="rnd-grid">'+rSel("rnd-cadence","Reassessment cadence",["Weekly (minimum for active)","Twice weekly","Every 2 weeks","Sooner if deteriorating"],"Weekly (minimum for active)")+rSel("rnd-track","Objective tracking tool",["PUSH","Bates-Jensen","Serial measurements"],"PUSH")+'</div>'+
@@ -2973,32 +2982,119 @@ function roundDraftNote(){
   aiDraftReq({context:c,suggestions:sugs}).then(function(d){if(d.text){var t=(typeof stripAIDisclaimer==="function"?stripAIDisclaimer(d.text):d.text);var nt=document.getElementById("rnd-note");if(nt){nt.value=(nt.value?nt.value+"\n\n":"")+t;}toast("AI draft added — review & edit","ok");}}).catch(function(err){toast(err&&err.message==="notcfg"?"AI isn't configured on the server yet":"AI draft failed","err");});
 }
 function roundBuildNote(w){
-  function g(id){return gv(id)||"";}
+  // Builds the visit note from EVERY field the provider populated across all phases.
+  function g(id){var v=gv(id);return v==null?"":String(v).trim();}
+  function ck(id){var el=document.getElementById(id);return !!(el&&el.checked);}
+  function fields(list){var a=[];list.forEach(function(f){var v=g(f[1]);if(v)a.push(f[0]+": "+v);});return a;}
+  function grp(prefix,list){return list.filter(function(o){return ck(prefix+o.k);}).map(function(o){return o.t;});}
+  var sec=[];
+  function add(title,lines){if(lines&&lines.length)sec.push(title+"\n- "+lines.join("\n- "));}
+  // PRE-ROUND PREP
+  var prep=[];
+  if(ck("rnd-tn"))prep.push("Treatment nurse rounding with provider");
+  prep=prep.concat(fields([["Onset (days)","rnd-onset"],["Last measurement reviewed","rnd-lastm"],["Area change","rnd-redux"],["Albumin (g/dL)","rnd-albumin"],["Prealbumin","rnd-prealb"],["HbA1c %","rnd-a1c"],["CBC / WBC","rnd-wbc"],["ESR","rnd-esr"],["CRP","rnd-crp"],["Vascular studies","rnd-vasc"],["Current dressing orders","rnd-dressing-cur"]]));
+  add("PRE-ROUND PREP",prep);
+  // HISTORY & EXAM
+  var ex=[];
+  if(ck("rnd-consent"))ex.push("Patient identified, consent obtained");
+  ex=ex.concat(fields([["Pain (0–10)","rnd-pain"],["Etiology","rnd-etio"],["Location","rnd-loc"],["Stage / classification","rnd-stage"]]));
   var L=g("rnd-L"),W=g("rnd-W"),D=g("rnd-D");
-  var barriers=roundCheckedLabels("rnd-bar-",ROUND_BARRIERS);
-  var sysplan=roundCheckedLabels("rnd-sys-",ROUND_SYS);
-  var infsigns=roundCheckedLabels("rnd-infsign-",ROUND_INFSIGNS);
-  var esc=roundCheckedLabels("rnd-esc-",ROUND_ESC);
-  var deb=g("rnd-debride");
-  var L2=[];
-  L2.push("WOUND ROUNDING NOTE — "+TDS());
-  L2.push("Location: "+g("rnd-loc")+" | Etiology: "+g("rnd-etio")+" | Stage/Class: "+g("rnd-stage")+(g("rnd-pain")?(" | Pain "+g("rnd-pain")+"/10"):""));
-  L2.push("Measurements: "+L+" x "+W+(D?(" x "+D):"")+" cm"+(g("rnd-under")?("; undermining/tunneling "+g("rnd-under")):""));
-  L2.push("Wound bed: granulation "+g("rnd-tg")+"%, slough "+g("rnd-ts")+"%, eschar "+g("rnd-te")+"%, epithelial "+g("rnd-tep")+"%.");
-  L2.push("Exudate: "+g("rnd-exvol")+" "+g("rnd-exchar")+(g("rnd-odor")==="Yes"?"; odor present":"")+". Periwound: "+g("rnd-peri")+".");
-  L2.push("Infection: "+g("rnd-inflvl")+(infsigns.length?(" ("+infsigns.join(", ")+")"):""));
-  L2.push("Perfusion: pulses "+g("rnd-pulses")+", cap refill "+g("rnd-cap")+", edema "+g("rnd-edema")+", ABI "+g("rnd-abi")+".");
-  L2.push("ASSESSMENT: "+g("rnd-etio")+" wound, trajectory "+g("rnd-traj")+". Barriers: "+(barriers.join(", ")||"none identified")+".");
-  if(g("rnd-culture")&&g("rnd-culture")!=="None")L2.push("Culture: "+g("rnd-culture")+".");
-  if(g("rnd-osteo")&&g("rnd-osteo")!=="None")L2.push("Osteomyelitis workup: "+g("rnd-osteo")+".");
-  L2.push("PLAN — Debridement: "+deb+((deb&&deb!=="None")?(" ("+g("rnd-deb-method")+"; tissue: "+g("rnd-deb-tissue")+"; "+g("rnd-deb-tol")+")"):"")+".");
-  L2.push("Dressings (TIME): T "+g("rnd-time-t")+"; I "+g("rnd-time-i")+"; M "+g("rnd-time-m")+"; E "+g("rnd-time-e")+".");
-  if(sysplan.length)L2.push("Systemic plan: "+sysplan.join("; ")+".");
-  L2.push("Goals of care: "+g("rnd-goal")+(document.getElementById("rnd-ktu")&&document.getElementById("rnd-ktu").checked?" (Kennedy terminal / EOL skin change)":"")+".");
-  L2.push("Nursing order: cleanse with "+g("rnd-order-cleanser")+"; apply "+g("rnd-order-product")+(g("rnd-order-sec")?(" + "+g("rnd-order-sec")):"")+"; change "+g("rnd-order-freq")+"."+(g("rnd-order-extra")?(" "+g("rnd-order-extra")):""));
-  L2.push("FOLLOW-UP: reassess "+g("rnd-cadence")+"; "+g("rnd-track")+(g("rnd-push")?(" "+g("rnd-push")):"")+". Escalation triggers: "+(esc.join("; ")||"none active")+".");
-  L2.push("POA status: "+g("rnd-poa")+". F-686: "+g("rnd-avoid")+"."+(g("rnd-mds")?(" MDS-M: "+g("rnd-mds")+"."):""));
-  return L2.join("\n");
+  if(L||W||D)ex.push("Measurements: "+(L||"?")+" x "+(W||"?")+(D?(" x "+D):"")+" cm");
+  ex=ex.concat(fields([["Undermining / tunneling","rnd-under"]]));
+  var tiss=[];[["granulation","rnd-tg"],["slough","rnd-ts"],["eschar","rnd-te"],["epithelial","rnd-tep"]].forEach(function(t){var v=g(t[1]);if(v)tiss.push(v+"% "+t[0]);});
+  if(tiss.length)ex.push("Wound bed: "+tiss.join(", "));
+  var exu=[g("rnd-exvol"),g("rnd-exchar")].filter(Boolean).join(" ");
+  if(exu)ex.push("Exudate: "+exu+(g("rnd-odor")==="Yes"?"; odor present":""));
+  ex=ex.concat(fields([["Periwound","rnd-peri"]]));
+  var infs=grp("rnd-infsign-",ROUND_INFSIGNS);if(infs.length)ex.push("Infection signs: "+infs.join(", "));
+  var perf=[];[["pulses","rnd-pulses"],["cap refill","rnd-cap"],["edema","rnd-edema"],["ABI","rnd-abi"]].forEach(function(p){var v=g(p[1]);if(v)perf.push(p[0]+" "+v);});
+  if(perf.length)ex.push("LE perfusion: "+perf.join(", "));
+  if(RND.photo)ex.push("Wound photo captured this visit");
+  add("HISTORY & EXAM",ex);
+  // ASSESSMENT
+  var as=fields([["Healing trajectory","rnd-traj"],["Infection level","rnd-inflvl"]]);
+  var bar=grp("rnd-bar-",ROUND_BARRIERS);if(bar.length)as.push("Barriers to healing: "+bar.join(", "));
+  if(g("rnd-culture")&&g("rnd-culture")!=="None")as.push("Culture: "+g("rnd-culture")+" (deep tissue, not surface swab)");
+  if(g("rnd-osteo")&&g("rnd-osteo")!=="None")as.push("Osteomyelitis workup: "+g("rnd-osteo"));
+  add("ASSESSMENT",as);
+  // PLAN
+  var pl=[];var deb=g("rnd-debride");
+  if(deb){var dd=[g("rnd-deb-method"),g("rnd-deb-tissue"),g("rnd-deb-tol")].filter(Boolean);pl.push("Debridement: "+deb+((deb!=="None"&&dd.length)?(" ("+dd.join("; ")+")"):""));}
+  var time=[];[["T","rnd-time-t"],["I","rnd-time-i"],["M","rnd-time-m"],["E","rnd-time-e"]].forEach(function(t){var v=g(t[1]);if(v)time.push(t[0]+" "+v);});
+  if(time.length)pl.push("Dressings (TIME): "+time.join("; "));
+  var sys=grp("rnd-sys-",ROUND_SYS);if(sys.length)pl.push("Systemic plan: "+sys.join("; "));
+  add("PLAN & TREATMENT",pl);
+  if(RND.smart&&RND.smart.length)add("GUIDELINE / SMART NOTES",RND.smart.slice());
+  // ORDERS & COMMUNICATION
+  var or=[];var ord=[];
+  if(g("rnd-order-cleanser"))ord.push("cleanse with "+g("rnd-order-cleanser"));
+  if(g("rnd-order-product"))ord.push("apply "+g("rnd-order-product")+(g("rnd-order-sec")?(" + "+g("rnd-order-sec")):""));
+  if(g("rnd-order-freq"))ord.push("change "+g("rnd-order-freq"));
+  if(ord.length||g("rnd-order-extra"))or.push("Nursing order: "+(ord.join("; ")||"")+(g("rnd-order-extra")?((ord.length?". ":"")+g("rnd-order-extra")):""));
+  var comm=[];if(ck("rnd-comm-tn"))comm.push("verbal handoff to treatment nurse");if(ck("rnd-comm-don"))comm.push("DON notified of changes");if(ck("rnd-comm-rp"))comm.push("responsible party updated");if(ck("rnd-comm-idt"))comm.push("care plan / IDT updated");
+  if(comm.length)or.push("Communication: "+comm.join(", "));
+  if(g("rnd-goal"))or.push("Goals of care: "+g("rnd-goal")+(ck("rnd-ktu")?" (Kennedy terminal / EOL skin change)":""));
+  add("ORDERS & COMMUNICATION",or);
+  // DOCUMENTATION & CODING
+  var dc=[];
+  if(g("rnd-em"))dc.push("E/M: "+g("rnd-em"));
+  var cpt=[];if(ck("rnd-cpt-97597"))cpt.push("97597/97598 selective debridement");if(ck("rnd-cpt-11042"))cpt.push("11042–11047 surgical debridement");if(ck("rnd-cpt-npwt"))cpt.push("97605–97608 NPWT");
+  if(cpt.length)dc.push("Procedure(s): "+cpt.join(", "));
+  dc=dc.concat(fields([["Modifiers","rnd-mod"],["POA status","rnd-poa"],["F-686 determination","rnd-avoid"],["MDS Section M","rnd-mds"]]));
+  if(ck("rnd-photo"))dc.push("Wound photo captured per facility policy");
+  add("DOCUMENTATION & CODING",dc);
+  // FOLLOW-UP
+  var fu=fields([["Reassessment cadence","rnd-cadence"],["Tracking tool","rnd-track"],["Score this visit","rnd-push"],["Next reassessment","rnd-next"]]);
+  var esc=grp("rnd-esc-",ROUND_ESC);if(esc.length)fu.push("Escalation triggers present: "+esc.join("; "));
+  var cl=[];if(ck("rnd-fu-cp"))cl.push("care plan updated");if(ck("rnd-fu-idt"))cl.push("loop closed with IDT");
+  if(cl.length)fu.push(cl.join(", "));
+  add("FOLLOW-UP & MONITORING",fu);
+  var head="WOUND ROUNDING NOTE — "+TDS()+"\nPatient: "+(w.name||"")+" · "+(w.fac||"");
+  return head+"\n\n"+sec.join("\n\n");
+}
+/* ---- Rounds: history, photos, smart notes, AI coding audit ---- */
+function roundHistoryHTML(w){
+  var pts=[].concat(w.chart||[]).filter(function(h){return h.L;});
+  if(!pts.length)return "";
+  var base=pts[0]?pts[0].L*pts[0].W:0;
+  var rows=pts.map(function(h){var ar=(h.area!=null?h.area:woundAreaOf(h));var dlt=(base>0&&ar!=null)?Math.round((base-ar)/base*100):null;
+    return '<tr><td>'+e(h.dt)+'</td><td>'+(h.L||"—")+'</td><td>'+(h.W||"—")+'</td><td>'+(h.D!=null?h.D:"—")+'</td><td class="b">'+(ar!=null?ar:"—")+'</td><td style="color:'+(dlt==null?"var(--mu)":dlt>=40?"#4f8268":dlt>=0?"#b07d3c":"#b3433a")+';font-weight:700">'+(dlt==null?"—":(dlt>=0?"−":"+")+Math.abs(dlt)+"%")+'</td><td>'+e(h.stage||"—")+'</td><td>'+e(h.heal||"—")+'</td><td>'+(h.inf?'<span class="pill pr2">Active</span>':'<span style="color:var(--gn)">✓</span>')+'</td></tr>';}).join("");
+  var photos=_chartPhotos(w);
+  var ph=photos.length?('<div class="rnd-sec st" style="margin-top:10px">Serial photos</div><div style="display:flex;gap:8px;flex-wrap:wrap">'+photos.map(function(p){return '<div style="text-align:center"><img src="'+p.url+'" style="height:84px;border-radius:7px;border:1px solid var(--bd);display:block"><div style="font-size:9px;color:var(--mu);margin-top:2px">'+e(p.dt)+'</div></div>';}).join("")+'</div>'):'';
+  return '<div class="rnd-sec st" style="margin-top:12px">Healing trajectory (history)</div><div style="overflow-x:auto"><table class="tbl" style="font-size:11px"><thead><tr><th>Date</th><th>L</th><th>W</th><th>D</th><th>Area</th><th>Δ base</th><th>Stage</th><th>Healing</th><th>Inf</th></tr></thead><tbody>'+rows+'</tbody></table></div>'+ph;
+}
+function roundPhotoBoxHTML(w){
+  var cur=RND.photo?('<div style="position:relative;display:inline-block"><img src="'+RND.photo+'" style="height:120px;border-radius:8px;border:1px solid var(--bd);display:block"><button class="btn br2 bsm" style="position:absolute;top:4px;right:4px;padding:1px 6px" onclick="roundRemovePhoto()">✕</button><div style="font-size:10px;color:var(--mu);text-align:center;margin-top:3px">This visit</div></div>'):'<div style="color:var(--mu);font-size:12px;padding:6px 0">No photo captured this visit yet — tap “Add / capture photo”.</div>';
+  return cur;
+}
+function roundAddPhoto(input){if(!input||!input.files||!input.files[0])return;var fr=new FileReader();fr.onload=function(){RND.photo=fr.result;var box=document.getElementById("rnd-photo-box");if(box)box.innerHTML=roundPhotoBoxHTML(curW());toast("Photo added to this round","ok");};fr.readAsDataURL(input.files[0]);}
+function roundRemovePhoto(){RND.photo=null;var box=document.getElementById("rnd-photo-box");if(box)box.innerHTML=roundPhotoBoxHTML(curW());}
+function roundAnalyzePhoto(){var w=curW();if(!w)return;if(typeof aiAvailable==="function"&&!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}if(RND.photo){_sendAnalyze(w,RND.photo,null);return;}var ph=_chartPhotos(w);if(ph.length){_sendAnalyze(w,ph[ph.length-1].url,null);return;}toast("Add a wound photo first","err");}
+function roundComparePhoto(){var w=curW();if(!w)return;if(typeof aiAvailable==="function"&&!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}var ph=_chartPhotos(w);if(RND.photo){if(!ph.length){toast("Need a prior photo on the chart to compare","err");return;}_sendAnalyze(w,RND.photo,ph[ph.length-1].url);return;}if(ph.length>=2){_sendAnalyze(w,ph[ph.length-1].url,ph[ph.length-2].url);return;}toast("Need two photos to compare (add one this visit)","err");}
+function roundSmartHTML(w){
+  var list=(typeof woundSuggestions==="function"?woundSuggestions(w):[]);RND._sug=list;
+  if(!list.length)return '<div style="font-size:12px;color:var(--mu)">No guideline prompts for the current data.</div>';
+  return list.map(function(s,i){return '<div style="background:var(--clay-10);border:1px solid var(--clay-20);border-radius:8px;padding:8px 11px;margin-bottom:6px"><div style="font-size:12px"><b style="color:var(--clay)">'+e(s.cat)+'</b> — '+e(s.sug)+' <span style="color:var(--mu)">['+e(s.cite)+']</span></div><div style="display:flex;justify-content:space-between;gap:10px;align-items:center;margin-top:5px"><div style="font-size:11px;color:var(--slate);font-style:italic">'+e(s.note)+'</div><button class="btn bg3 bsm" style="flex-shrink:0;margin:0" onclick="roundAddSmart('+i+')">+ Add to note</button></div></div>';}).join("");
+}
+function roundAddSmart(i){if(!RND._sug)return;var s=RND._sug[i];if(!s||!s.note)return;if(RND.smart.indexOf(s.note)<0){RND.smart.push(s.note);var nt=document.getElementById("rnd-note");if(nt&&nt.value.trim())nt.value=nt.value+"\n- "+s.note;toast("Smart note added — included in the visit note","ok");}else{toast("Already added");}}
+function roundAddAllSmart(){if(!RND._sug)return;var n=0;RND._sug.forEach(function(s){if(s.note&&RND.smart.indexOf(s.note)<0){RND.smart.push(s.note);n++;}});var nt=document.getElementById("rnd-note");if(nt&&nt.value.trim()&&n)nt.value=nt.value+"\n- "+RND._sug.map(function(s){return s.note;}).join("\n- ");toast(n?(n+" smart note"+(n>1?"s":"")+" added"):"All already added","ok");}
+function roundAuditCoding(){
+  var w=curW();if(!w)return;if(typeof aiAvailable==="function"&&!aiAvailable()){toast("Connect Claude first — Settings → AI (Claude)","err");return;}
+  var codes=[];if(gv("rnd-em"))codes.push(gv("rnd-em"));
+  if(document.getElementById("rnd-cpt-97597")&&document.getElementById("rnd-cpt-97597").checked)codes.push("97597/97598 selective debridement");
+  if(document.getElementById("rnd-cpt-11042")&&document.getElementById("rnd-cpt-11042").checked)codes.push("11042-11047 surgical debridement");
+  if(document.getElementById("rnd-cpt-npwt")&&document.getElementById("rnd-cpt-npwt").checked)codes.push("97605-97608 NPWT");
+  if(gv("rnd-mod"))codes.push("Modifiers: "+gv("rnd-mod"));
+  var ctx=clinContext(w);delete ctx.name;
+  var box=document.getElementById("rnd-audit");if(box)box.innerHTML='<div style="font-size:12px;color:var(--mu);margin-top:8px">🤖 Claude is auditing the note &amp; charges…</div>';
+  aiAuditReq({note:gv("rnd-note"),codes:codes,context:ctx}).then(function(d){roundRenderAudit(d.audit||{});}).catch(function(err){if(box)box.innerHTML='';toast(err&&err.message==="notcfg"?"Claude isn't configured on the server yet":"AI audit failed","err");});
+}
+function roundRenderAudit(a){
+  function sec(t,arr,clr){if(!arr||!arr.length)return"";return '<div style="margin-bottom:8px"><div class="st" style="margin-bottom:3px;color:'+(clr||"#9c4e30")+'">'+e(t)+'</div><ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.5;color:#42474d">'+arr.map(function(x){return"<li>"+e(x)+"</li>";}).join("")+'</ul></div>';}
+  var h='<div style="background:var(--clay-10);border:1px solid var(--clay-20);border-radius:8px;padding:11px 13px;margin-top:10px"><div class="st" style="margin-bottom:6px">🤖 Claude reimbursement self-audit</div>';
+  if(a.summary)h+='<div style="font-size:12.5px;color:#42474d;margin-bottom:8px">'+e(a.summary)+'</div>';
+  h+=sec("⚠ Documentation gaps",a.gaps,"#b3433a")+sec("Verbiage to add (supports the codes)",a.verbiage)+sec("Under-coding / capture opportunities",a.underCoding,"#946325")+sec("Recommended ICD / CPT / modifiers",a.recommendedCodes)+sec("Compliance flags",a.complianceFlags,"#b3433a")+'</div>';
+  var box=document.getElementById("rnd-audit");if(box)box.innerHTML=h;
 }
 function roundComplete(){
   var w=curW();if(!w)return;var today=TDS();
@@ -3016,6 +3112,7 @@ function roundComplete(){
     offload:(document.getElementById("rnd-sys-offload")&&document.getElementById("rnd-sys-offload").checked)?"offloading":"",
     compression:(document.getElementById("rnd-sys-comp")&&document.getElementById("rnd-sys-comp").checked)?"compression":"",
     osteo:(gv("rnd-osteo")&&gv("rnd-osteo")!=="None")?"suspect":""};
+  if(RND.photo)en.photo=RND.photo;
   if(!w.chart)w.chart=[];w.chart.push(en);
   w.stage=stage;if(tx)w.tx=tx;w.heal=heal;w.inf=inf;w.ls=today;if(note)w.notes=note.split("\n")[2]||w.notes;
   var ab=parseFloat(gv("rnd-abi"));if(!isNaN(ab))w.abi=ab;
