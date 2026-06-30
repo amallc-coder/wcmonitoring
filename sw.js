@@ -7,6 +7,8 @@ self.addEventListener("install", function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL).catch(function () {}); }));
 });
 
+self.addEventListener("message", function (e) { if (e.data === "skipWaiting") self.skipWaiting(); });
+
 self.addEventListener("activate", function (e) {
   e.waitUntil(
     caches.keys().then(function (keys) {
